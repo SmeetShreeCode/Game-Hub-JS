@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Photo Hunt Game</title>
+    <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<h1>Photo Hunt Game</h1>
+<h1>Level : 1</h1>
+
+<div id="info">
+    <span id="timer">Time: 0s</span> |
+    <span id="score">Score: 0</span> |
+    <span id="highScore">High Score: 0</span> |
+    <span id="lives">Lives: 10</span> |
+    <span id="foundCounter">Found: 0 / 0</span> |
+    <button onclick="showHint()">Hint</button> |
+    <button onclick="toggleMusic()" id="musicToggleBtn">🔊 Music On</button> |
+    <button id="themeToggleBtn">🌞 Light Theme</button>
+</div>
+
+<div id="progressContainer">
+    <div id="progressBar"></div>
+</div>
+
+<div id="soundSettings" class="settings-panel">
+    <h3>🎧 Sound Settings</h3>
+
+    <label>
+        Volume:
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+    </label>
+
+    <br/>
+
+    <label>
+        Track:
+        <select id="trackSelector">
+            <option value="music/music.mp3">Main Theme</option>
+            <option value="music/chill.mp3">Chill Vibes</option>
+            <option value="music/ambient.mp3">Ambient</option>
+        </select>
+    </label>
+
+    <br/>
+
+    <label>
+        <input type="checkbox" id="ambientModeToggle">
+        🧘 Ambient Mode (No Timer)
+    </label>
+
+</div>
+
+<!-- Toggle Button -->
+<button id="settingsToggleBtn" onclick="toggleSettings()">🎛 Sound Settings</button>
+
+<div id="game">
+    <div class="image-container">
+        <br/>
+        <img id="leftImage" alt="Original Image"/>
+        <img id="rightImage" alt="Altered Image"/>
+        <canvas id="canvas"></canvas>
+    </div>
+</div>
+<button id="reset">Restart Game</button>
+
+<div id="message"></div>
+
+<audio id="correctSound" src="correct1.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="correct.mp3" preload="auto"></audio>
+<audio id="bgMusic" src="music/music.mp3" loop preload="auto"></audio>
+
+<!-- START SCREEN -->
+<div id="startScreen" class="overlay-screen">
+    <h2>Welcome to Photo Hunt!</h2>
+    <p>Find all the differences before time runs out. You have 3 lives per level.</p>
+    <button onclick="startGame()">Start Game</button>
+</div>
+
+<!-- END SCREEN -->
+<div id="endScreen" class="overlay-screen" style="display: none;">
+    <h2 id="endTitle">Game Over!</h2>
+    <p id="finalScore">Your final score: 0</p>
+    <button onclick="restartGame()">Play Again</button>
+</div>
+<script src="js/levels.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
