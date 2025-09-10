@@ -1,6 +1,6 @@
 
 
-let currentLevel = 0, found = [], score = 0, timeLeft = 60, lives = 10, gameOver = false;
+let currentLevel = 0, found = [], score = 0, timeLeft = 60, lives = 15, gameOver = false;
 let timerInterval;
 let highScore = parseInt(localStorage.getItem("highScore")) || 0;
 
@@ -97,7 +97,7 @@ function loadLevel(levelIndex) {
     clearInterval(timerInterval);
     const level = levels[levelIndex];
     found = [];
-    lives = 10;
+    lives = 15;
     updateFoundCounter();
     updateLivesDisplay();
     updateScoreDisplay();
@@ -223,7 +223,7 @@ function restartGame() {
     document.getElementById("endScreen").style.display = "none";
     score = 0;
     currentLevel = 0;
-    lives = 10;
+    lives = 15;
     updateLivesDisplay();
     loadLevel(currentLevel);
 }
