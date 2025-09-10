@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Game Hub</title>
+<!--    <link rel="stylesheet" href="styles.css">-->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .game-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        }
+        .game-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .game-card h3 {
+            margin: 10px;
+        }
+        .game-card p {
+            margin: 0 10px 15px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+<h1>🎮 Game Hub</h1>
+
+<div class="game-grid">
+    <!-- Photo Hunt Game -->
+    <div class="game-card" onclick="location.href='index.html'">
+        <img src="images/banner/photo-hunt.jpg" alt="Photo Hunt">
+        <h3>Photo Hunt</h3>
+        <p>Spot all the differences before time runs out!</p>
+    </div>
+
+    <!-- Placeholder for Another Game -->
+    <div class="game-card" onclick="location.href='tic-tac-toe.html'">
+        <img src="images/banner/tic-tac-toe.jpg" alt="Tic Tac Toe">
+        <h3>Tic Tac Toe</h3>
+        <p>Play classic X's and O's with a friend.</p>
+    </div>
+
+    <!-- Add more games -->
+    <div class="game-card" onclick="location.href='memory-game.html'">
+        <img src="images/banner/memory-game.jpg" alt="Memory Game">
+        <h3>Memory Game</h3>
+        <p>Test your memory and match all pairs!</p>
+    </div>
+</div>
+</body>
+</html>
