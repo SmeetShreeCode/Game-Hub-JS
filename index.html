@@ -1,92 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <title>Photo Hunt Game</title>
-    <link rel="stylesheet" href="styles.css"/>
+    <meta charset="UTF-8">
+    <title>Game Hub</title>
+    <!--    <link rel="stylesheet" href="styles.css">-->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #dac5c5;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .game-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.2);
+        }
+        .game-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .game-card h3 {
+            margin: 10px;
+        }
+        .game-card p {
+            margin: 0 10px 15px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-<h1>Photo Hunt Game</h1>
-<a href="games.html" style="display:inline-block; margin: 10px; font-size: 18px;">⬅ Back to Game Hub</a>
+<h1>🎮 Game Hub</h1>
 
-<h1>Level : 1</h1>
+<div class="game-grid">
+    <!-- Photo Hunt Game -->
+    <div class="game-card" onclick="location.href='photo-hunt.html'">
+        <img src="photo-hunt-banner.jpg" alt="Photo Hunt">
+        <h3>Photo Hunt</h3>
+        <p>Spot all the differences before time runs out!</p>
+    </div>
 
-<div id="info">
-    <span id="timer">Time: 0s</span> |
-    <span id="score">Score: 0</span> |
-    <span id="highScore">High Score: 0</span> |
-    <span id="lives">Lives: 3</span> |
-    <span id="foundCounter">Found: 0 / 0</span> |
-    <button onclick="showHint()">Hint</button> |
-    <button onclick="toggleMusic()" id="musicToggleBtn">🔊 Music On</button> |
-    <button id="themeToggleBtn">🌞 Light Theme</button>
-</div>
+<!--    &lt;!&ndash; Placeholder for Another Game &ndash;&gt;-->
+    <div class="game-card" onclick="location.href='tic-tac-toe.html'">
+        <img src="images/banner/tic-tac-toe.jpg" alt="Tic Tac Toe">
+        <h3>Tic Tac Toe</h3>
+        <p>Play classic X's and O's with a friend.</p>
+    </div>
 
-<div id="progressContainer">
-    <div id="progressBar"></div>
-</div>
-
-<div id="soundSettings" class="settings-panel">
-    <h3>🎧 Sound Settings</h3>
-
-    <label>
-        Volume:
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
-    </label>
-
-    <br/>
-
-    <label>
-        Track:
-        <select id="trackSelector">
-            <option value="music/music.mp3">Main Theme</option>
-            <option value="music/chill.mp3">Chill Vibes</option>
-            <option value="music/ambient.mp3">Ambient</option>
-        </select>
-    </label>
-
-    <br/>
-
-    <label>
-        <input type="checkbox" id="ambientModeToggle">
-        🧘 Ambient Mode (No Timer)
-    </label>
-
-</div>
-
-<!-- Toggle Button -->
-<button id="settingsToggleBtn" onclick="toggleSettings()">🎛 Sound Settings</button>
-
-<div id="game">
-    <div class="image-container">
-        <br/>
-        <img id="leftImage" alt="Original Image"/>
-        <img id="rightImage" alt="Altered Image"/>
-        <canvas id="canvas"></canvas>
+<!--    &lt;!&ndash; Add more games &ndash;&gt;-->
+    <div class="game-card" onclick="location.href='memory-game.html'">
+        <img src="images/banner/memory-game.jpg" alt="Memory Game">
+        <h3>Memory Game</h3>
+        <p>Test your memory and match all pairs!</p>
     </div>
 </div>
-<button id="reset">Restart Game</button>
-
-<div id="message"></div>
-
-<audio id="correctSound" src="correct1.mp3" preload="auto"></audio>
-<audio id="wrongSound" src="correct.mp3" preload="auto"></audio>
-<audio id="bgMusic" src="music/music.mp3" loop preload="auto"></audio>
-
-<!-- START SCREEN -->
-<div id="startScreen" class="overlay-screen">
-    <h2>Welcome to Photo Hunt!</h2>
-    <p>Find all the differences before time runs out. You have 3 lives per level.</p>
-    <button onclick="startGame()">Start Game</button>
-</div>
-
-<!-- END SCREEN -->
-<div id="endScreen" class="overlay-screen" style="display: none;">
-    <h2 id="endTitle">Game Over!</h2>
-    <p id="finalScore">Your final score: 0</p>
-    <button onclick="restartGame()">Play Again</button>
-</div>
-<script src="js/levels.js"></script>
-<script src="js/main.js"></script>
 </body>
 </html>

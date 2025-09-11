@@ -1,8 +1,8 @@
-
-
 let currentLevel = 0, found = [], score = 0, timeLeft = 60, lives = 15, gameOver = false;
 let timerInterval;
 let highScore = parseInt(localStorage.getItem("highScore")) || 0;
+let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
+let ambientMode = JSON.parse(localStorage.getItem("ambientMode")) || false;
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
@@ -14,19 +14,9 @@ const message = document.getElementById("message");
 const leftImage = document.getElementById("leftImage");
 const rightImage = document.getElementById("rightImage");
 const livesDisplay = document.getElementById("lives");
-const bgMusic = document.getElementById("bgMusic");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
-const volumeSlider = document.getElementById("volumeSlider");
-const trackSelector = document.getElementById("trackSelector");
 const ambientToggle = document.getElementById("ambientModeToggle");
-const soundSettingsPanel = document.getElementById("soundSettings");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
-
-const savedTrack = localStorage.getItem("musicTrack") || "music.mp3";
-const savedVolume = parseFloat(localStorage.getItem("volume")) || 1;
-
-let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
-let ambientMode = JSON.parse(localStorage.getItem("ambientMode")) || false;
 
 function updateLivesDisplay() {
     livesDisplay.textContent = `Lives: ${lives}`;
@@ -37,7 +27,7 @@ function updateScoreDisplay() {
 }
 
 function updateFoundCounter() {
-    const total = levels[currentLevel].differences.length;
+    const total = easyLevels[currentLevel].differences.length;
     const foundCount = found.length;
     document.getElementById("foundCounter").textContent = `Found: ${foundCount} / ${total}`;
 }
@@ -53,6 +43,7 @@ function updateHighScore() {
 function startTimer() {
     clearInterval(timerInterval);
     if (ambientMode) return (timerDisplay.textContent = "Ambient Mode 🎧");
+
     timeLeft = 60;
     timerDisplay.textContent = `Time: ${timeLeft}s`;
     timerInterval = setInterval(() => {
@@ -61,6 +52,7 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             message.textContent = "⏰ Time's up! Try again.";
+            showEndScreen(false);
             disableClicks();
             setTimeout(() => restartLevel(), 2000);
         }
@@ -79,14 +71,14 @@ function drawCircle(x, y, color = "red") {
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.arc(x, y, 25, 0, 2 * Math.PI);
+    ctx.arc(x, y, 20, 0, 2 * Math.PI);
     ctx.stroke();
 }
 
 function redrawFound() {
     const imageOffset = leftImage.width + 20;
     found.forEach((index) => {
-        const diff = levels[currentLevel].differences[index];
+        const diff = easyLevels[currentLevel].differences[index];
         drawCircle(diff.x + imageOffset, diff.y);
         drawCircle(diff.x, diff.y);
     });
@@ -95,12 +87,13 @@ function redrawFound() {
 function loadLevel(levelIndex) {
     updateProgressBar();
     clearInterval(timerInterval);
-    const level = levels[levelIndex];
+    const level = easyLevels[levelIndex];
     found = [];
     lives = 15;
     updateFoundCounter();
     updateLivesDisplay();
     updateScoreDisplay();
+
     message.textContent = "";
     enableClicks();
     leftImage.src = level.images.left;
@@ -119,7 +112,7 @@ function loadLevel(levelIndex) {
 }
 
 function restartLevel() {
-    score = Math.max(0, score - 10); // Small penalty
+    score = Math.max(0, score - 10);
     loadLevel(currentLevel);
 }
 
@@ -130,7 +123,6 @@ function handleClick(e) {
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
     const imageOffset = leftImage.width + 20;
-
     const isRightImage = clickX > imageOffset;
     if (!isRightImage) return;
 
@@ -138,7 +130,8 @@ function handleClick(e) {
     console.log(`Clicked at (x: ${adjustedX}, y: ${clickY})`);
 
     let hit = false;
-    levels[currentLevel].differences.forEach((diff, index) => {
+
+    easyLevels[currentLevel].differences.forEach((diff, index) => {
         if (found.includes(index)) return;
 
         const dx = diff.x - adjustedX;
@@ -150,35 +143,39 @@ function handleClick(e) {
             found.push(index);
             drawCircle(diff.x, diff.y);
             drawCircle(diff.x + imageOffset, diff.y);
-            correctSound.play();
+
+            if (musicOn) correctSound.play();
+
             score += 10;
             updateFoundCounter();
             updateScoreDisplay();
             updateHighScore();
+            showSparkle(e.clientX, e.clientY);
 
-            if (found.length === levels[currentLevel].differences.length) {
+            if (found.length === easyLevels[currentLevel].differences.length) {
                 clearInterval(timerInterval);
                 message.textContent = "🎉 Level Complete!";
                 disableClicks();
                 setTimeout(() => {
-                    if (++currentLevel < levels.length) loadLevel(currentLevel); else showEndScreen(true);
+                    if (++currentLevel < easyLevels.length) loadLevel(currentLevel); else showEndScreen(true);
                 }, 2000);
             }
         }
     });
 
     if (!hit) {
-        wrongSound.play();
         drawCircle(clickX, clickY, "blue");
         score = Math.max(0, score - 5);
         lives--;
         updateLivesDisplay();
         updateScoreDisplay();
+        showSparkle(e.clientX, e.clientY);
 
+        if (musicOn) wrongSound.play();
         if (lives === 0) {
             clearInterval(timerInterval);
             message.textContent = "💀 Game Over!";
-            showEndScreen(false); // Show lose screen
+            showEndScreen(false);
         }
     }
 }
@@ -186,7 +183,7 @@ function handleClick(e) {
 function showHint() {
     if (gameOver) return;
 
-    const remaining = levels[currentLevel].differences
+    const remaining = easyLevels[currentLevel].differences
         .map((d, i) => ({diff: d, index: i}))
         .filter((d) => !found.includes(d.index));
 
@@ -198,18 +195,17 @@ function showHint() {
         drawCircle(random.diff.x + offset, random.diff.y, "green");
         drawCircle(random.diff.x, random.diff.y, "green");
 
-        if (found.length === levels[currentLevel].differences.length) {
+        if (found.length === easyLevels[currentLevel].differences.length) {
             clearInterval(timerInterval);
             message.textContent = "🎉 Level Complete!";
             disableClicks();
             setTimeout(() => {
-                if (++currentLevel < levels.length) loadLevel(currentLevel); else showEndScreen(true);
+                if (++currentLevel < easyLevels.length) loadLevel(currentLevel); else showEndScreen(true);
             }, 2000);
         }
     }
 }
 
-// Show end screen
 function showEndScreen(isWin) {
     disableClicks();
     document.getElementById("endScreen").style.display = "flex";
@@ -217,7 +213,6 @@ function showEndScreen(isWin) {
     document.getElementById("finalScore").textContent = `Your final score: ${score}`;
 }
 
-// Restart entire game from end screen
 function restartGame() {
     document.getElementById("progressBar").style.width = "0%";
     document.getElementById("endScreen").style.display = "none";
@@ -229,14 +224,11 @@ function restartGame() {
 }
 
 function updateProgressBar() {
-    const percent = ((currentLevel + 1) / levels.length) * 100;
+    const percent = ((currentLevel + 1) / easyLevels.length) * 100;
     document.getElementById("progressBar").style.width = `${percent}%`;
 }
 
-function toggleSettings() {
-    soundSettingsPanel.style.display = soundSettingsPanel.style.display === "none" ? "block" : "none";
-}
-
+// === SOUND TOGGLE ===
 function toggleMusic() {
     musicOn = !musicOn;
     localStorage.setItem("musicOn", musicOn);
@@ -245,9 +237,12 @@ function toggleMusic() {
 
 function updateMusicState() {
     musicToggleBtn.textContent = musicOn ? "🔊 Music On" : "🔇 Music Off";
-    musicOn ? bgMusic.play() : bgMusic.pause();
+    [correctSound, wrongSound].forEach(audio => {
+        audio.muted = !musicOn;
+    });
 }
 
+// === THEME TOGGLE ===
 function updateThemeUI(theme) {
     document.body.classList.remove("light-theme", "dark-theme");
     document.body.classList.add(`${theme}-theme`);
@@ -255,29 +250,14 @@ function updateThemeUI(theme) {
     localStorage.setItem("theme", theme);
 }
 
-// === Event Listeners ===
+// === INIT ===
 document.getElementById("game").addEventListener("click", handleClick);
+document.getElementById("game").addEventListener("touchstart", (e) => {
+    const touch = e.touches[0];
+    handleClick({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {} });
+    e.preventDefault();
+}, { passive: false });
 document.getElementById("reset").addEventListener("click", restartGame);
-
-// Load saved preferences
-bgMusic.volume = savedVolume;
-volumeSlider.value = savedVolume;
-bgMusic.src = savedTrack;
-trackSelector.value = savedTrack;
-ambientToggle.checked = ambientMode;
-
-// Handle changes
-volumeSlider.addEventListener("input", () => {
-    bgMusic.volume = volumeSlider.value;
-    localStorage.setItem("volume", volumeSlider.value);
-});
-
-trackSelector.addEventListener("change", () => {
-    bgMusic.pause();
-    bgMusic.src = trackSelector.value;
-    bgMusic.play();
-    localStorage.setItem("musicTrack", trackSelector.value);
-});
 
 ambientToggle.addEventListener("change", () => {
     ambientMode = ambientToggle.checked;
@@ -290,31 +270,31 @@ themeToggleBtn.addEventListener("click", () => {
     updateThemeUI(current === "light" ? "dark" : "light");
 });
 
-// On load, apply saved theme
 window.addEventListener("DOMContentLoaded", () => {
-    // Show start screen
     document.getElementById("startScreen").style.display = "flex";
 
-    // Apply saved theme
     const savedTheme = localStorage.getItem("theme") || "light";
     updateThemeUI(savedTheme);
 
-    // Update high score display
     document.getElementById("highScore").textContent = `High Score: ${highScore}`;
     updateHighScore();
-
-    // Load music settings
-    bgMusic.volume = savedVolume;
-    volumeSlider.value = savedVolume;
-    bgMusic.src = savedTrack;
-    trackSelector.value = savedTrack;
-    if (musicOn) bgMusic.play();
     updateMusicState();
 });
 
-
-// Start game from start screen
 function startGame() {
     document.getElementById("startScreen").style.display = "none";
     loadLevel(currentLevel);
+}
+function showSparkle(x, y) {
+    const sparkle = document.createElement("div");
+    sparkle.className = "sparkle";
+    sparkle.style.left = `${x}px`;
+    sparkle.style.top = `${y}px`;
+    sparkle.style.position = "absolute";
+
+    document.body.appendChild(sparkle);
+
+    setTimeout(() => {
+        sparkle.remove();
+    }, 600); // Match animation duration
 }

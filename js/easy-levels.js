@@ -1,24 +1,4 @@
-const levels = [{
-    images: {
-        left: "images/Left/level1_left.jpg",
-        right: "images/Right/level1_right.jpg"
-    }, differences: [
-        {x: 170, y: 85, radius: 20},
-        {x: 100, y: 130, radius: 20},
-        {x: 180, y: 200, radius: 20},
-    ]
-}, {
-    images: {
-        left: "images/Left/level2_left.jpg",
-        right: "images/Right/level2_right.jpg"
-    },
-    differences: [
-        {x: 60, y: 125, radius: 15},
-        {x: 200, y: 130, radius: 15},
-        {x: 280, y: 170, radius: 15},
-        {x: 280, y: 60, radius: 15},
-    ]
-}, {
+const easyLevels = [{
     images: {
         left: "images/Left/level15_left.jpg",
         right: "images/Right/level15_right.jpg"
@@ -95,7 +75,7 @@ const levels = [{
         {x: 40, y: 155, radius: 15},
         {x: 225, y: 300, radius: 15},
         {x: 150, y: 200, radius: 15},
-        {x: 85, y: 50, radius: 15},
+        {x: 85, y: 50, radius: 20},
         {x: 200, y: 380, radius: 15},
         {x: 85, y: 395, radius: 15},
         {x: 300, y: 270, radius: 15},
@@ -203,6 +183,26 @@ const levels = [{
         {x: 210, y: 235, radius: 15},
         {x: 245, y: 190, radius: 15},
         {x: 315, y: 130, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level1_left.jpg",
+        right: "images/Right/level1_right.jpg"
+    }, differences: [
+        {x: 170, y: 85, radius: 20},
+        {x: 100, y: 130, radius: 20},
+        {x: 180, y: 200, radius: 20},
+    ]
+}, {
+    images: {
+        left: "images/Left/level2_left.jpg",
+        right: "images/Right/level2_right.jpg"
+    },
+    differences: [
+        {x: 60, y: 125, radius: 15},
+        {x: 200, y: 130, radius: 15},
+        {x: 280, y: 170, radius: 15},
+        {x: 280, y: 60, radius: 15},
     ]
 },
 ];
