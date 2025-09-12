@@ -1,4 +1,4 @@
-let currentLevel = 0, found = [], score = 0, timeLeft = 60, lives = 15, hintsLeft = 15, comboStreak = 0, selectedLevel = 0, gameOver = false;
+let currentLevel = 0, found = [], hintFound = [], score = 0, timeLeft = 60, lives = 15, hintsLeft = 15, comboStreak = 0, selectedLevel = 0, gameOver = false;
 let timerInterval;
 let highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
@@ -69,20 +69,29 @@ function enableClicks() {
     gameOver = false;
 }
 
-function drawCircle(x, y, color = "red", radius = 20) {
+function drawCircle(x, y, color = "red", radius = 20, temporary = false) {
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
     ctx.stroke();
+    if (temporary) {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        setTimeout(() => {
+            ctx.putImageData(imageData, 0, 0);
+            redrawFound();
+        }, Math.random() * 2000 + 500);
+    }
 }
 
 function redrawFound() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     const imageOffset = leftImage.width + 20;
     found.forEach((index) => {
         const diff = easyLevels[currentLevel].differences[index];
-        drawCircle(diff.x + imageOffset, diff.y);
-        drawCircle(diff.x, diff.y);
+        const color = hintFound.includes(index) ? "green" : "red";
+        drawCircle(diff.x + imageOffset, diff.y, color);
+        drawCircle(diff.x, diff.y, color);
     });
 }
 
@@ -91,6 +100,7 @@ function loadLevel(levelIndex) {
     clearInterval(timerInterval);
     const level = easyLevels[levelIndex];
     found = [];
+    hintFound = [];
     lives = 15;
     hintsLeft = 15;
     updateFoundCounter();
@@ -131,11 +141,18 @@ function handleClick(e) {
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
     const imageOffset = leftImage.width + 20;
-    const isRightImage = clickX > imageOffset;
-    if (!isRightImage) return;
 
-    const adjustedX = clickX - imageOffset;
-    console.log(`Clicked at (x: ${adjustedX}, y: ${clickY})`);
+    let adjustedX, isRightImage;
+
+    if (clickX > imageOffset) {
+        isRightImage = true;
+        adjustedX = clickX - imageOffset;
+    } else {
+        isRightImage = false;
+        adjustedX = clickX;
+    }
+
+    console.log(`Clicked at (x: ${adjustedX}, y: ${clickY}) on ${isRightImage ? 'right' : 'left'} image`);
 
     let hit = false;
 
@@ -157,11 +174,7 @@ function handleClick(e) {
             comboStreak++;
             const comboBonus = comboStreak >= 4 ? 5 : 0;
             score += 10 + comboBonus;
-            if (comboBonus > 0) {
-                message.textContent = `🔥 Combo X${comboStreak}! +${comboBonus}`;
-            } else {
-                message.textContent = "";
-            }
+            message.textContent = comboBonus > 0 ? `🔥 Combo X${comboStreak}! +${comboBonus}` : "";
             updateFoundCounter();
             updateScoreDisplay();
             updateHighScore();
@@ -172,14 +185,15 @@ function handleClick(e) {
                 message.textContent = "🎉 Level Complete!";
                 disableClicks();
                 setTimeout(() => {
-                    if (++currentLevel < easyLevels.length) loadLevel(currentLevel); else showEndScreen(true);
+                    if (++currentLevel < easyLevels.length) loadLevel(currentLevel);
+                    else showEndScreen(true);
                 }, 2000);
             }
         }
     });
 
     if (!hit) {
-        drawCircle(clickX, clickY, "blue");
+        drawCircle(clickX, clickY, "blue", 20, true);
         score = Math.max(0, score - 5);
         lives--;
         comboStreak = 0;
@@ -194,16 +208,6 @@ function handleClick(e) {
             showEndScreen(false);
         }
     }
-
-    if (found.length === easyLevels[currentLevel].differences.length) {
-        clearInterval(timerInterval);
-        message.textContent = `🎉 Level Complete! Time left: ${timeLeft}s`;
-        disableClicks();
-        setTimeout(() => {
-            if (++currentLevel < easyLevels.length) loadLevel(currentLevel);
-            else showEndScreen(true);
-        }, 2000);
-    }
 }
 
 function showHint() {
@@ -216,6 +220,7 @@ function showHint() {
     if (remaining.length > 0) {
         const random = remaining[Math.floor(Math.random() * remaining.length)];
         found.push(random.index);
+        hintFound.push(random.index);
         updateFoundCounter();
         const offset = leftImage.width + 20;
         drawCircle(random.diff.x + offset, random.diff.y, "green");
