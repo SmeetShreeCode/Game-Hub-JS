@@ -8,17 +8,18 @@
 </head>
 <body>
 <h1>Photo Hunt Game</h1>
-<a href="index.html" style="display:inline-block; margin: 10px; font-size: 18px;">⬅ Back to Home</a>
 
 <div id="info">
+    <a href="index.html" style="display:inline-block; margin: 0 10px 10px 10px; font-size: 15px;">⬅ Back</a> |
     <span id="timer">Time: 0s</span> |
     <span id="score">Score: 0</span> |
     <span id="highScore">High Score: 0</span> |
-    <span id="lives">Lives: 3</span> |
+    <span id="lives" class="hearts">❤️❤️❤️</span> |
     <span id="foundCounter">Found: 0 / 0</span> |<br>
-    <button onclick="showHint()">Hint</button> |
+    <button id="reset">Restart Game</button> |
+    <button onclick="showHint()" id="hintButton">Hint: 3</button> |
     <button onclick="toggleMusic()" id="musicToggleBtn">🔊 Music On</button> |
-    <button id="themeToggleBtn">🌞 Light Theme</button> |
+    <button id="themeToggleBtn">🌞Light Theme</button> |
     <label>
         <input type="checkbox" id="ambientModeToggle" />
         🧘On/Off Timer
@@ -35,7 +36,6 @@
     <canvas id="canvas"></canvas>
 </div>
 
-<br><button id="reset">Restart Game</button>
 <div id="message"></div>
 
 <audio id="correctSound" src="correct1.mp3" preload="auto"></audio>
@@ -45,6 +45,12 @@
     <h2>Welcome to Photo Hunt!</h2>
     <p>Find all the differences before time runs out. You have 3 lives per level.</p>
     <button onclick="startGame()">Start Game</button>
+</div>
+
+<div id="levelSelectScreen" class="overlay-screen" style="display: none;">
+    <h2>Select a Level</h2>
+    <div id="levelButtons"></div>
+    <button onclick="startGame()">Play Selected</button>
 </div>
 
 <div id="endScreen" class="overlay-screen" style="display: none;">

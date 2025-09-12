@@ -186,8 +186,8 @@ const easyLevels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level1_left.jpg",
-        right: "images/Right/level1_right.jpg"
+        left: "images/Left/1.jpg",
+        right: "images/Right/1.jpg"
     }, differences: [
         {x: 170, y: 85, radius: 20},
         {x: 100, y: 130, radius: 20},
@@ -195,8 +195,8 @@ const easyLevels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level2_left.jpg",
-        right: "images/Right/level2_right.jpg"
+        left: "images/Left/2.jpg",
+        right: "images/Right/2.jpg"
     },
     differences: [
         {x: 60, y: 125, radius: 15},
