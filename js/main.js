@@ -21,7 +21,7 @@ const themeToggleBtn = document.getElementById("themeToggleBtn");
 function updateLivesDisplay() {
     const heart = '❤️';
     const lost = '🤍';
-    livesDisplay.innerHTML = `${heart.repeat(lives)}${lost.repeat(15 - lives)}`;
+    livesDisplay.innerHTML = `${heart.repeat(lives)}${lost.repeat(20 - lives)}`;
 }
 
 function updateScoreDisplay() {
@@ -69,19 +69,25 @@ function enableClicks() {
     gameOver = false;
 }
 
-function drawShape(x, y, color = "red", radius = 20, shape = "circle", temporary = false) {
+function drawShape(x, y, color = "red", radius = 20, shape = "circle", temporary = false, width = null, height = null) {
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
-    if (shape === "square") {
-        ctx.strokeRect(x - radius, y - radius, radius * 2, radius * 2);
+
+    if (shape === "square" || shape === "rect") {
+        const w = width ?? radius * 2;
+        const h = height ?? radius * 2;
+        ctx.strokeRect(x - w / 2, y - h / 2, w, h);
     } else {
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.stroke();
     }
+
     if (temporary) {
+        const clearW = (width ?? radius * 2) + 6;
+        const clearH = (height ?? radius * 2) + 6;
         setTimeout(() => {
-            ctx.clearRect(x - radius - 3, y - radius - 3, radius * 2 + 6, radius * 2 + 6);
+            ctx.clearRect(x - clearW / 2, y - clearH / 2, clearW, clearH);
             redrawFound();
         }, Math.random() * 2000 + 2000); // 2 to 4 seconds
     }
@@ -93,8 +99,8 @@ function redrawFound() {
     found.forEach((index) => {
         const diff = easyLevels[currentLevel].differences[index];
         const color = hintFound.includes(index) ? "green" : "red";
-        drawShape(diff.x + imageOffset, diff.y, color, diff.radius, diff.shape || "circle");
-        drawShape(diff.x, diff.y, color, diff.radius, diff.shape || "circle");
+        drawShape(diff.x + imageOffset, diff.y, color, diff.radius, diff.shape || "circle", false, diff.width, diff.height);
+        drawShape(diff.x, diff.y, color, diff.radius, diff.shape || "circle", false, diff.width, diff.height);
     });
 }
 
@@ -104,8 +110,8 @@ function loadLevel(levelIndex) {
     const level = easyLevels[levelIndex];
     found = [];
     hintFound = [];
-    lives = 15;
-    hintsLeft = 15;
+    lives = 20;
+    hintsLeft = 20;
     updateFoundCounter();
     updateLivesDisplay();
     updateScoreDisplay();
@@ -197,8 +203,8 @@ function handleClick(e) {
         if (distance < diff.radius) {
             hit = true;
             found.push(index);
-            drawShape(diff.x, diff.y, "red", diff.radius, diff.shape || "circle");
-            drawShape(diff.x + imageOffset, diff.y, "red", diff.radius, diff.shape || "circle");
+            drawShape(diff.x, diff.y, "red", diff.radius, diff.shape || "circle", false, diff.width, diff.height);
+            drawShape(diff.x + imageOffset, diff.y, "red", diff.radius, diff.shape || "circle", false, diff.width, diff.height);
 
             if (musicOn) correctSound.play();
 
@@ -254,8 +260,8 @@ function showHint() {
         hintFound.push(random.index);
         updateFoundCounter();
         const offset = leftImage.width + 20;
-        drawShape(random.diff.x + offset, random.diff.y, "green", random.diff.radius, random.diff.shape || "circle");
-        drawShape(random.diff.x, random.diff.y, "green", random.diff.radius, random.diff.shape || "circle");
+        drawShape(random.diff.x + offset, random.diff.y, "green", random.diff.radius, random.diff.shape || "circle", false, random.diff.width, random.diff.height);
+        drawShape(random.diff.x, random.diff.y, "green", random.diff.radius, random.diff.shape || "circle", false, random.diff.width, random.diff.height);
         hintsLeft--;
         updateHintDisplay();
         score = Math.max(0, score - 5); // Optional penalty
@@ -282,8 +288,8 @@ function restartGame() {
     score = 0;
     currentLevel = 0;
     selectedLevel = 0;
-    lives = 15;
-    hintsLeft = 15;
+    lives = 20;
+    hintsLeft = 20;
     comboStreak = 0;
     gameOver = false;
     clearInterval(timerInterval);
@@ -409,8 +415,8 @@ document.getElementById("restartLevelBtn").addEventListener("click", () => {
 
 function restartCurrentLevel() {
     if (gameOver) return;
-    lives = 15;
-    hintsLeft = 15;
+    lives = 20;
+    hintsLeft = 20;
     comboStreak = 0;
     score = Math.max(0, score - 10);
     updateLivesDisplay();
@@ -419,4 +425,16 @@ function restartCurrentLevel() {
     loadLevel(currentLevel);
     message.textContent = "";
     enableClicks();
+}
+
+function addHint() {
+    console.log("You Still Have some Hint left");
+    if (gameOver) return;
+    if (hintsLeft !== 0) return;
+    if (score >= 30) {
+        console.log("Your second score is greater then 30 :"+score)
+    }
+    console.log("Hint Added +1");
+    console.log("Your Score is:" + score);
+    console.log("Your Left Hint:" + hintsLeft);
 }
