@@ -69,18 +69,21 @@ function enableClicks() {
     gameOver = false;
 }
 
-function drawCircle(x, y, color = "red", radius = 20, temporary = false) {
+function drawShape(x, y, color = "red", radius = 20, shape = "circle", temporary = false) {
     ctx.strokeStyle = color;
     ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, 2 * Math.PI);
-    ctx.stroke();
+    if (shape === "square") {
+        ctx.strokeRect(x - radius, y - radius, radius * 2, radius * 2);
+    } else {
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
     if (temporary) {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         setTimeout(() => {
-            ctx.putImageData(imageData, 0, 0);
+            ctx.clearRect(x - radius - 3, y - radius - 3, radius * 2 + 6, radius * 2 + 6);
             redrawFound();
-        }, Math.random() * 2000 + 500);
+        }, Math.random() * 2000 + 2000); // 2 to 4 seconds
     }
 }
 
@@ -90,8 +93,8 @@ function redrawFound() {
     found.forEach((index) => {
         const diff = easyLevels[currentLevel].differences[index];
         const color = hintFound.includes(index) ? "green" : "red";
-        drawCircle(diff.x + imageOffset, diff.y, color);
-        drawCircle(diff.x, diff.y, color);
+        drawShape(diff.x + imageOffset, diff.y, color, diff.radius, diff.shape || "circle");
+        drawShape(diff.x, diff.y, color, diff.radius, diff.shape || "circle");
     });
 }
 
@@ -154,6 +157,34 @@ function handleClick(e) {
 
     console.log(`Clicked at (x: ${adjustedX}, y: ${clickY}) on ${isRightImage ? 'right' : 'left'} image`);
 
+    //    const rect = canvas.getBoundingClientRect();
+    //
+    //     // Fix for canvas scaling
+    //     const scaleX = canvas.width / rect.width;
+    //     const scaleY = canvas.height / rect.height;
+    //
+    //     const clickX = (e.clientX - rect.left) * scaleX;
+    //     const clickY = (e.clientY - rect.top) * scaleY;
+    //
+    //     const leftWidth = leftImage.width;
+    //     const spacing = 20;
+    //     const imageOffset = leftWidth + spacing;
+    //
+    //     let adjustedX, isRightImage;
+    //
+    //     if (clickX >= 0 && clickX <= leftWidth) {
+    //         isRightImage = false;
+    //         adjustedX = clickX;
+    //     } else if (clickX >= imageOffset && clickX <= imageOffset + rightImage.width) {
+    //         isRightImage = true;
+    //         adjustedX = clickX - imageOffset;
+    //     } else {
+    //         console.log("Clicked outside images or in gap");
+    //         return;
+    //     }
+    //
+    //     console.log(`Clicked at (x: ${adjustedX.toFixed(2)}, y: ${clickY.toFixed(2)}) on ${isRightImage ? 'right' : 'left'} image`);
+
     let hit = false;
 
     easyLevels[currentLevel].differences.forEach((diff, index) => {
@@ -166,8 +197,8 @@ function handleClick(e) {
         if (distance < diff.radius) {
             hit = true;
             found.push(index);
-            drawCircle(diff.x, diff.y);
-            drawCircle(diff.x + imageOffset, diff.y);
+            drawShape(diff.x, diff.y, "red", diff.radius, diff.shape || "circle");
+            drawShape(diff.x + imageOffset, diff.y, "red", diff.radius, diff.shape || "circle");
 
             if (musicOn) correctSound.play();
 
@@ -193,7 +224,7 @@ function handleClick(e) {
     });
 
     if (!hit) {
-        drawCircle(clickX, clickY, "blue", 20, true);
+        drawShape(clickX, clickY, "blue", 20, "circle", true);
         score = Math.max(0, score - 5);
         lives--;
         comboStreak = 0;
@@ -223,8 +254,8 @@ function showHint() {
         hintFound.push(random.index);
         updateFoundCounter();
         const offset = leftImage.width + 20;
-        drawCircle(random.diff.x + offset, random.diff.y, "green");
-        drawCircle(random.diff.x, random.diff.y, "green");
+        drawShape(random.diff.x + offset, random.diff.y, "green", random.diff.radius, random.diff.shape || "circle");
+        drawShape(random.diff.x, random.diff.y, "green", random.diff.radius, random.diff.shape || "circle");
         hintsLeft--;
         updateHintDisplay();
         score = Math.max(0, score - 5); // Optional penalty
@@ -248,16 +279,23 @@ function showEndScreen(isWin) {
 }
 
 function restartGame() {
-    document.getElementById("progressBar").style.width = "0%";
-    document.getElementById("endScreen").style.display = "none";
     score = 0;
     currentLevel = 0;
+    selectedLevel = 0;
     lives = 15;
     hintsLeft = 15;
     comboStreak = 0;
+    gameOver = false;
+    clearInterval(timerInterval);
+
     updateLivesDisplay();
     updateHintDisplay();
-    loadLevel(currentLevel);
+    updateScoreDisplay();
+    updateHighScore();
+    document.getElementById("progressBar").style.width = "0%";
+    document.getElementById("endScreen").style.display = "none";
+    message.textContent = "";
+    showLevelSelectScreen();
 }
 
 function updateProgressBar() {
@@ -363,4 +401,22 @@ function highlightSelectedLevel(index) {
     buttons.forEach((btn, i) => {
         btn.style.backgroundColor = i === index ? "#5aafff" : "";
     });
+}
+
+document.getElementById("restartLevelBtn").addEventListener("click", () => {
+    restartCurrentLevel();
+});
+
+function restartCurrentLevel() {
+    if (gameOver) return;
+    lives = 15;
+    hintsLeft = 15;
+    comboStreak = 0;
+    score = Math.max(0, score - 10);
+    updateLivesDisplay();
+    updateHintDisplay();
+    updateScoreDisplay();
+    loadLevel(currentLevel);
+    message.textContent = "";
+    enableClicks();
 }

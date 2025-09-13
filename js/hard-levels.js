@@ -4,7 +4,7 @@ const easyLevels = [{
         right: "images/Right/R3.jpg"
     },
     differences: [
-        {x: 420, y: 45, radius: 15},
+        {x: 420, y: 45, radius: 20, shape: "square" },
         {x: 430, y: 132, radius: 15},
         {x: 288, y: 202, radius: 15},
         {x: 230, y: 298, radius: 15},
