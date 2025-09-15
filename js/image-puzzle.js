@@ -217,14 +217,14 @@ imageUpload.addEventListener("change", e => {
 });
 imagePreview.src = imageURL;
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').then(reg => {
-                console.log('ServiceWorker registered with scope:', reg.scope);
-            }).catch(err => {
-                console.error('ServiceWorker registration failed:', err);
-            });
-    });
-} else {
-    console.warn('ServiceWorker not supported on file:// protocol. Use a local server.');
-}
+// if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+//     window.addEventListener('load', () => {
+//         navigator.serviceWorker.register('./service-worker.js').then(reg => {
+//                 console.log('ServiceWorker registered with scope:', reg.scope);
+//             }).catch(err => {
+//                 console.error('ServiceWorker registration failed:', err);
+//             });
+//     });
+// } else {
+//     console.warn('ServiceWorker not supported on file:// protocol. Use a local server.');
+// }
