@@ -86,7 +86,7 @@ const Levels = [{
         right: "images/Right/level7_right.jpg"
     },
     differences: [
-        {x: 598, y: 52, radius: 20},
+        {x: 598, y: 52, radius: 25},
         {x: 500, y: 95, radius: 15},
         {x: 330, y: 355, radius: 15},
         {x: 462, y: 328, radius: 15},

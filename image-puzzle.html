@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Puzzle Craft</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="css/image-puzzle.css"/>
+    <link rel="manifest" href="manifest.json"/>
+    <meta name="theme-color" content="#333333"/>
+</head>
+<body>
+<header>
+    <h1>Puzzle Craft 🧩</h1>
+    <button onclick="restartGame()">🔄 Restart</button>
+    Best: <span id="best-score">—</span>
+</header>
+
+<main>
+    <div id="game-info">
+        <p>Moves: <span id="moveCount">0</span> |
+            Time: <span id="timer">00:00</span></p>
+        <p>
+            <button id="toggle-dark">🌓 Dark Mode</button>
+            <label for="theme-select">Theme:</label>
+            <select id="theme-select">
+                <option value="default">Default</option>
+                <option value="ocean">Ocean</option>
+                <option value="sunset">Sunset</option>
+            </select>
+        </p>
+    </div>
+
+    <div id="image-preview-container" style="margin: 10px;">
+        <img id="image-preview" src="images/puzzle.png" alt="Preview" style="width: 80px; height: 80px; object-fit: cover; border: 2px solid #ccc; border-radius: 4px;"/>
+    </div>
+
+    <div class="controls">
+        <label for="grid-size">Grid Size:</label>
+        <select id="grid-size">
+            <option value="3">3 × 3</option>
+            <option value="4">4 × 4</option>
+            <option value="5">5 × 5</option>
+        </select>
+
+        <label for="image-upload">Upload Image:</label>
+        <input type="file" id="image-upload" accept="image/*"/>
+
+        <button id="shuffle">Shuffle</button>
+    </div>
+    <div id="puzzle-container"></div>
+</main>
+
+<footer>
+    <p><a href="index.html">⬅ Back to Games</a></p>
+</footer>
+<script src="js/image-puzzle.js"></script>
+</body>
+</html>
