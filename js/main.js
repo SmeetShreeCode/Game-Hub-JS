@@ -1,4 +1,4 @@
-let currentLevel = 0, found = [], hintFound = [], score = 0, timeLeft = 60, lives = 15, hintsLeft = 15, comboStreak = 0, selectedLevel = 0, gameOver = false;
+let currentLevel = 0, levelStartScore = 0, found = [], hintFound = [], score = 0, timeLeft = 60, lives = 15, hintsLeft = 3, comboStreak = 0, selectedLevel = 0, gameOver = false;
 let timerInterval;
 let highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
@@ -29,7 +29,7 @@ function updateScoreDisplay() {
 }
 
 function updateFoundCounter() {
-    const total = easyLevels[currentLevel].differences.length;
+    const total = activeLevels[currentLevel].differences.length;
     const foundCount = found.length;
     document.getElementById("foundCounter").textContent = `Found: ${foundCount} / ${total}`;
 }
@@ -40,6 +40,28 @@ function updateHighScore() {
         localStorage.setItem("highScore", highScore);
     }
     document.getElementById("highScore").textContent = `High Score: ${highScore}`;
+}
+
+const Chapters = {
+    chapter1: Levels.slice(0, 14),
+    chapter2: Levels.slice(14, 24),
+};
+
+let currentChapter = "chapter1";
+let activeLevels = pickLevels(Chapters[currentChapter], 10);
+
+function shuffleArray(array) {
+    let arr = [...array]; // copy
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+// Pick 10 random levels from a chapter
+function pickLevels(chapterLevels, count = 10) {
+    return shuffleArray(chapterLevels).slice(0, count);
 }
 
 function startTimer() {
@@ -97,7 +119,7 @@ function redrawFound() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const imageOffset = leftImage.width + 20;
     found.forEach((index) => {
-        const diff = easyLevels[currentLevel].differences[index];
+        const diff = activeLevels[currentLevel].differences[index];
         const color = hintFound.includes(index) ? "green" : "red";
         drawShape(diff.x + imageOffset, diff.y, color, diff.radius, diff.shape || "circle", false, diff.width, diff.height);
         drawShape(diff.x, diff.y, color, diff.radius, diff.shape || "circle", false, diff.width, diff.height);
@@ -105,13 +127,14 @@ function redrawFound() {
 }
 
 function loadLevel(levelIndex) {
+    const level = activeLevels[levelIndex];
     updateProgressBar();
     clearInterval(timerInterval);
-    const level = easyLevels[levelIndex];
     found = [];
     hintFound = [];
     lives = 20;
-    hintsLeft = 20;
+    hintsLeft = 3;
+    levelStartScore = score;
     updateFoundCounter();
     updateLivesDisplay();
     updateScoreDisplay();
@@ -137,7 +160,7 @@ function loadLevel(levelIndex) {
 function restartLevel() {
     message.textContent = "";
     comboStreak = 0;
-    hintsLeft = 15;
+    hintsLeft = 3;
     updateHintDisplay();
     score = Math.max(0, score - 10);
     loadLevel(currentLevel);
@@ -147,53 +170,40 @@ function handleClick(e) {
     if (gameOver) return;
 
     const rect = canvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-    const imageOffset = leftImage.width + 20;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clickX = (e.clientX - rect.left) * scaleX;
+    const clickY = (e.clientY - rect.top) * scaleY;
 
-    let adjustedX, isRightImage;
+    const leftWidth = leftImage.width;
+    const leftHeight = leftImage.height;
+    const spacing = 20;
+    const imageOffset = leftWidth + spacing;
 
-    if (clickX > imageOffset) {
-        isRightImage = true;
-        adjustedX = clickX - imageOffset;
-    } else {
+    let adjustedX, adjustedY, isRightImage;
+
+    if (clickX >= 0 && clickX <= leftWidth) {
+        // Left image = no scaling needed
         isRightImage = false;
         adjustedX = clickX;
+        adjustedY = clickY;
+    } else if (clickX >= imageOffset && clickX <= imageOffset + rightImage.width) {
+        // Right image = map to left image scale
+        isRightImage = true;
+        adjustedX = (clickX - imageOffset) * (leftWidth / rightImage.width);
+        adjustedY = clickY * (leftHeight / rightImage.height);
+    } else {
+        console.log("Clicked outside images or in gap");
+        return;
     }
 
-    console.log(`Clicked at (x: ${adjustedX}, y: ${clickY}) on ${isRightImage ? 'right' : 'left'} image`);
-
-    //    const rect = canvas.getBoundingClientRect();
-    //
-    //     // Fix for canvas scaling
-    //     const scaleX = canvas.width / rect.width;
-    //     const scaleY = canvas.height / rect.height;
-    //
-    //     const clickX = (e.clientX - rect.left) * scaleX;
-    //     const clickY = (e.clientY - rect.top) * scaleY;
-    //
-    //     const leftWidth = leftImage.width;
-    //     const spacing = 20;
-    //     const imageOffset = leftWidth + spacing;
-    //
-    //     let adjustedX, isRightImage;
-    //
-    //     if (clickX >= 0 && clickX <= leftWidth) {
-    //         isRightImage = false;
-    //         adjustedX = clickX;
-    //     } else if (clickX >= imageOffset && clickX <= imageOffset + rightImage.width) {
-    //         isRightImage = true;
-    //         adjustedX = clickX - imageOffset;
-    //     } else {
-    //         console.log("Clicked outside images or in gap");
-    //         return;
-    //     }
-    //
-    //     console.log(`Clicked at (x: ${adjustedX.toFixed(2)}, y: ${clickY.toFixed(2)}) on ${isRightImage ? 'right' : 'left'} image`);
+    console.log(
+        `Clicked at (x: ${adjustedX}, y: ${adjustedY}) on ${isRightImage ? "right" : "left"} image`
+    );
 
     let hit = false;
 
-    easyLevels[currentLevel].differences.forEach((diff, index) => {
+    activeLevels[currentLevel].differences.forEach((diff, index) => {
         if (found.includes(index)) return;
 
         const dx = diff.x - adjustedX;
@@ -217,12 +227,12 @@ function handleClick(e) {
             updateHighScore();
             showSparkle(e.clientX, e.clientY, 'limegreen');
 
-            if (found.length === easyLevels[currentLevel].differences.length) {
+            if (found.length === activeLevels[currentLevel].differences.length) {
                 clearInterval(timerInterval);
                 message.textContent = "🎉 Level Complete!";
                 disableClicks();
                 setTimeout(() => {
-                    if (++currentLevel < easyLevels.length) loadLevel(currentLevel);
+                    if (++currentLevel < activeLevels.length) loadLevel(currentLevel);
                     else showEndScreen(true);
                 }, 2000);
             }
@@ -250,7 +260,7 @@ function handleClick(e) {
 function showHint() {
     if (gameOver || hintsLeft <= 0) return;
 
-    const remaining = easyLevels[currentLevel].differences
+    const remaining = activeLevels[currentLevel].differences
         .map((d, i) => ({diff: d, index: i}))
         .filter((d) => !found.includes(d.index));
 
@@ -266,12 +276,12 @@ function showHint() {
         updateHintDisplay();
         score = Math.max(0, score - 5); // Optional penalty
         updateScoreDisplay();
-        if (found.length === easyLevels[currentLevel].differences.length) {
+        if (found.length === activeLevels[currentLevel].differences.length) {
             clearInterval(timerInterval);
             message.textContent = "🎉 Level Complete!";
             disableClicks();
             setTimeout(() => {
-                if (++currentLevel < easyLevels.length) loadLevel(currentLevel); else showEndScreen(true);
+                if (++currentLevel < activeLevels.length) loadLevel(currentLevel); else showEndScreen(true);
             }, 2000);
         }
     }
@@ -289,7 +299,7 @@ function restartGame() {
     currentLevel = 0;
     selectedLevel = 0;
     lives = 20;
-    hintsLeft = 20;
+    hintsLeft = 3;
     comboStreak = 0;
     gameOver = false;
     clearInterval(timerInterval);
@@ -305,7 +315,7 @@ function restartGame() {
 }
 
 function updateProgressBar() {
-    const percent = (currentLevel / easyLevels.length) * 100;
+    const percent = (currentLevel / activeLevels.length) * 100;
     document.getElementById("progressBar").style.width = `${percent}%`;
 }
 
@@ -335,9 +345,12 @@ function updateThemeUI(theme) {
 document.getElementById("game").addEventListener("click", handleClick);
 document.getElementById("game").addEventListener("touchstart", (e) => {
     const touch = e.touches[0];
-    handleClick({ clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {} });
+    handleClick({
+        clientX: touch.clientX, clientY: touch.clientY, preventDefault: () => {
+        }
+    });
     e.preventDefault();
-}, { passive: false });
+}, {passive: false});
 document.getElementById("reset").addEventListener("click", restartGame);
 
 ambientToggle.addEventListener("change", () => {
@@ -352,7 +365,7 @@ themeToggleBtn.addEventListener("click", () => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-    showLevelSelectScreen();
+    showChapterSelectScreen();
 
     const savedTheme = localStorage.getItem("theme") || "light";
     updateThemeUI(savedTheme);
@@ -368,6 +381,7 @@ function startGame() {
     document.getElementById("levelSelectScreen").style.display = "none";
     loadLevel(currentLevel);
 }
+
 function showSparkle(x, y, color = 'yellow') {
     const sparkle = document.createElement("div");
     sparkle.className = "sparkle";
@@ -380,14 +394,52 @@ function showSparkle(x, y, color = 'yellow') {
 
 function updateHintDisplay() {
     const hintBtn = document.getElementById("hintButton");
+    const addHintBtn = document.getElementById("addHintButton");
     hintBtn.textContent = `Hint: ${hintsLeft}`;
     hintBtn.disabled = hintsLeft === 0;
+    addHintBtn.disabled = (hintsLeft !== 0);
+}
+
+function showChapterSelectScreen() {
+    const container = document.getElementById("chapterButtons");
+    container.innerHTML = "";
+
+    Object.keys(Chapters).forEach((chapterKey, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = `Chapter ${i + 1}`;
+        btn.className = "level-btn";
+        btn.onclick = () => {
+            currentChapter = chapterKey;
+            activeLevels = pickLevels(Chapters[currentChapter], 10);
+            highlightSelectedChapter(chapterKey);
+        };
+        container.appendChild(btn);
+    });
+
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("chapterSelectScreen").style.display = "flex";
+}
+
+function highlightSelectedChapter(chapterKey) {
+    const buttons = document.querySelectorAll("#chapterButtons button");
+    buttons.forEach(btn => {
+        btn.style.backgroundColor = btn.textContent.includes(chapterKey.split("chapter")[1]) ? "#5aafff" : "";
+    });
+}
+
+function goToLevelSelect() {
+    if (!currentChapter) {
+        alert("Please select a chapter first!");
+        return;
+    }
+    document.getElementById("chapterSelectScreen").style.display = "none";
+    showLevelSelectScreen(); // your existing level selection
 }
 
 function showLevelSelectScreen() {
     const container = document.getElementById("levelButtons");
     container.innerHTML = "";
-    easyLevels.forEach((_, index) => {
+    activeLevels.forEach((_, index) => {
         const btn = document.createElement("button");
         btn.textContent = `Level ${index + 1}`;
         btn.className = "level-btn";
@@ -415,10 +467,13 @@ document.getElementById("restartLevelBtn").addEventListener("click", () => {
 
 function restartCurrentLevel() {
     if (gameOver) return;
+    const earnedThisLevel = score - levelStartScore;
+    if (earnedThisLevel > 0) {
+        score = Math.max(0, score - earnedThisLevel);
+    }
     lives = 20;
-    hintsLeft = 20;
+    hintsLeft = 3;
     comboStreak = 0;
-    score = Math.max(0, score - 10);
     updateLivesDisplay();
     updateHintDisplay();
     updateScoreDisplay();
@@ -428,13 +483,27 @@ function restartCurrentLevel() {
 }
 
 function addHint() {
-    console.log("You Still Have some Hint left");
-    if (gameOver) return;
-    if (hintsLeft !== 0) return;
-    if (score >= 30) {
-        console.log("Your second score is greater then 30 :"+score)
-    }
-    console.log("Hint Added +1");
-    console.log("Your Score is:" + score);
-    console.log("Your Left Hint:" + hintsLeft);
+    if (gameOver || hintsLeft !== 0) return;
+    showAdModal();
 }
+
+function showAdModal() {
+    const modal = document.getElementById("adModal");
+    const closeBtn = document.getElementById("closeAdBtn");
+
+    modal.style.display = "flex";
+    closeBtn.disabled = true;
+    closeBtn.textContent = "Please wait...";
+    setTimeout(() => {
+        closeBtn.disabled = false;
+        closeBtn.textContent = "🎁Close Ad";
+    }, 5000);
+}
+
+document.getElementById("closeAdBtn").addEventListener("click", () => {
+    const modal = document.getElementById("adModal");
+    modal.style.display = "none";
+    hintsLeft++;
+    updateHintDisplay();
+    message.textContent = "✅ Hint added after watching ad!";
+});

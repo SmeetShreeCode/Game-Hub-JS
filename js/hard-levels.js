@@ -1,4 +1,220 @@
-const easyLevels = [{
+const Levels = [{
+    images: {
+        left: "images/Left/level15_left.jpg",
+        right: "images/Right/level15_right.jpg"
+    },
+    differences: [
+        {x: 115, y: 76, radius: 15},
+        {x: 98, y: 160, radius: 15},
+        {x: 500, y: 178, radius: 15},
+        {x: 360, y: 264, radius: 25, shape: "rect" },
+        {x: 142, y: 308, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level10_left.jpg",
+        right: "images/Right/level10_right.jpg"
+    },
+    differences: [
+        {x: 105, y: 300, radius: 15},
+        {x: 300, y: 376, radius: 15},
+        {x: 368, y: 415, radius: 15},
+        {x: 388, y: 370, radius: 15},
+        {x: 35, y: 175, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level9_left.jpg",
+        right: "images/Right/level9_right.jpg"
+    },
+    differences: [
+        {x: 268, y: 140, radius: 15},
+        {x: 478, y: 114, radius: 35, shape: "square" },
+        {x: 450, y: 306, radius: 25},
+        {x: 274, y: 410, radius: 15},
+        {x: 48, y: 442, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level6_left.jpg",
+        right: "images/Right/level6_right.jpg"
+    },
+    differences: [
+        {x: 598, y: 45, radius: 25, shape: "rect" },
+        {x: 190, y: 215, radius: 20},
+        {x: 370, y: 228, radius: 20},
+        {x: 512, y: 288, radius: 20},
+        {x: 482, y: 215, radius: 20},
+    ]
+}, {
+    images: {
+        left: "images/Left/level3_left.png",
+        right: "images/Right/level3_right.png"
+    },
+    differences: [
+        {x: 45, y: 50, radius: 15},
+        {x: 272, y: 32, radius: 15},
+        {x: 205, y: 114, radius: 15},
+        {x: 295, y: 144, radius: 15},
+        {x: 168, y: 290, radius: 15},
+        {x: 98, y: 340, radius: 15},
+        {x: 64, y: 224, radius: 15},
+        {x: 170, y: 492, radius: 15},
+        {x: 342, y: 518, radius: 15},
+        {x: 340, y: 405, radius: 24},
+    ]
+}, {
+    images: {
+        left: "images/Left/level5_left.jpg",
+        right: "images/Right/level5_right.jpg"
+    },
+    differences: [
+        {x: 200, y: 284, radius: 15},
+        {x: 100, y: 35, radius: 20, shape: "square" },
+        {x: 130, y: 430, radius: 15},
+        {x: 45, y: 465, radius: 15},
+        {x: 100, y: 598, radius: 15},
+        {x: 293, y: 570, radius: 15},
+        {x: 328, y: 450, radius: 15},
+        {x: 448, y: 390, radius: 15},
+        {x: 308, y: 100, radius: 20},
+        {x: 20, y: 198, radius: 30, shape: "square" },
+    ]
+}, {
+    images: {
+        left: "images/Left/level7_left.jpg",
+        right: "images/Right/level7_right.jpg"
+    },
+    differences: [
+        {x: 598, y: 52, radius: 20},
+        {x: 500, y: 95, radius: 15},
+        {x: 330, y: 355, radius: 15},
+        {x: 462, y: 328, radius: 15},
+        {x: 210, y: 400, radius: 15},
+        {x: 68, y: 305, radius: 15},
+        {x: 80, y: 120, radius: 15},
+        {x: 218, y: 198, radius: 15},
+        {x: 370, y: 158, radius: 15},
+        {x: 450, y: 160, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level8_left.jpg",
+        right: "images/Right/level8_right.jpg"
+    },
+    differences: [
+        {x: 558, y: 144, radius: 35, shape: "rect" },
+        {x: 572, y: 374, radius: 15},
+        {x: 458, y: 266, radius: 15},
+        {x: 420, y: 148, radius: 15},
+        {x: 348, y: 88, radius: 15},
+        {x: 190, y: 254, radius: 15},
+        {x: 230, y: 138, radius: 15},
+        {x: 120, y: 356, radius: 15},
+        {x: 348, y: 272, radius: 15},
+        {x: 205, y: 346, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level11_left.jpg",
+        right: "images/Right/level11_right.jpg"
+    },
+    differences: [
+        {x: 578, y: 32, radius: 15},
+        {x: 566, y: 155, radius: 15},
+        {x: 600, y: 365, radius: 15},
+        {x: 280, y: 333, radius: 15},
+        {x: 414, y: 380, radius: 15},
+        {x: 165, y: 178, radius: 15},
+        {x: 15, y: 198, radius: 15},
+        {x: 138, y: 72, radius: 15},
+        {x: 210, y: 50, radius: 15},
+        {x: 455, y: 265, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level13_left.jpg",
+        right: "images/Right/level13_right.jpg"
+    },
+    differences: [
+        {x: 265, y: 144, radius: 15},
+        {x: 68, y: 72, radius: 15},
+        {x: 90, y: 178, radius: 15},
+        {x: 208, y: 202, radius: 15},
+        {x: 136, y: 310, radius: 15},
+        {x: 78, y: 244, radius: 15},
+        {x: 410, y: 388, radius: 15},
+        {x: 608, y: 144, radius: 15},
+        {x: 420, y: 222, radius: 15},
+        {x: 502, y: 88, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level14_left.jpg",
+        right: "images/Right/level14_right.jpg"
+    },
+    differences: [
+        {x: 504, y: 163, radius: 15},
+        {x: 524, y: 260, radius: 15},
+        {x: 580, y: 336, radius: 15},
+        {x: 398, y: 256, radius: 15},
+        {x: 253, y: 246, radius: 15},
+        {x: 260, y: 42, radius: 15},
+        {x: 254, y: 310, radius: 15},
+        {x: 124, y: 286, radius: 15},
+        {x: 38, y: 312, radius: 15},
+        {x: 160, y: 166, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/level12_left.jpg",
+        right: "images/Right/level12_right.jpg"
+    },
+    differences: [
+        {x: 400, y: 84, radius: 15},
+        {x: 508, y: 178, radius: 15},
+        {x: 478, y: 358, radius: 15},
+        {x: 324, y: 354, radius: 15},
+        {x: 126, y: 188, radius: 15},
+        {x: 60, y: 140, radius: 15},
+        {x: 286, y: 105, radius: 15},
+        {x: 288, y: 178, radius: 15},
+        {x: 252, y: 230, radius: 15},
+        {x: 204, y: 76, radius: 15},
+        {x: 14, y: 240, radius: 15},
+        {x: 378, y: 272, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/1.jpg",
+        right: "images/Right/1.jpg"
+    }, differences: [
+        {x: 70, y: 80, radius: 15},
+        {x: 328, y: 38, radius: 15},
+        {x: 406, y: 138, radius: 15},
+        {x: 405, y: 242, radius: 15},
+        {x: 217, y: 146, radius: 15},
+        {x: 70, y: 230, radius: 15},
+        {x: 155, y: 184, radius: 15},
+    ]
+}, {
+    images: {
+        left: "images/Left/2.jpg",
+        right: "images/Right/2.jpg"
+    },
+    differences: [
+        {x: 340, y: 408, radius: 15},
+        {x: 84, y: 318, radius: 15},
+        {x: 105, y: 108, radius: 15},
+        {x: 30, y: 220, radius: 15},
+        {x: 180, y: 74, radius: 15},
+        {x: 340, y: 216, radius: 15},
+        {x: 312, y: 160, radius: 15},
+        {x: 316, y: 330, radius: 15},
+        {x: 391, y: 218, radius: 15},
+        {x: 100, y: 458, radius: 15},
+    ]
+}, {
     images: {
         left: "images/Left/L3.jpg",
         right: "images/Right/R3.jpg"
@@ -152,7 +368,7 @@ const easyLevels = [{
         {x: 500, y: 50, radius: 15},
     ]
 }, {
-    // ---------------------------Stop-----Break--------------------------
+    // ---------------------Point------Stop-----Break--------------------------
     images: {
         left: "images/Left/L7.jpg",
         right: "images/Right/R7.jpg"
@@ -161,6 +377,7 @@ const easyLevels = [{
         {x: 468, y: 710, radius: 30, shape: 'square'},
         {x: 308, y: 714, radius: 15},
         {x: 255, y: 265, radius: 20},
+        {x: 500, y: 50, radius: 15},
     ]
 }, {
     images: {
@@ -171,6 +388,7 @@ const easyLevels = [{
         {x: 468, y: 710, radius: 30, shape: 'square'},
         {x: 308, y: 714, radius: 15},
         {x: 255, y: 265, radius: 20},
+        {x: 500, y: 50, radius: 15},
     ]
 }, {
     images: {
@@ -181,6 +399,7 @@ const easyLevels = [{
         {x: 468, y: 710, radius: 30, shape: 'square'},
         {x: 308, y: 714, radius: 15},
         {x: 255, y: 265, radius: 20},
+        {x: 500, y: 50, radius: 15},
     ]
 }, {
     images: {

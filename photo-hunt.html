@@ -16,7 +16,7 @@
     <span id="highScore">High Score: 0</span> |
     <span id="lives" class="hearts">❤️❤️❤️</span> |
     <span id="foundCounter">Found: 0 / 0</span> |<br>
-    <button id="reset">Start From Begging</button> |
+    <button id="reset">Select Levels</button> |
     <button id="restartLevelBtn">Restart Level</button> |
     <button onclick="showHint()" id="hintButton">Hint: 3</button> |
     <button onclick="addHint()" id="addHintButton">Add Hint: +1</button> |
@@ -49,6 +49,12 @@
     <button onclick="startGame()">Start Game</button>
 </div>
 
+<div id="chapterSelectScreen" class="overlay-screen" style="display: none;">
+    <h2>Select a Chapter</h2>
+    <div id="chapterButtons"></div>
+    <button onclick="goToLevelSelect()">Continue</button>
+</div>
+
 <div id="levelSelectScreen" class="overlay-screen" style="display: none;">
     <h2>Select a Level</h2>
     <h3>Unlock more levels by playing and progressing!</h3>
@@ -60,6 +66,15 @@
     <h2 id="endTitle">Game Over!</h2>
     <p id="finalScore">Your final score: 0</p>
     <button onclick="restartGame()">Play Again</button>
+</div>
+
+<!-- Ad Modal -->
+<div id="adModal" class="modal">
+    <div class="modal-content">
+        <h2>📺 Watch Ad</h2>
+        <p>Simulated ad playing... Please wait ⏳</p>
+        <button id="closeAdBtn" disabled>Close Ad</button>
+    </div>
 </div>
 
 <script src="js/constants.js"></script>
