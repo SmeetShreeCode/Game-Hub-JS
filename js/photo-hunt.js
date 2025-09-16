@@ -43,8 +43,8 @@ function updateHighScore() {
 }
 
 const Chapters = {
-    chapter1: Levels.slice(0, 14),
-    chapter2: Levels.slice(14, 24),
+    chapter1: PhotoHuntLevels.slice(0, 14),
+    chapter2: PhotoHuntLevels.slice(14, 24),
 };
 
 let currentChapter = "chapter1";

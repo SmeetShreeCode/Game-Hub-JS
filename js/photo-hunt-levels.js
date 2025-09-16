@@ -1,4 +1,4 @@
-const Levels = [{
+const PhotoHuntLevels = [{
     images: {
         left: "images/Photo-hunt/Left/level15_left.jpg",
         right: "images/Photo-hunt/Right/level15_right.jpg"

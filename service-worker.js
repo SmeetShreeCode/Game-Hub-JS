@@ -2,8 +2,8 @@
 // const filesToCache = [
 //     './',
 //     './index.html',
-//     './css/image-puzzle.css',
-//     './js/image-puzzle.js',
+//     './css/puzzle-craft.css',
+//     './js/puzzle-craft.js',
 //     './images/puzzle.png',
 //     './icon.png',
 //     './icon.png',
