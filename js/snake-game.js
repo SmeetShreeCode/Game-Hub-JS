@@ -15,6 +15,7 @@ let foodX;
 let foodY;
 
 let gameOver = false;
+let intervalId;
 
 window.onload = function () {
     board = document.getElementById("board");
@@ -25,7 +26,8 @@ window.onload = function () {
     placeFood();
     document.addEventListener("keydown", changeDirection);
     // update();
-    setInterval(update, 1000/10);
+    intervalId = setInterval(update, 1000 / 10);
+    console.log(intervalId);
 }
 
 function update() {
@@ -35,7 +37,6 @@ function update() {
 
     context.fillStyle = "black";
     context.fillRect(0, 0, board.width, board.height);
-
     context.fillStyle = "red";
     context.fillRect(foodX, foodY, blockSize, blockSize);
 
@@ -61,13 +62,13 @@ function update() {
 
     if (snakeX < 0 || snakeX >= cols * blockSize || snakeY < 0 || snakeY >= rows * blockSize) {
         gameOver = true;
-        alert("Game Over!");
+        showEndScreen(true);
     }
 
     for (let i = 0; i < snakeBody.length; i++) {
         if (snakeX === snakeBody[i][0] && snakeY === snakeBody[i][1]) {
             gameOver = true;
-            alert("Game Over!");
+            showEndScreen(true);
         }
     }
 }
@@ -91,4 +92,26 @@ function changeDirection(e) {
 function placeFood() {
     foodX = Math.floor(Math.random() * cols) * blockSize;
     foodY = Math.floor(Math.random() * rows) * blockSize;
+}
+
+function restartGame() {
+    snakeX = blockSize * 5;
+    snakeY = blockSize * 5;
+    velocityX = 0;
+    velocityY = 0;
+    snakeBody = [];
+    gameOver = false;
+    placeFood();
+
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
+
+    intervalId = setInterval(update, 1000 / 10);
+    document.getElementById("endScreen").style.display = "none";
+}
+
+function showEndScreen(gameOver) {
+    document.getElementById("endScreen").style.display = "flex";
+    document.getElementById("endTitle").textContent = gameOver ? "💀 Game Over!" : " " ;
 }

@@ -1,7 +1,7 @@
 const Levels = [{
     images: {
-        left: "images/Left/level15_left.jpg",
-        right: "images/Right/level15_right.jpg"
+        left: "images/Photo-hunt/Left/level15_left.jpg",
+        right: "images/Photo-hunt/Right/level15_right.jpg"
     },
     differences: [
         {x: 115, y: 76, radius: 15},
@@ -12,8 +12,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level10_left.jpg",
-        right: "images/Right/level10_right.jpg"
+        left: "images/Photo-hunt/Left/level10_left.jpg",
+        right: "images/Photo-hunt/Right/level10_right.jpg"
     },
     differences: [
         {x: 105, y: 300, radius: 15},
@@ -24,8 +24,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level9_left.jpg",
-        right: "images/Right/level9_right.jpg"
+        left: "images/Photo-hunt/Left/level9_left.jpg",
+        right: "images/Photo-hunt/Right/level9_right.jpg"
     },
     differences: [
         {x: 268, y: 140, radius: 15},
@@ -36,8 +36,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level6_left.jpg",
-        right: "images/Right/level6_right.jpg"
+        left: "images/Photo-hunt/Left/level6_left.jpg",
+        right: "images/Photo-hunt/Right/level6_right.jpg"
     },
     differences: [
         {x: 598, y: 45, radius: 25, shape: "rect" },
@@ -48,8 +48,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level3_left.png",
-        right: "images/Right/level3_right.png"
+        left: "images/Photo-hunt/Left/level3_left.png",
+        right: "images/Photo-hunt/Right/level3_right.png"
     },
     differences: [
         {x: 45, y: 50, radius: 15},
@@ -65,8 +65,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level5_left.jpg",
-        right: "images/Right/level5_right.jpg"
+        left: "images/Photo-hunt/Left/level5_left.jpg",
+        right: "images/Photo-hunt/Right/level5_right.jpg"
     },
     differences: [
         {x: 200, y: 284, radius: 15},
@@ -82,8 +82,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level7_left.jpg",
-        right: "images/Right/level7_right.jpg"
+        left: "images/Photo-hunt/Left/level7_left.jpg",
+        right: "images/Photo-hunt/Right/level7_right.jpg"
     },
     differences: [
         {x: 598, y: 52, radius: 25},
@@ -99,8 +99,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level8_left.jpg",
-        right: "images/Right/level8_right.jpg"
+        left: "images/Photo-hunt/Left/level8_left.jpg",
+        right: "images/Photo-hunt/Right/level8_right.jpg"
     },
     differences: [
         {x: 558, y: 144, radius: 35, shape: "rect" },
@@ -116,8 +116,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level11_left.jpg",
-        right: "images/Right/level11_right.jpg"
+        left: "images/Photo-hunt/Left/level11_left.jpg",
+        right: "images/Photo-hunt/Right/level11_right.jpg"
     },
     differences: [
         {x: 578, y: 32, radius: 15},
@@ -133,8 +133,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level13_left.jpg",
-        right: "images/Right/level13_right.jpg"
+        left: "images/Photo-hunt/Left/level13_left.jpg",
+        right: "images/Photo-hunt/Right/level13_right.jpg"
     },
     differences: [
         {x: 265, y: 144, radius: 15},
@@ -150,8 +150,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level14_left.jpg",
-        right: "images/Right/level14_right.jpg"
+        left: "images/Photo-hunt/Left/level14_left.jpg",
+        right: "images/Photo-hunt/Right/level14_right.jpg"
     },
     differences: [
         {x: 504, y: 163, radius: 15},
@@ -167,8 +167,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/level12_left.jpg",
-        right: "images/Right/level12_right.jpg"
+        left: "images/Photo-hunt/Left/level12_left.jpg",
+        right: "images/Photo-hunt/Right/level12_right.jpg"
     },
     differences: [
         {x: 400, y: 84, radius: 15},
@@ -186,8 +186,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/1.jpg",
-        right: "images/Right/1.jpg"
+        left: "images/Photo-hunt/Left/1.jpg",
+        right: "images/Photo-hunt/Right/1.jpg"
     }, differences: [
         {x: 70, y: 80, radius: 15},
         {x: 328, y: 38, radius: 15},
@@ -199,8 +199,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/2.jpg",
-        right: "images/Right/2.jpg"
+        left: "images/Photo-hunt/Left/2.jpg",
+        right: "images/Photo-hunt/Right/2.jpg"
     },
     differences: [
         {x: 340, y: 408, radius: 15},
@@ -216,8 +216,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L3.jpg",
-        right: "images/Right/R3.jpg"
+        left: "images/Photo-hunt/Left/L3.jpg",
+        right: "images/Photo-hunt/Right/R3.jpg"
     },
     differences: [
         {x: 420, y: 45, radius: 20, shape: "square" },
@@ -230,8 +230,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L2.jpg",
-        right: "images/Right/R2.jpg"
+        left: "images/Photo-hunt/Left/L2.jpg",
+        right: "images/Photo-hunt/Right/R2.jpg"
     },
     differences: [
         {x: 354, y: 48, radius: 15},
@@ -249,8 +249,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/l.jpg",
-        right: "images/Right/r.jpg"
+        left: "images/Photo-hunt/Left/l.jpg",
+        right: "images/Photo-hunt/Right/r.jpg"
     },
     differences: [
         {x: 435, y: 220, radius: 15},
@@ -269,8 +269,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L1.jpg",
-        right: "images/Right/R1.jpg"
+        left: "images/Photo-hunt/Left/L1.jpg",
+        right: "images/Photo-hunt/Right/R1.jpg"
     },
     differences: [
         {x: 220, y: 495, radius: 15},
@@ -289,8 +289,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/AnimalFarm-Left.jpg",
-        right: "images/Right/AnimalFarm-Right.jpg"
+        left: "images/Photo-hunt/Left/AnimalFarm-Left.jpg",
+        right: "images/Photo-hunt/Right/AnimalFarm-Right.jpg"
     },
     differences: [
         {x: 270, y: 80, radius: 15},
@@ -311,8 +311,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L4.jpg",
-        right: "images/Right/R4.jpg"
+        left: "images/Photo-hunt/Left/L4.jpg",
+        right: "images/Photo-hunt/Right/R4.jpg"
     },
     differences: [
         {x: 194, y: 270, radius: 15},
@@ -330,8 +330,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L5.jpg",
-        right: "images/Right/R5.jpg"
+        left: "images/Photo-hunt/Left/L5.jpg",
+        right: "images/Photo-hunt/Right/R5.jpg"
     },
     differences: [
         {x: 138, y: 455, radius: 20, shape: 'square'},
@@ -350,8 +350,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L6.jpg",
-        right: "images/Right/R6.jpg"
+        left: "images/Photo-hunt/Left/L6.jpg",
+        right: "images/Photo-hunt/Right/R6.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -370,8 +370,8 @@ const Levels = [{
 }, {
     // ---------------------Point------Stop-----Break--------------------------
     images: {
-        left: "images/Left/L7.jpg",
-        right: "images/Right/R7.jpg"
+        left: "images/Photo-hunt/Left/L7.jpg",
+        right: "images/Photo-hunt/Right/R7.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -381,8 +381,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L8.jpg",
-        right: "images/Right/R8.jpg"
+        left: "images/Photo-hunt/Left/L8.jpg",
+        right: "images/Photo-hunt/Right/R8.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -392,8 +392,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L9.jpg",
-        right: "images/Right/R9.jpg"
+        left: "images/Photo-hunt/Left/L9.jpg",
+        right: "images/Photo-hunt/Right/R9.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -403,8 +403,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L10.jpg",
-        right: "images/Right/R10.jpg"
+        left: "images/Photo-hunt/Left/L10.jpg",
+        right: "images/Photo-hunt/Right/R10.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -413,8 +413,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L11.jpg",
-        right: "images/Right/R11.jpg"
+        left: "images/Photo-hunt/Left/L11.jpg",
+        right: "images/Photo-hunt/Right/R11.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -423,8 +423,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L12.jpg",
-        right: "images/Right/R12.jpg"
+        left: "images/Photo-hunt/Left/L12.jpg",
+        right: "images/Photo-hunt/Right/R12.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -433,8 +433,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L13.jpg",
-        right: "images/Right/R13.jpg"
+        left: "images/Photo-hunt/Left/L13.jpg",
+        right: "images/Photo-hunt/Right/R13.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -443,8 +443,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L14.jpg",
-        right: "images/Right/R14.jpg"
+        left: "images/Photo-hunt/Left/L14.jpg",
+        right: "images/Photo-hunt/Right/R14.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -453,8 +453,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L15.jpg",
-        right: "images/Right/R15.jpg"
+        left: "images/Photo-hunt/Left/L15.jpg",
+        right: "images/Photo-hunt/Right/R15.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -463,8 +463,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L16.jpg",
-        right: "images/Right/R16.jpg"
+        left: "images/Photo-hunt/Left/L16.jpg",
+        right: "images/Photo-hunt/Right/R16.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -473,8 +473,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L17.jpg",
-        right: "images/Right/R17.jpg"
+        left: "images/Photo-hunt/Left/L17.jpg",
+        right: "images/Photo-hunt/Right/R17.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -483,8 +483,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L18.jpg",
-        right: "images/Right/R18.jpg"
+        left: "images/Photo-hunt/Left/L18.jpg",
+        right: "images/Photo-hunt/Right/R18.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -493,8 +493,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L19.jpg",
-        right: "images/Right/R19.jpg"
+        left: "images/Photo-hunt/Left/L19.jpg",
+        right: "images/Photo-hunt/Right/R19.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -503,8 +503,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L20.jpg",
-        right: "images/Right/R20.jpg"
+        left: "images/Photo-hunt/Left/L20.jpg",
+        right: "images/Photo-hunt/Right/R20.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -513,8 +513,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L21.jpg",
-        right: "images/Right/R21.jpg"
+        left: "images/Photo-hunt/Left/L21.jpg",
+        right: "images/Photo-hunt/Right/R21.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -523,8 +523,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L22.jpg",
-        right: "images/Right/R22.jpg"
+        left: "images/Photo-hunt/Left/L22.jpg",
+        right: "images/Photo-hunt/Right/R22.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -533,8 +533,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L23.jpg",
-        right: "images/Right/R23.jpg"
+        left: "images/Photo-hunt/Left/L23.jpg",
+        right: "images/Photo-hunt/Right/R23.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -543,8 +543,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L24.jpg",
-        right: "images/Right/R24.jpg"
+        left: "images/Photo-hunt/Left/L24.jpg",
+        right: "images/Photo-hunt/Right/R24.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -553,8 +553,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L25.jpg",
-        right: "images/Right/R25.jpg"
+        left: "images/Photo-hunt/Left/L25.jpg",
+        right: "images/Photo-hunt/Right/R25.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -563,8 +563,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L26.jpg",
-        right: "images/Right/R26.jpg"
+        left: "images/Photo-hunt/Left/L26.jpg",
+        right: "images/Photo-hunt/Right/R26.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -573,8 +573,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L27.jpg",
-        right: "images/Right/R27.jpg"
+        left: "images/Photo-hunt/Left/L27.jpg",
+        right: "images/Photo-hunt/Right/R27.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -583,8 +583,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L28.jpg",
-        right: "images/Right/R28.jpg"
+        left: "images/Photo-hunt/Left/L28.jpg",
+        right: "images/Photo-hunt/Right/R28.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -593,8 +593,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L29.jpg",
-        right: "images/Right/R29.jpg"
+        left: "images/Photo-hunt/Left/L29.jpg",
+        right: "images/Photo-hunt/Right/R29.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -603,8 +603,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L30.jpg",
-        right: "images/Right/R30.jpg"
+        left: "images/Photo-hunt/Left/L30.jpg",
+        right: "images/Photo-hunt/Right/R30.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -613,8 +613,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L31.jpg",
-        right: "images/Right/R31.jpg"
+        left: "images/Photo-hunt/Left/L31.jpg",
+        right: "images/Photo-hunt/Right/R31.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},
@@ -623,8 +623,8 @@ const Levels = [{
     ]
 }, {
     images: {
-        left: "images/Left/L32.jpg",
-        right: "images/Right/R32.jpg"
+        left: "images/Photo-hunt/Left/L32.jpg",
+        right: "images/Photo-hunt/Right/R32.jpg"
     },
     differences: [
         {x: 468, y: 710, radius: 30, shape: 'square'},

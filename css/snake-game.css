@@ -2,3 +2,33 @@ body {
     font-family: Courier New, Courier, monospace;
     text-align: center;
 }
+
+.overlay-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(40, 40, 60, 0.9);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.overlay-screen h2 {
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
+.overlay-screen button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background: #5cb85c;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+}

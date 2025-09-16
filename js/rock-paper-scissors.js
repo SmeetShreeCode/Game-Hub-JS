@@ -13,7 +13,6 @@ window.onload = () => {
         img.id = choice;
         img.src = `./images/RockPaperScissors/${choice}.png`;
         img.alt = choice;
-        img.style.cursor = "pointer";
         img.addEventListener("click", selectChoice);
         choiceContainer.appendChild(img);
     });
