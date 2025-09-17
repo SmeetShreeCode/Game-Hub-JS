@@ -27,7 +27,6 @@ window.onload = function () {
     document.addEventListener("keydown", changeDirection);
     // update();
     intervalId = setInterval(update, 1000 / 10);
-    console.log(intervalId);
 }
 
 function update() {
