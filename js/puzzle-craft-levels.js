@@ -15,7 +15,7 @@ const chapters = {
         ]
     },
     2: {
-        levelsCount: 3,
+        levelsCount: 5,
         levels: [
             {size: 3, image: "images/Puzzle-craft/L11.webp"},
             {size: 3, image: "images/Puzzle-craft/L12.webp"},
@@ -24,6 +24,7 @@ const chapters = {
             {size: 3, image: "images/Puzzle-craft/L15.jpg"},
             {size: 3, image: "images/Puzzle-craft/L16.jpg"},
             {size: 3, image: "images/Puzzle-craft/L17.jpg"},
+            {size: 3, image: "images/Puzzle-craft/L18.jpg"},
         ]
     },
 };
