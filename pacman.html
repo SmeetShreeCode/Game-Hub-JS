@@ -5,11 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pac-Man</title>
     <link rel="stylesheet" href="css/pacman.css">
-    <script src="js/pacman.js"></script>
     <script src="js/pacman-levels.js"></script>
+    <script src="js/pacman.js"></script>
 </head>
 <body>
-<canvas id="board"></canvas>
+<div id="gameContainer">
+    <canvas id="board"></canvas>
+</div>
+<div id="controls">
+    <button onclick="setDirection('U')">⬆️</button>
+    <br>
+    <button onclick="setDirection('L')">⬅️</button>
+    <button onclick="setDirection('D')">⬇️</button>
+    <button onclick="setDirection('R')">➡️</button>
+</div>
+
 <footer>
     <p><a href="index.html">⬅ Back to Games</a></p>
 </footer>

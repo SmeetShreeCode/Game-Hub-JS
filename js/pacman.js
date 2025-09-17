@@ -5,7 +5,7 @@ const tileSize = 32;
 const boardWidth = columnCount * tileSize;
 const boardHeight = rowCount * tileSize;
 let context;
-let highScore = localStorage.getItem("pacmanHighScore") || 0;
+let highScore = parseInt(localStorage.getItem("pacmanHighScore")) || 0;
 
 let blueGhostImage;
 let orangeGhostImage;
@@ -26,7 +26,7 @@ let levelStarting = true;
 let readyTimeout = null;
 let teleportCooldown = 0;
 
-const maps = [tileMap1, tileMap2, tileMap3, tileMap4];
+const maps = [tileMap1, tileMap2, tileMap3, tileMap4, tileMap5, tileMap6, tileMap7];
 let currentLevel = 0;
 const walls = new Set();
 const foods = new Set();
@@ -55,7 +55,7 @@ window.onload = function () {
         ghost.updateDirection(newDirection);
     }
     update();
-    document.addEventListener("keyup", movePacman)
+    document.addEventListener("keydown", movePacman)
 }
 
 function loadImages() {
@@ -186,7 +186,7 @@ function update() {
     context.fillStyle = "yellow";
     context.font = "16px sans-serif";
     context.fillText("Score: " + score, 10, 20);
-    context.fillText("High Score: " + highScore, 150, 20);
+    context.fillText("High Score: " + highScore, 100, 20);
     context.fillText("Level: " + (currentLevel + 1), boardWidth / 2 - 30, 20);
 
     for (let i = 0; i < lives; i++) {
@@ -207,8 +207,8 @@ function draw() {
     for (let cheery of cherrys.values()) {
         context.drawImage(cheery.image, cheery.x, cheery.y, cheery.width, cheery.height);
     }
-    for (let smallCheery of smallCherrys.values()) {
-        context.drawImage(smallCheery.image, smallCheery.x, smallCheery.y, smallCheery.width, smallCheery.height);
+    for (let smallCherry of smallCherrys.values()) {
+        context.drawImage(smallCherry.image, smallCherry.x, smallCherry.y, smallCherry.width, smallCherry.height);
     }
     for (let wall of walls.values()) {
         context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height);
@@ -241,7 +241,9 @@ function move() {
             }
         }
 
-        if (!blocked) {
+        if (!blocked && Math.abs(pacman.x % tileSize) < 4 && Math.abs(pacman.y % tileSize) < 4) {
+            pacman.x = Math.round(pacman.x / tileSize) * tileSize;
+            pacman.y = Math.round(pacman.y / tileSize) * tileSize;
             pacman.updateDirection(pacman.nextDirection);
             pacman.image = getPacmanImage(pacman.direction);
             pacman.nextDirection = null;
@@ -274,6 +276,8 @@ function move() {
                 ghost.reset();
                 ghost.frightened = false;
                 ghost.image = ghost.originalImage;
+                const newDirection = directions[Math.floor(Math.random() * 4)];
+                ghost.updateDirection(newDirection);
                 score += 200;
             } else {
                 lives -= 1;
@@ -408,7 +412,7 @@ function movePacman(e) {
         lives = 3;
         score = 0;
         gameOver = false;
-        highScore = localStorage.getItem("pacmanHighScore") || 0;
+        highScore = parseInt(localStorage.getItem("pacmanHighScore")) || 0;
         update();
         return;
     }
@@ -563,13 +567,13 @@ class Block {
         const prevDirection = this.direction;
         this.direction = direction;
         this.updateVelocity();
-        this.x += this.velocityX;
-        this.y += this.velocityY;
+
+        // Test new position
+        const testX = this.x + this.velocityX;
+        const testY = this.y + this.velocityY;
 
         for (let wall of walls.values()) {
-            if (collision(this, wall)) {
-                this.x -= this.velocityX;
-                this.y -= this.velocityY;
+            if (collision({ ...this, x: testX, y: testY }, wall)) {
                 this.direction = prevDirection;
                 this.updateVelocity();
                 return;
@@ -598,5 +602,11 @@ class Block {
     reset() {
         this.x = this.startX;
         this.y = this.startY;
+    }
+}
+
+function setDirection(dir) {
+    if (pacman) {
+        pacman.nextDirection = dir;
     }
 }
