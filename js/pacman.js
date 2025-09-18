@@ -136,7 +136,7 @@ function loadMap() {
                 const cherry = new Block(cherryImage, x, y, tileSize, tileSize);
                 cherrys.add(cherry);
             } else if (tileMapChar === 'c') {
-                const smallCherry = new Block(smallCherryImage, x + 5, y + 5, tileSize - 15, tileSize - 15);
+                const smallCherry = new Block(null, x + 10, y + 10, 10, 10);
                 smallCherrys.add(smallCherry);
             }
         }
@@ -208,7 +208,7 @@ function draw() {
         context.drawImage(cheery.image, cheery.x, cheery.y, cheery.width, cheery.height);
     }
     for (let smallCherry of smallCherrys.values()) {
-        context.drawImage(smallCherry.image, smallCherry.x, smallCherry.y, smallCherry.width, smallCherry.height);
+        context.fillRect(smallCherry.x, smallCherry.y, smallCherry.width, smallCherry.height);
     }
     for (let wall of walls.values()) {
         context.drawImage(wall.image, wall.x, wall.y, wall.width, wall.height);
@@ -583,7 +583,6 @@ class Block {
 
     updateVelocity() {
         // const speed = tileSize / (4 - Math.min(currentLevel, 3)); /* Increase Speed each level up*/
-
         if (this.direction === 'U') {
             this.velocityX = 0;
             this.velocityY = -tileSize / 4; //use -speed;
@@ -605,8 +604,8 @@ class Block {
     }
 }
 
-function setDirection(dir) {
-    if (pacman) {
-        pacman.nextDirection = dir;
-    }
-}
+// function setDirection(dir) {
+//     if (pacman) {
+//         pacman.nextDirection = dir;
+//     }
+// }
