@@ -1,173 +1,6 @@
-/*!* CLEANED-UP CSS *!*/
-/*body {*/
-/*    text-align: center;*/
-/*    font-family: 'Georgia', serif;*/
-/*}*/
-
-/*span {*/
-/*    font-weight: bold;*/
-/*    !*background-color: #7b9f8b;*!*/
-/*    color: #000000;*/
-/*}*/
-
-/*#leftImage, #rightImage {*/
-/*    border: 4px solid #000000;*/
-/*    box-shadow: 0 0 10px rgba(113, 55, 55, 0.5);*/
-/*}*/
-
-/*#info {*/
-/*    font-size: 18px;*/
-/*    margin-bottom: 10px;*/
-/*}*/
-
-/*#game {*/
-/*    position: relative;*/
-/*    display: inline-block;*/
-/*}*/
-
-/*.image-container {*/
-/*    position: relative;*/
-/*    display: inline-block;*/
-/*}*/
-
-/*.image-wrapper {*/
-/*    position: relative;*/
-/*    display: inline-block;*/
-/*}*/
-
-/*.image-wrapper canvas {*/
-/*    position: absolute;*/
-/*    top: 0;*/
-/*    left: 0;*/
-/*    z-index: 10;*/
-/*    pointer-events: auto; !* Important *!*/
-/*}*/
-
-/*.image-wrapper img {*/
-/*    display: block;*/
-/*    max-width: 100%;*/
-/*    height: auto;*/
-/*}*/
-
-/*.overlay-screen {*/
-/*    position: fixed;*/
-/*    top: 0;*/
-/*    left: 0;*/
-/*    width: 100%;*/
-/*    height: 100%;*/
-/*    background: rgba(40, 40, 60, 0.9);*/
-/*    color: white;*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    align-items: center;*/
-/*    justify-content: center;*/
-/*    z-index: 1000;*/
-/*}*/
-
-/*.overlay-screen h2 {*/
-/*    font-size: 32px;*/
-/*    margin-bottom: 20px;*/
-/*}*/
-
-/*.overlay-screen button {*/
-/*    padding: 10px 20px;*/
-/*    font-size: 18px;*/
-/*    background: #5cb85c;*/
-/*    border: none;*/
-/*    border-radius: 5px;*/
-/*    color: white;*/
-/*    cursor: pointer;*/
-/*}*/
-
-/*@keyframes sparkleFade {*/
-/*    0% {*/
-/*        opacity: 1;*/
-/*        transform: scale(0.8);*/
-/*    }*/
-/*    100% {*/
-/*        opacity: 0;*/
-/*        transform: scale(2);*/
-/*    }*/
-/*}*/
-
-/*@media (max-width: 768px) {*/
-/*    #leftImage,*/
-/*    #rightImage {*/
-/*        width: 100%;*/
-/*        max-width: 100%;*/
-/*        height: auto;*/
-/*        margin: 10px auto;*/
-/*        display: block;*/
-/*    }*/
-
-/*    .image-container {*/
-/*        display: block;*/
-/*        text-align: center;*/
-/*    }*/
-
-/*    #info {*/
-/*        font-size: 16px;*/
-/*        flex-wrap: wrap;*/
-/*    }*/
-/*}*/
-
-/*.level-btn {*/
-/*    margin: 5px;*/
-/*    padding: 10px 20px;*/
-/*    font-size: 16px;*/
-/*}*/
-
-/*!* Sparkle Effect *!*/
-/*.sparkle {*/
-/*    width: 20px;*/
-/*    height: 20px;*/
-/*    border-radius: 50%;*/
-/*    background-color: rgba(255, 255, 0, 0.7);*/
-/*    position: absolute;*/
-/*    pointer-events: none;*/
-/*    transform: scale(1);*/
-/*    animation: pop 0.6s ease-out forwards;*/
-/*    transition: transform 0.3s ease, opacity 0.3s ease;*/
-/*    z-index: 9999;*/
-/*}*/
-
-/*@keyframes pop {*/
-/*    0% {*/
-/*        transform: scale(1);*/
-/*        opacity: 1;*/
-/*    }*/
-/*    100% {*/
-/*        transform: scale(2.5);*/
-/*        opacity: 0;*/
-/*    }*/
-/*}*/
-
-/*.modal {*/
-/*    display: none;*/
-/*    position: fixed;*/
-/*    z-index: 2000;*/
-/*    left: 0;*/
-/*    top: 0;*/
-/*    width: 100%;*/
-/*    height: 100%;*/
-/*    overflow: auto;*/
-/*    background-color: rgba(0, 0, 0, 0.8);*/
-/*    justify-content: center;*/
-/*    align-items: center;*/
-/*}*/
-
-/*.modal-content {*/
-/*    background-color: #fefefe;*/
-/*    padding: 20px;*/
-/*    border: 2px solid #888;*/
-/*    border-radius: 10px;*/
-/*    width: 300px;*/
-/*    text-align: center;*/
-/*    color: black;*/
-/*}*/
-
 /* CLEANED-UP CSS */
 body {
+    /*background: url("../images/Banners/photo-hunt-left-banner.jpg");*/
     text-align: center;
     font-family: 'Georgia', serif;
 }
@@ -197,13 +30,23 @@ span {
     position: relative;
     display: inline-block;
 }
+.image-wrapper {
+    position: relative;
+    display: inline-block;
+}
 
-#canvas {
+.image-wrapper canvas {
     position: absolute;
     top: 0;
     left: 0;
     z-index: 10;
-    pointer-events: none;
+    pointer-events: auto; /* Important */
+}
+
+.image-wrapper img {
+    display: block;
+    max-width: 100%;
+    height: auto;
 }
 
 #message {
@@ -241,6 +84,12 @@ span {
     border-radius: 5px;
     color: white;
     cursor: pointer;
+}
+
+.overlay-screen button:hover,
+.overlay-screen button:focus {
+    background: #4cae4c;
+    transform: scale(1.05);
 }
 
 #progressContainer {
@@ -333,6 +182,13 @@ body.dark-theme #progressBar {
     animation: pop 0.6s ease-out forwards;
     transition: transform 0.3s ease, opacity 0.3s ease;
     z-index: 9999;
+}
+.sparkle {
+    animation: pop 0.6s ease-out forwards, rotate 0.6s linear;
+}
+@keyframes rotate {
+    from { transform: rotate(0deg) scale(1); }
+    to   { transform: rotate(360deg) scale(2.5); }
 }
 
 @keyframes pop {

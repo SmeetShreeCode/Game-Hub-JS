@@ -10,12 +10,13 @@
 <h1>Photo Hunt Game</h1>
 
 <div id="info">
+    <h3>Level: <span id="level">1</span></h3>
     <a href="index.html" style="display:inline-block; margin: 0 10px 10px 10px; font-size: 15px;">⬅ Back</a> |
     <span id="timer">Time: 0s</span> |
     <span id="score">Score: 0</span> |
     <span id="highScore">High Score: 0</span> |
     <span id="lives" class="hearts">❤️❤️❤️</span> |
-    <span id="foundCounter">Found: 0 / 0</span> |<br>
+    <span id="foundCounter">Found: 0 / 0</span><br>
     <button id="reset">Select PhotoHuntLevels</button> |
     <button id="restartLevelBtn">Restart Level</button> |
     <button onclick="showHint()" id="hintButton">Hint: 3</button> |
@@ -34,16 +35,15 @@
 
 <div id="game" class="image-container">
     <div class="image-wrapper">
-        <img id="leftImage" alt="Original Image" src="1.jpg"/>
+        <img id="leftImage" alt="Original Image" src="images/Banners/photo-hunt-left-banner.jpg"/>
         <canvas id="leftCanvas"></canvas>
     </div>
     <div class="image-wrapper">
-        <img id="rightImage" alt="Altered Image" src="r1.jpg"/>
+        <img id="rightImage" alt="Altered Image" src="images/Banners/photo-hunt-right-banner.jpg"/>
         <canvas id="rightCanvas"></canvas>
     </div>
+    <div id="message"></div>
 </div>
-
-<div id="message"></div>
 
 <audio id="correctSound" src="music/correct1.mp3" preload="auto"></audio>
 <audio id="wrongSound" src="music/wrong1.mp3" preload="auto"></audio>
