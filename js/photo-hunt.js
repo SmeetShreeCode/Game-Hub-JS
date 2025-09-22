@@ -1,19 +1,20 @@
-// === Game state ===
 let currentLevel = 0, levelStartScore = 0, found = [], hintFound = [], score = 0, timeLeft = 60,
     lives = 20, hintsLeft = 3, comboStreak = 0, selectedLevel = 0, gameOver = false;
 let timerInterval;
 let highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
 let ambientMode = JSON.parse(localStorage.getItem("ambientMode")) || false;
+let selectedChapter = null;
+let selectedMode = null; // "easy", "medium", "hard"
 
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
+const bonusSound = document.getElementById("bonusSound");
 const scoreDisplay = document.getElementById("score");
 const timerDisplay = document.getElementById("timer");
 const message = document.getElementById("message");
 const livesDisplay = document.getElementById("lives");
 const musicToggleBtn = document.getElementById("musicToggleBtn");
-const ambientToggle = document.getElementById("ambientModeToggle");
 const themeToggleBtn = document.getElementById("themeToggleBtn");
 
 const leftImage = document.getElementById("leftImage");
@@ -59,12 +60,12 @@ function updateHintDisplay() {
         hintBtn.textContent = `Hint: ${hintsLeft}`;
         hintBtn.disabled = hintsLeft === 0 || gameOver;
     }
-    if (addHintBtn) addHintBtn.disabled = (hintsLeft !== 0);
+    if (addHintBtn) addHintBtn.style.display = hintsLeft === 0 && !gameOver ? "inline-block" : "none";
 }
 
 function updateMusicState() {
     if (musicToggleBtn) musicToggleBtn.textContent = musicOn ? "🔊 Music On" : "🔇 Music Off";
-    [correctSound, wrongSound].forEach(audio => {
+    [correctSound, wrongSound, bonusSound].forEach(audio => {
         if (audio) audio.muted = !musicOn;
     });
 }
@@ -197,12 +198,8 @@ function loadLevel(levelIndex) {
     message.textContent = "";
     leftImage.src = level.images.left;
     rightImage.src = level.images.right;
-
-    updateFoundCounter();
-    updateLivesDisplay();
-    updateScoreDisplay();
-    updateHintDisplay();
     enableClicks();
+    updateUI();
 
     // Wait for both images to load then resize/draw and start timer
     let loaded = 0;
@@ -347,7 +344,6 @@ function handleCanvasClick(e, side) {
     }
 }
 
-// Attach canvas listeners (use pointerdown to support mouse/touch consistently)
 leftCanvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     handleCanvasClick(e, "left");
@@ -357,14 +353,11 @@ rightCanvas.addEventListener("pointerdown", (e) => {
     handleCanvasClick(e, "right");
 });
 
-// Optional: keyboard / game area click shouldn't call handleClick directly
-// Remove any global element click binding that used the wrong signature
-// (If you have element with id "game" remove direct handler or keep only valid ones)
-
-// === Hint / ad logic ===
 function showHint() {
     if (gameOver || hintsLeft <= 0) return;
-
+    if (musicOn && bonusSound) {
+        try { bonusSound.currentTime = 0; bonusSound.play(); } catch (err) {}
+    }
     const diffs = activeLevels[currentLevel].differences || [];
     const remaining = diffs.map((d, i) => ({ diff: d, index: i })).filter(d => !found.includes(d.index));
     if (remaining.length === 0) return;
@@ -372,16 +365,12 @@ function showHint() {
     const random = remaining[Math.floor(Math.random() * remaining.length)];
     found.push(random.index);
     hintFound.push(random.index);
-    updateFoundCounter();
-
-    // show immediately on canvases
     drawShape(leftCtx, random.diff.x, random.diff.y, "green", random.diff.radius || 15, random.diff.shape || "circle", random.diff.width, random.diff.height);
     drawShape(rightCtx, random.diff.x, random.diff.y, "green", random.diff.radius || 15, random.diff.shape || "circle", random.diff.width, random.diff.height);
 
     hintsLeft--;
-    updateHintDisplay();
     score = Math.max(0, score - 5);
-    updateScoreDisplay();
+    updateUI();
 
     if (found.length === diffs.length) {
         clearInterval(timerInterval);
@@ -415,7 +404,7 @@ document.getElementById("closeAdBtn")?.addEventListener("click", () => {
     if (!modal) return;
     modal.style.display = "none";
     hintsLeft++;
-    updateHintDisplay();
+    updateUI();
     message.textContent = "✅ Hint added after watching ad!";
 });
 
@@ -439,10 +428,7 @@ function restartGame() {
     gameOver = false;
     clearInterval(timerInterval);
 
-    updateLivesDisplay();
-    updateHintDisplay();
-    updateScoreDisplay();
-    updateHighScore();
+    updateUI();
     const pb = document.getElementById("progressBar");
     if (pb) pb.style.width = "0%";
     const end = document.getElementById("endScreen");
@@ -465,9 +451,7 @@ function restartCurrentLevel() {
     lives = 20;
     hintsLeft = 3;
     comboStreak = 0;
-    updateLivesDisplay();
-    updateHintDisplay();
-    updateScoreDisplay();
+    updateUI();
     loadLevel(currentLevel);
     message.textContent = "";
     enableClicks();
@@ -495,10 +479,9 @@ function updateProgressBar() {
     if (bar) bar.style.width = `${percent}%`;
 }
 
-// === Sound / theme toggles ===
 function toggleMusic() {
     musicOn = !musicOn;
-    localStorage.setItem("musicOn", musicOn);
+    localStorage.setItem("musicOn", JSON.stringify(musicOn));
     updateMusicState();
 }
 
@@ -508,42 +491,61 @@ themeToggleBtn?.addEventListener("click", () => {
     updateThemeUI(current === "light" ? "dark" : "light");
 });
 
-// === Chapter/level UI ===
 function showChapterSelectScreen() {
-    const container = document.getElementById("chapterButtons");
-    if (!container) return;
-    container.innerHTML = "";
-    Object.entries(Chapters).forEach(([chapterKey, levels], i) => {
-        if (!levels || levels.length === 0) return;
+    const chapterButtons = document.getElementById("chapterButtons");
+    const modeButtons = document.getElementById("modeButtons");
+
+    chapterButtons.innerHTML = "";
+    modeButtons.innerHTML = "";
+
+    // Generate Chapter Buttons
+    PhotoHuntLevels.forEach((chapter, index) => {
         const btn = document.createElement("button");
-        btn.textContent = `Chapter ${i + 1}`;
-        btn.className = "level-btn";
-        btn.onclick = () => {
-            currentChapter = chapterKey;
-            activeLevels = pickLevels(Chapters[currentChapter], 10);
-            selectedLevel = 0;
-            highlightSelectedChapter(chapterKey);
-        };
-        container.appendChild(btn);
+        btn.textContent = `Chapter ${chapter.chapter}`;
+        btn.addEventListener("click", () => {
+            selectedChapter = chapter;
+            highlightSelection(chapterButtons, btn);
+        });
+        chapterButtons.appendChild(btn);
     });
-    document.getElementById("startScreen") && (document.getElementById("startScreen").style.display = "none");
-    document.getElementById("chapterSelectScreen") && (document.getElementById("chapterSelectScreen").style.display = "flex");
+
+    // Generate Mode Buttons
+    ["easy", "medium", "hard"].forEach(mode => {
+        const btn = document.createElement("button");
+        btn.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+        btn.addEventListener("click", () => {
+            selectedMode = mode;
+            highlightSelection(modeButtons, btn);
+        });
+        modeButtons.appendChild(btn);
+    });
+
+    document.getElementById("chapterSelectScreen").style.display = "block";
 }
 
-function highlightSelectedChapter(chapterKey) {
-    const buttons = document.querySelectorAll("#chapterButtons button");
-    buttons.forEach(btn => {
-        btn.style.backgroundColor = btn.textContent.includes(chapterKey.replace("chapter", "Chapter ")) ? "#5aafff" : "";
-    });
+function highlightSelection(container, selectedBtn) {
+    Array.from(container.children).forEach(btn => btn.classList.remove("selected"));
+    selectedBtn.classList.add("selected");
 }
 
 function goToLevelSelect() {
-    if (!currentChapter) {
-        alert("Please select a chapter first!");
+    if (!selectedChapter || !selectedMode) {
+        alert("Please select both a chapter and a difficulty mode.");
         return;
     }
-    document.getElementById("chapterSelectScreen") && (document.getElementById("chapterSelectScreen").style.display = "none");
-    showLevelSelectScreen();
+
+    const levels = selectedChapter[selectedMode];
+    if (!levels || levels.length === 0) {
+        alert(`No levels found for ${selectedMode} mode in Chapter ${selectedChapter.chapter}`);
+        return;
+    }
+
+    // Shuffle & pick a few levels
+    activeLevels = pickLevels(levels, 10);
+    currentLevel = 0;
+
+    document.getElementById("chapterSelectScreen").style.display = "none";
+    loadLevel(currentLevel); // Load first level
 }
 
 function showLevelSelectScreen() {
@@ -583,12 +585,50 @@ function startGame() {
     loadLevel(currentLevel);
 }
 
-// === Init on DOMContentLoaded ===
+document.getElementById("reset").addEventListener("click", restartGame);
+
+function updateScore(isCorrect) {
+    if (isCorrect) {
+        comboStreak++;
+        let bonus = comboStreak >= 3 ? 5 : 0;
+        score += 10 + bonus;
+    } else {
+        comboStreak = 0;
+        score = Math.max(0, score - 5);
+    }
+}
+
+function updateUI() {
+    updateLivesDisplay();
+    updateScoreDisplay();
+    updateFoundCounter();
+    updateHighScore();
+    updateHintDisplay();
+    updateMusicState();
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     showChapterSelectScreen();
+    const ambientToggle = document.getElementById("ambientModeToggle");
+    if (ambientToggle) {
+
+        ambientToggle.checked = ambientMode;
+        ambientToggle.addEventListener("change", () => {
+            ambientMode = ambientToggle.checked;
+            localStorage.setItem("ambientMode", ambientMode);
+
+            if (ambientMode) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = "Ambient Mode 🎧";
+            } else {
+                startTimer();
+            }
+        });
+    }
     const savedTheme = localStorage.getItem("theme") || "light";
     updateThemeUI(savedTheme);
     document.getElementById("highScore") && (document.getElementById("highScore").textContent = `High Score: ${highScore}`);
+    document.getElementById("musicToggleBtn")?.addEventListener("click", toggleMusic);
     updateHighScore();
     updateMusicState();
     updateLivesDisplay();
