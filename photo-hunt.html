@@ -21,7 +21,7 @@
     <button id="restartLevelBtn">Restart Level</button> |
     <button onclick="showHint()" id="hintButton">Hint: 3</button> |
     <button onclick="addHint()" id="addHintButton">Add Hint: +1</button> |
-    <button onclick="toggleMusic()" id="musicToggleBtn">🔊 Music On</button> |
+    <button id="musicToggleBtn">🔊 Music On</button> |
     <button id="themeToggleBtn">🌞Light Theme</button> |
     <label>
         <input type="checkbox" id="ambientModeToggle" />
@@ -45,8 +45,9 @@
     <div id="message"></div>
 </div>
 
-<audio id="correctSound" src="music/correct1.mp3" preload="auto"></audio>
-<audio id="wrongSound" src="music/wrong1.mp3" preload="auto"></audio>
+<audio id="correctSound" src="music/correct.mp3" preload="auto"></audio>
+<audio id="wrongSound" src="music/wrong.mp3" preload="auto"></audio>
+<audio id="bonusSound" src="music/bonus.mp3" preload="auto"></audio>
 
 <div id="startScreen" class="overlay-screen">
     <h2>Welcome to Photo Hunt!</h2>
@@ -57,6 +58,7 @@
 <div id="chapterSelectScreen" class="overlay-screen" style="display: none;">
     <h2>Select a Chapter</h2>
     <div id="chapterButtons"></div>
+    <div id="modeButtons"></div>
     <button onclick="goToLevelSelect()">Continue</button>
 </div>
 

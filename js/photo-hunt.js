@@ -5,7 +5,7 @@ let highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
 let ambientMode = JSON.parse(localStorage.getItem("ambientMode")) || false;
 let selectedChapter = null;
-let selectedMode = null; // "easy", "medium", "hard"
+let selectedMode = null;
 
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
@@ -77,15 +77,21 @@ function updateThemeUI(theme) {
     localStorage.setItem("theme", theme);
 }
 
-// === Chapters and levels (unchanged logic) ===
 const Chapters = {};
+const unlockedChapter = parseInt(localStorage.getItem("unlockedChapter")) || 1;
+
 PhotoHuntLevels.forEach((chapter, index) => {
-    const key = `chapter${index + 1}`;
-    Chapters[key] = [
-        ...(chapter.easy || []),
-        ...(chapter.medium || []),
-        ...(chapter.hard || [])
-    ];
+    const btn = document.createElement("button");
+    btn.textContent = `Chapter ${chapter.chapter}`;
+    if (index + 1 > unlockedChapter) {
+        btn.disabled = true;
+        btn.title = "Complete previous chapters to unlock";
+    }
+    btn.addEventListener("click", () => {
+        selectedChapter = chapter;
+        highlightSelection(chapterButtons, btn);
+    });
+    chapterButtons.appendChild(btn);
 });
 
 function getLevels(chapterName, count = 10) {
@@ -109,7 +115,6 @@ function shuffleArray(array) {
 let currentChapter = "chapter1";
 let activeLevels = getLevels(currentChapter, 10);
 
-// === Timer ===
 function startTimer() {
     clearInterval(timerInterval);
     if (ambientMode) {
@@ -131,7 +136,6 @@ function startTimer() {
     }, 1000);
 }
 
-// === Click enabling/disabling ===
 function disableClicks() {
     gameOver = true;
 }
@@ -140,7 +144,6 @@ function enableClicks() {
     gameOver = false;
 }
 
-// === Drawing helpers ===
 function drawShape(ctx, x, y, color = "red", radius = 20, shape = "circle", width = null, height = null) {
     ctx.save();
     ctx.strokeStyle = color;
@@ -157,20 +160,16 @@ function drawShape(ctx, x, y, color = "red", radius = 20, shape = "circle", widt
     ctx.restore();
 }
 
-// Redraw base images then overlay found/hinted shapes
 function redrawCanvasesOverlay() {
-    // left
     leftCtx.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
     if (leftImage.naturalWidth && leftImage.complete) {
         leftCtx.drawImage(leftImage, 0, 0, leftCanvas.width, leftCanvas.height);
     }
-    // right
     rightCtx.clearRect(0, 0, rightCanvas.width, rightCanvas.height);
     if (rightImage.naturalWidth && rightImage.complete) {
         rightCtx.drawImage(rightImage, 0, 0, rightCanvas.width, rightCanvas.height);
     }
 
-    // draw all found/hinted shapes
     const differences = activeLevels[currentLevel] && activeLevels[currentLevel].differences ? activeLevels[currentLevel].differences : [];
     found.forEach((index) => {
         const diff = differences[index];
@@ -181,64 +180,58 @@ function redrawCanvasesOverlay() {
     });
 }
 
-// === Level loading/restart ===
 function loadLevel(levelIndex) {
     const level = activeLevels[levelIndex];
     if (!level) {
         showEndScreen(true);
         return;
     }
-    updateProgressBar();
-    clearInterval(timerInterval);
-    found = [];
-    hintFound = [];
-    lives = 20;
-    hintsLeft = 3;
-    levelStartScore = score;
-    message.textContent = "";
-    leftImage.src = level.images.left;
-    rightImage.src = level.images.right;
-    enableClicks();
-    updateUI();
+    preloadImages(level, (preloadedLeft, preloadedRight) => {
+        leftImage.src = preloadedLeft.src;
+        rightImage.src = preloadedRight.src;
+        updateProgressBar();
+        clearInterval(timerInterval);
+        found = [];
+        hintFound = [];
+        lives = 20;
+        hintsLeft = 3;
+        levelStartScore = score;
+        message.textContent = "";
+        enableClicks();
+        updateUI();
+        let loaded = 0;
+        function checkBothLoaded() {
+            loaded++;
+            if (loaded < 2) return;
+            requestAnimationFrame(() => {
+                resizeCanvases();
+                redrawCanvasesOverlay();
+                startTimer();
+            });
+        }
+        leftImage.onload = checkBothLoaded;
+        rightImage.onload = checkBothLoaded;
 
-    // Wait for both images to load then resize/draw and start timer
-    let loaded = 0;
-    function checkBothLoaded() {
-        loaded++;
-        if (loaded < 2) return;
-        requestAnimationFrame(() => {
-            resizeCanvases();
-            redrawCanvasesOverlay();
-            startTimer();
-        });
-    }
-    leftImage.onload = checkBothLoaded;
-    rightImage.onload = checkBothLoaded;
-
-    // In case images are already cached & complete
-    if (leftImage.complete) checkBothLoaded();
-    if (rightImage.complete) checkBothLoaded();
+        if (leftImage.complete) checkBothLoaded();
+        if (rightImage.complete) checkBothLoaded();
+    });
 }
 
 function resizeCanvases() {
-    // Use natural size for canvas coordinate space
     leftCanvas.width = leftImage.naturalWidth || leftImage.width || leftCanvas.clientWidth;
     leftCanvas.height = leftImage.naturalHeight || leftImage.height || leftCanvas.clientHeight;
     rightCanvas.width = rightImage.naturalWidth || rightImage.width || rightCanvas.clientWidth;
     rightCanvas.height = rightImage.naturalHeight || rightImage.height || rightCanvas.clientHeight;
 
-    // Keep CSS size as rendered element size to match layout (optional)
     leftCanvas.style.width = leftImage.offsetWidth + "px";
     leftCanvas.style.height = leftImage.offsetHeight + "px";
     rightCanvas.style.width = rightImage.offsetWidth + "px";
     rightCanvas.style.height = rightImage.offsetHeight + "px";
 
-    // Draw the base images
     if (leftImage.naturalWidth) leftCtx.drawImage(leftImage, 0, 0, leftCanvas.width, leftCanvas.height);
     if (rightImage.naturalWidth) rightCtx.drawImage(rightImage, 0, 0, rightCanvas.width, rightCanvas.height);
 }
 
-// restart current level but penalize score for earned points if required
 function restartLevel() {
     message.textContent = "";
     comboStreak = 0;
@@ -248,8 +241,6 @@ function restartLevel() {
     loadLevel(currentLevel);
 }
 
-// === Input handling ===
-// Helper to get a scaled click within natural image coordinates
 function getScaledCoordsFromEvent(e, canvas, image) {
     const rect = canvas.getBoundingClientRect();
     const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
@@ -263,7 +254,14 @@ function getScaledCoordsFromEvent(e, canvas, image) {
     const scaledY = y * scaleY;
     return { scaledX, scaledY, clientX, clientY };
 }
+window.debugMode = false;
 
+document.addEventListener("keydown", (e) => {
+    if (e.key === "D" || e.key === "d") {
+        debugMode = !debugMode;
+        alert("Debug Mode: " + (debugMode ? "ON" : "OFF"));
+    }
+});
 function handleCanvasClick(e, side) {
     if (gameOver) return;
     const canvas = side === "left" ? leftCanvas : rightCanvas;
@@ -271,7 +269,9 @@ function handleCanvasClick(e, side) {
     const image = side === "left" ? leftImage : rightImage;
 
     const { scaledX, scaledY, clientX, clientY } = getScaledCoordsFromEvent(e, canvas, image);
-
+    if (debugMode) {
+        console.log("Scaled coords:", scaledX, scaledY);
+    }
     let hit = false;
     const differences = activeLevels[currentLevel].differences || [];
     for (let i = 0; i < differences.length; i++) {
@@ -285,7 +285,6 @@ function handleCanvasClick(e, side) {
         if (dist <= radius) {
             hit = true;
             found.push(i);
-            // Draw immediately on both canvases
             drawShape(leftCtx, dx, dy, "lime", radius, diff.shape || "circle", diff.width, diff.height);
             drawShape(rightCtx, dx, dy, "lime", radius, diff.shape || "circle", diff.width, diff.height);
 
@@ -311,13 +310,11 @@ function handleCanvasClick(e, side) {
                     else showEndScreen(true);
                 }, 1000);
             }
-            break; // stop after first hit
+            break;
         }
     }
 
     if (!hit) {
-        // Draw a temporary red marker where user clicked (on the clicked canvas)
-        // We'll show it for 700ms and then redraw the image + overlays
         drawShape(ctx, scaledX, scaledY, "red", 20, "circle");
         score = Math.max(0, score - 5);
         lives--;
@@ -331,7 +328,6 @@ function handleCanvasClick(e, side) {
         }
 
         setTimeout(() => {
-            // redraw images + overlays to remove the temporary marker
             redrawCanvasesOverlay();
         }, 700);
 
@@ -408,7 +404,6 @@ document.getElementById("closeAdBtn")?.addEventListener("click", () => {
     message.textContent = "✅ Hint added after watching ad!";
 });
 
-// === End / restart ===
 function showEndScreen(isWin) {
     disableClicks();
     const endScreen = document.getElementById("endScreen");
@@ -416,6 +411,34 @@ function showEndScreen(isWin) {
     endScreen.style.display = "flex";
     document.getElementById("endTitle").textContent = isWin ? "🎉 You Win!" : "💀 Game Over!";
     document.getElementById("finalScore").textContent = `Your final score: ${score}`;
+    const currentChapterNum = selectedChapter.chapter;
+    if (isWin && currentLevel >= activeLevels.length - 1 && currentChapterNum >= unlockedChapter) {
+        localStorage.setItem("unlockedChapter", currentChapterNum + 1);
+    }
+}
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+
+function updateLeaderboard(score) {
+    const name = prompt("Enter your initials (3 chars):", "ABC").toUpperCase().slice(0, 3);
+    leaderboard.push({ name, score });
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 5); // keep top 5
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+}
+
+function preloadImages(level, callback) {
+    const left = new Image();
+    const right = new Image();
+    let loaded = 0;
+
+    function checkLoaded() {
+        if (++loaded === 2) callback(left, right);
+    }
+
+    left.onload = checkLoaded;
+    right.onload = checkLoaded;
+    left.src = level.images.left;
+    right.src = level.images.right;
 }
 
 function restartGame() {
@@ -498,7 +521,6 @@ function showChapterSelectScreen() {
     chapterButtons.innerHTML = "";
     modeButtons.innerHTML = "";
 
-    // Generate Chapter Buttons
     PhotoHuntLevels.forEach((chapter, index) => {
         const btn = document.createElement("button");
         btn.textContent = `Chapter ${chapter.chapter}`;
@@ -509,7 +531,6 @@ function showChapterSelectScreen() {
         chapterButtons.appendChild(btn);
     });
 
-    // Generate Mode Buttons
     ["easy", "medium", "hard"].forEach(mode => {
         const btn = document.createElement("button");
         btn.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
@@ -540,12 +561,11 @@ function goToLevelSelect() {
         return;
     }
 
-    // Shuffle & pick a few levels
     activeLevels = pickLevels(levels, 10);
     currentLevel = 0;
 
     document.getElementById("chapterSelectScreen").style.display = "none";
-    loadLevel(currentLevel); // Load first level
+    loadLevel(currentLevel);
 }
 
 function showLevelSelectScreen() {
