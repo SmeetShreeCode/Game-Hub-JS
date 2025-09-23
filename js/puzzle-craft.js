@@ -12,7 +12,6 @@ function initGame() {
     const level = chapters[currentChapter].selectedLevels[currentLevelIndex];
     size = level.size;
     imageURL = level.image;
-    document.getElementById("image-preview").src = imageURL;
     moveCount = 0;
     seconds = 0;
     clearInterval(timerInterval);

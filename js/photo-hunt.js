@@ -1,11 +1,14 @@
 let currentLevel = 0, levelStartScore = 0, found = [], hintFound = [], score = 0, timeLeft = 60,
     lives = 20, hintsLeft = 3, comboStreak = 0, selectedLevel = 0, gameOver = false;
+let activeLevels = [];
 let timerInterval;
 let highScore = parseInt(localStorage.getItem("highScore")) || 0;
 let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
 let ambientMode = JSON.parse(localStorage.getItem("ambientMode")) || false;
 let selectedChapter = null;
 let selectedMode = null;
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+let unlockedChapter = parseInt(localStorage.getItem("unlockedChapter")) || 1;
 
 const correctSound = document.getElementById("correctSound");
 const wrongSound = document.getElementById("wrongSound");
@@ -25,7 +28,6 @@ const rightImage = document.getElementById("rightImage");
 const rightCanvas = document.getElementById("rightCanvas");
 const rightCtx = rightCanvas.getContext("2d");
 
-console.log(PhotoHuntLevels);
 function updateLivesDisplay() {
     const heart = '❤️';
     const lost = '🤍';
@@ -76,24 +78,21 @@ function updateThemeUI(theme) {
 }
 
 const Chapters = {};
-const unlockedChapter = parseInt(localStorage.getItem("unlockedChapter")) || 1;
 
-PhotoHuntLevels.forEach((chapter, index) => {
-    const btn = document.createElement("button");
-    btn.textContent = `Chapter ${chapter.chapter}`;
-    if (index + 1 > unlockedChapter) {
-        btn.disabled = true;
-        btn.title = "Complete previous chapters to unlock";
-    }
-    btn.addEventListener("click", () => {
-        selectedChapter = chapter;
-        highlightSelection(chapterButtons, btn);
-    });
+PhotoHuntLevels.forEach(chapter => {
+    Chapters[`chapter${chapter.chapter}`] = {
+        easy: chapter.easy || [],
+        medium: chapter.medium || [],
+        hard: chapter.hard || []
+    };
 });
 
-function getLevels(chapterName, count = 10) {
-    const levels = Chapters[chapterName];
-    if (!levels || levels.length === 0) return [];
+function getLevels(chapterName, difficulty, count = 10) {
+    const levels = Chapters[chapterName]?.[difficulty];
+    if (!levels || !Array.isArray(levels) || levels.length === 0) {
+        console.warn(`No levels for chapter ${chapterName}, mode ${difficulty}`);
+        return [];
+    }
     return pickLevels(levels, count);
 }
 
@@ -109,8 +108,6 @@ function shuffleArray(array) {
     }
     return arr;
 }
-let currentChapter = "chapter1";
-let activeLevels = getLevels(currentChapter, 10);
 
 function startTimer() {
     clearInterval(timerInterval);
@@ -255,16 +252,18 @@ function handleCanvasClick(e, side) {
     const canvas = side === "left" ? leftCanvas : rightCanvas;
     const ctx = side === "left" ? leftCtx : rightCtx;
     const image = side === "left" ? leftImage : rightImage;
-
     const { scaledX, scaledY, clientX, clientY } = getScaledCoordsFromEvent(e, canvas, image);
+    const level = activeLevels[currentLevel];
+
+    if (!level || !level.differences) return;
     if (debugMode) {
         console.log("Scaled coords:", scaledX, scaledY);
     }
+    const differences = level.differences || [];
     let hit = false;
-    const differences = activeLevels[currentLevel].differences || [];
     for (let i = 0; i < differences.length; i++) {
-        const diff = differences[i];
         if (found.includes(i)) continue;
+        const diff = differences[i];
 
         const dx = diff.x;
         const dy = diff.y;
@@ -400,11 +399,10 @@ function showEndScreen(isWin) {
     document.getElementById("endTitle").textContent = isWin ? "🎉 You Win!" : "💀 Game Over!";
     document.getElementById("finalScore").textContent = `Your final score: ${score}`;
     const currentChapterNum = selectedChapter.chapter;
-    if (isWin && currentLevel >= activeLevels.length - 1 && currentChapterNum >= unlockedChapter) {
+    if (isWin && currentLevel >= activeLevels.length - 1 && currentChapterNum === unlockedChapter) {
         localStorage.setItem("unlockedChapter", currentChapterNum + 1);
     }
 }
-let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
 function updateLeaderboard(score) {
     let name = prompt("Enter your initials (3 chars):", "ABC") || "AAA";
@@ -470,15 +468,10 @@ function restartCurrentLevel() {
 function showSparkle(x, y, color = 'yellow') {
     const sparkle = document.createElement("div");
     sparkle.className = "sparkle";
-    sparkle.style.position = "absolute";
     sparkle.style.left = `${x - 10}px`;
     sparkle.style.top = `${y - 10}px`;
-    sparkle.style.width = "20px";
-    sparkle.style.height = "20px";
-    sparkle.style.borderRadius = "50%";
     sparkle.style.backgroundColor = color;
     sparkle.style.opacity = "0.9";
-    sparkle.style.zIndex = 9999;
     document.body.appendChild(sparkle);
     setTimeout(() => sparkle.remove(), 600);
 }
@@ -596,17 +589,6 @@ function startGame() {
 
 document.getElementById("reset").addEventListener("click", restartGame);
 
-function updateScore(isCorrect) {
-    if (isCorrect) {
-        comboStreak++;
-        let bonus = comboStreak >= 3 ? 5 : 0;
-        score += 10 + bonus;
-    } else {
-        comboStreak = 0;
-        score = Math.max(0, score - 5);
-    }
-}
-
 function updateUI() {
     updateLivesDisplay();
     updateScoreDisplay();
@@ -640,33 +622,3 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("musicToggleBtn")?.addEventListener("click", toggleMusic);
     updateUI();
 });
-
-
-
-// leftImg.addEventListener('touchstart', function (e) {
-//     const rect = leftImg.getBoundingClientRect();
-//     const touch = e.touches[0];
-//     const x = touch.clientX - rect.left;
-//     const y = touch.clientY - rect.top;
-//     handleClick(x, y);
-// });
-//
-// rightImg.addEventListener('touchstart', function (e) {
-//     const rect = rightImg.getBoundingClientRect();
-//     const touch = e.touches[0];
-//     const x = touch.clientX - rect.left;
-//     const y = touch.clientY - rect.top;
-//     handleClick(x, y);
-// });
-//leftImage.addEventListener("touchstart", handleTouch);
-// rightImage.addEventListener("touchstart", handleTouch);
-//
-// function handleTouch(e) {
-//     const rect = e.target.getBoundingClientRect();
-//     const touch = e.touches[0];
-//     const x = touch.clientX - rect.left;
-//     const y = touch.clientY - rect.top;
-//     const side = e.target.id === "leftImage" ? "left" : "right";
-//     handleClick(x, y, side);
-// }
-//

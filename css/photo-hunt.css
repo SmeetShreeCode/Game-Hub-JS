@@ -179,13 +179,11 @@ body.dark-theme #progressBar {
     position: absolute;
     pointer-events: none;
     transform: scale(1);
-    animation: pop 0.6s ease-out forwards;
+    animation: pop 0.6s ease-out forwards, rotate 0.6s linear;
     transition: transform 0.3s ease, opacity 0.3s ease;
     z-index: 9999;
 }
-.sparkle {
-    animation: pop 0.6s ease-out forwards, rotate 0.6s linear;
-}
+
 @keyframes rotate {
     from { transform: rotate(0deg) scale(1); }
     to   { transform: rotate(360deg) scale(2.5); }
