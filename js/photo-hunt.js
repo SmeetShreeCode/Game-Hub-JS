@@ -40,8 +40,7 @@ function updateScoreDisplay() {
 function updateFoundCounter() {
     const total = (activeLevels && activeLevels[currentLevel] && activeLevels[currentLevel].differences) ? activeLevels[currentLevel].differences.length : 0;
     const foundCount = found.length;
-    const el = document.getElementById("foundCounter");
-    if (el) el.textContent = `Found: ${foundCount} / ${total}`;
+    document.getElementById("foundCounter").textContent = `Found: ${foundCount} / ${total}`;
 }
 
 function updateHighScore() {
@@ -49,8 +48,7 @@ function updateHighScore() {
         highScore = score;
         localStorage.setItem("highScore", highScore);
     }
-    const el = document.getElementById("highScore");
-    if (el) el.textContent = `High Score: ${highScore}`;
+    document.getElementById("highScore").textContent = `High Score: ${highScore}`;
 }
 
 function updateHintDisplay() {
@@ -64,7 +62,7 @@ function updateHintDisplay() {
 }
 
 function updateMusicState() {
-    if (musicToggleBtn) musicToggleBtn.textContent = musicOn ? "🔊 Music On" : "🔇 Music Off";
+    if (musicToggleBtn) musicToggleBtn.textContent = musicOn ? "🔊 Sound On" : "🔇 Sound Off";
     [correctSound, wrongSound, bonusSound].forEach(audio => {
         if (audio) audio.muted = !musicOn;
     });
@@ -91,7 +89,6 @@ PhotoHuntLevels.forEach((chapter, index) => {
         selectedChapter = chapter;
         highlightSelection(chapterButtons, btn);
     });
-    chapterButtons.appendChild(btn);
 });
 
 function getLevels(chapterName, count = 10) {
@@ -131,7 +128,7 @@ function startTimer() {
             message.textContent = "⏰ Time's up! Try again.";
             showEndScreen(false);
             disableClicks();
-            setTimeout(() => restartLevel(), 1500);
+            setTimeout(() => restartCurrentLevel(), 1500);
         }
     }, 1000);
 }
@@ -230,15 +227,6 @@ function resizeCanvases() {
 
     if (leftImage.naturalWidth) leftCtx.drawImage(leftImage, 0, 0, leftCanvas.width, leftCanvas.height);
     if (rightImage.naturalWidth) rightCtx.drawImage(rightImage, 0, 0, rightCanvas.width, rightCanvas.height);
-}
-
-function restartLevel() {
-    message.textContent = "";
-    comboStreak = 0;
-    hintsLeft = 3;
-    updateHintDisplay();
-    score = Math.max(0, score - 10);
-    loadLevel(currentLevel);
 }
 
 function getScaledCoordsFromEvent(e, canvas, image) {
@@ -419,7 +407,8 @@ function showEndScreen(isWin) {
 let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
 function updateLeaderboard(score) {
-    const name = prompt("Enter your initials (3 chars):", "ABC").toUpperCase().slice(0, 3);
+    let name = prompt("Enter your initials (3 chars):", "ABC") || "AAA";
+    name = name.toUpperCase().slice(0, 3);
     leaderboard.push({ name, score });
     leaderboard.sort((a, b) => b.score - a.score);
     leaderboard = leaderboard.slice(0, 5); // keep top 5
@@ -452,10 +441,8 @@ function restartGame() {
     clearInterval(timerInterval);
 
     updateUI();
-    const pb = document.getElementById("progressBar");
-    if (pb) pb.style.width = "0%";
-    const end = document.getElementById("endScreen");
-    if (end) end.style.display = "none";
+    document.getElementById("progressBar").style.width = "0%";
+    document.getElementById("endScreen").style.display = "none";
     message.textContent = "";
     showLevelSelectScreen();
 }
@@ -497,7 +484,10 @@ function showSparkle(x, y, color = 'yellow') {
 }
 
 function updateProgressBar() {
-    const percent = (currentLevel / (activeLevels.length || 1)) * 100 || 5;
+    if (!activeLevels || activeLevels.length === 0) return;
+    let percent = (currentLevel / activeLevels.length) * 100;
+    if (percent <= 0) percent = 5;
+    if (percent > 100) percent = 100;
     const bar = document.getElementById("progressBar");
     if (bar) bar.style.width = `${percent}%`;
 }
@@ -508,7 +498,6 @@ function toggleMusic() {
     updateMusicState();
 }
 
-musicToggleBtn?.addEventListener("click", toggleMusic);
 themeToggleBtn?.addEventListener("click", () => {
     const current = localStorage.getItem("theme") || "light";
     updateThemeUI(current === "light" ? "dark" : "light");
@@ -649,11 +638,7 @@ window.addEventListener("DOMContentLoaded", () => {
     updateThemeUI(savedTheme);
     document.getElementById("highScore") && (document.getElementById("highScore").textContent = `High Score: ${highScore}`);
     document.getElementById("musicToggleBtn")?.addEventListener("click", toggleMusic);
-    updateHighScore();
-    updateMusicState();
-    updateLivesDisplay();
-    updateScoreDisplay();
-    updateHintDisplay();
+    updateUI();
 });
 
 
