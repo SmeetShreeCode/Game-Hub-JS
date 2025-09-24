@@ -1,33 +1,44 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
     text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #faf8ef;
 }
 
 hr {
-    width: 500px;
+    width: 90%;
+    max-width: 500px;
+    margin: 10px auto;
 }
 
 #board {
-    width: 400px;
-    height: 400px;
+    width: 90vmin;
+    height: 90vmin;
+    max-width: 400px;
+    max-height: 400px;
 
     background-color: #cdc1b5;
     border: 6px solid #bbada0;
-    margin: 0 auto;
+    margin: 20px auto;
     display: flex;
     flex-wrap: wrap;
+    box-sizing: border-box;
 }
 
 .tile {
-    width: 90px;
-    height: 90px;
-    border: 5px solid #bbada0;
+    width: 22%;
+    height: 22%;
+    margin: 1%;
+    border-radius: 5px;
 
-    font-size: 40px;
+    font-size: 5vmin;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
+    box-sizing: border-box;
+    border: 2px solid #bbada0;
 }
 
 .x2 {
@@ -93,4 +104,27 @@ hr {
 .x8192 {
     background-color: #ff2020;
     color: white;
+}
+
+footer {
+    margin: 20px 0;
+    font-size: 1rem;
+}
+
+@media (max-width: 500px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    .tile {
+        font-size: 6vmin;
+    }
+
+    footer p {
+        font-size: 0.9rem;
+    }
 }
