@@ -221,10 +221,80 @@ const PhotoHuntLevels = [
             },
             // more easy levels…
         ],
-        medium: [
+        medium: [{
+            images: {
+                left: "images/Photo-hunt/Left/1.jpg",
+                right: "images/Photo-hunt/Right/1.jpg"
+            }, differences: [
+                {x: 70, y: 80, radius: 15},
+                {x: 328, y: 38, radius: 15},
+                {x: 406, y: 138, radius: 15},
+                {x: 405, y: 242, radius: 15},
+                {x: 217, y: 146, radius: 15},
+                {x: 70, y: 230, radius: 15},
+                {x: 155, y: 184, radius: 15},
+            ]
+        }, {
+            images: {
+                left: "images/Photo-hunt/Left/2.jpg",
+                right: "images/Photo-hunt/Right/2.jpg"
+            },
+            differences: [
+                {x: 340, y: 408, radius: 15},
+                {x: 84, y: 318, radius: 15},
+                {x: 105, y: 108, radius: 15},
+                {x: 30, y: 220, radius: 15},
+                {x: 180, y: 74, radius: 15},
+                {x: 340, y: 216, radius: 15},
+                {x: 312, y: 160, radius: 15},
+                {x: 316, y: 330, radius: 15},
+                {x: 391, y: 218, radius: 15},
+                {x: 100, y: 458, radius: 15},
+            ]
+        },
             // medium levels for chapter 1
         ],
         hard: [
+            {
+                images: {
+                    left: "images/Photo-hunt/Left/L5.jpg",
+                    right: "images/Photo-hunt/Right/R5.jpg"
+                },
+                differences: [
+                    {x: 138, y: 455, radius: 20, shape: 'square'},
+                    {x: 450, y: 410, radius: 15, shape: 'square'},
+                    {x: 560, y: 320, radius: 15},
+                    {x: 90, y: 822, radius: 15},
+                    {x: 298, y: 815, radius: 20, shape: 'square'},
+                    {x: 520, y: 820, radius: 20, shape: 'square'},
+                    {x: 42, y: 658, radius: 15},
+                    {x: 562, y: 155, radius: 15},
+                    {x: 520, y: 615, radius: 25, shape: 'square'},
+                    {x: 350, y: 90, radius: 30, shape: 'square'},
+                    {x: 190, y: 655, radius: 15},
+                    {x: 595, y: 435, radius: 18},
+                    {x: 128, y: 270, radius: 15},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L6.jpg",
+                    right: "images/Photo-hunt/Right/R6.jpg"
+                },
+                differences: [
+                    {x: 468, y: 710, radius: 30, shape: 'square'},
+                    {x: 308, y: 714, radius: 15},
+                    {x: 255, y: 265, radius: 20},
+                    {x: 165, y: 772, radius: 25, shape: 'square'},
+                    {x: 142, y: 938, radius: 15, shape: 'square'},
+                    {x: 465, y: 180, radius: 30},
+                    {x: 35, y: 375, radius: 15},
+                    {x: 555, y: 380, radius: 35, shape: 'square'},
+                    {x: 455, y: 565, radius: 35, shape: 'square'},
+                    {x: 108, y: 270, radius: 15},
+                    {x: 355, y: 346, radius: 15},
+                    {x: 500, y: 50, radius: 15},
+                ]
+            },
             // hard levels for chapter 1
         ]
     },

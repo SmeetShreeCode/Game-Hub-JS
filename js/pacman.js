@@ -16,6 +16,7 @@ let pacmanUpImage;
 let pacmanDownImage;
 let pacmanLeftImage;
 let pacmanRightImage;
+let pacmanGift;
 let wallImage;
 let cherryImage;
 let smallCherryImage;
@@ -81,6 +82,8 @@ function loadImages() {
     pacmanLeftImage.src = "./images/PacMan/pacmanLeft.png";
     pacmanRightImage = new Image();
     pacmanRightImage.src = "./images/PacMan/pacmanRight.png";
+    pacmanGift = new Image();
+    pacmanGift.src = "./images/PacMan/pacmanGift.gif";
 
     cherryImage = new Image();
     cherryImage.src = "./images/PacMan/cherry.png";

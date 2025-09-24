@@ -3,12 +3,11 @@ body {
     /*background: url("../images/Banners/photo-hunt-left-banner.jpg");*/
     text-align: center;
     font-family: 'Georgia', serif;
+    color: #000;
 }
 
 span {
     font-weight: bold;
-    /*background-color: #7b9f8b;*/
-    color: #000000;
 }
 
 #leftImage, #rightImage {
@@ -21,16 +20,7 @@ span {
     margin-bottom: 10px;
 }
 
-#game {
-    position: relative;
-    display: inline-block;
-}
-
-.image-container {
-    position: relative;
-    display: inline-block;
-}
-.image-wrapper {
+#game, .image-container, .image-wrapper {
     position: relative;
     display: inline-block;
 }
@@ -40,7 +30,7 @@ span {
     top: 0;
     left: 0;
     z-index: 10;
-    pointer-events: auto; /* Important */
+    pointer-events: auto;
 }
 
 .image-wrapper img {
@@ -62,7 +52,7 @@ span {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(40, 40, 60, 0.9);
+    background: rgba(40, 40, 60, 0.95);
     color: white;
     display: flex;
     flex-direction: column;
@@ -76,7 +66,10 @@ span {
     margin-bottom: 20px;
 }
 
-.overlay-screen button {
+.overlay-screen button,
+.modal-content button,
+.level-btn,
+.chapter-btn {
     padding: 10px 20px;
     font-size: 18px;
     background: #5cb85c;
@@ -84,11 +77,12 @@ span {
     border-radius: 5px;
     color: white;
     cursor: pointer;
+    margin: 5px;
 }
 
 .overlay-screen button:hover,
 .overlay-screen button:focus {
-    background: #4cae4c;
+    background: #367c36;
     transform: scale(1.05);
 }
 
@@ -110,13 +104,11 @@ span {
 
 body.light-theme {
     background: #aba2c6;
-    /*background: url('Search-bro.svg') no-repeat right bottom;*/
-    color: #000;
 }
 
 body.dark-theme {
     background: #1e1e1e;
-    color: #fff;
+    color: rgba(255, 255, 255, 0.69);
 }
 
 body.dark-theme #progressContainer {
@@ -130,44 +122,6 @@ body.dark-theme #progressBar {
 #foundCounter {
     font-weight: bold;
     color: green;
-}
-
-@keyframes sparkleFade {
-    0% {
-        opacity: 1;
-        transform: scale(0.8);
-    }
-    100% {
-        opacity: 0;
-        transform: scale(2);
-    }
-}
-
-@media (max-width: 768px) {
-    #leftImage,
-    #rightImage {
-        width: 100%;
-        max-width: 100%;
-        height: auto;
-        margin: 10px auto;
-        display: block;
-    }
-
-    .image-container {
-        display: block;
-        text-align: center;
-    }
-
-    #info {
-        font-size: 16px;
-        flex-wrap: wrap;
-    }
-}
-
-.level-btn {
-    margin: 5px;
-    padding: 10px 20px;
-    font-size: 16px;
 }
 
 /* Sparkle Effect */
@@ -185,8 +139,12 @@ body.dark-theme #progressBar {
 }
 
 @keyframes rotate {
-    from { transform: rotate(0deg) scale(1); }
-    to   { transform: rotate(360deg) scale(2.5); }
+    from {
+        transform: rotate(0deg) scale(1);
+    }
+    to {
+        transform: rotate(360deg) scale(2.5);
+    }
 }
 
 @keyframes pop {
@@ -200,12 +158,40 @@ body.dark-theme #progressBar {
     }
 }
 
+.sparkle-burst {
+    position: absolute;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+    z-index: 9999;
+}
+
+.sparkle-particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    animation: firework-particle 0.8s ease-out forwards;
+}
+
+@keyframes firework-particle {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--x), var(--y)) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* Modal */
 .modal {
     display: none;
     position: fixed;
     z-index: 2000;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
@@ -229,7 +215,32 @@ body.dark-theme #progressBar {
     padding: 10px 20px;
     font-size: 16px;
 }
+
 button.selected {
     background-color: #4caf50;
     color: white;
+}
+
+button.selected {
+    background-color: #4caf50;
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #leftImage, #rightImage {
+        width: 100%;
+        margin: 10px auto;
+        display: block;
+    }
+
+    .image-container {
+        display: block;
+        text-align: center;
+    }
+
+    #info {
+        font-size: 16px;
+        flex-wrap: wrap;
+    }
 }

@@ -1,80 +1,254 @@
-let currentLevel = 0, levelStartScore = 0, found = [], hintFound = [], score = 0, timeLeft = 60,
-    lives = 20, hintsLeft = 3, comboStreak = 0, selectedLevel = 0, gameOver = false;
-let activeLevels = [];
-let timerInterval;
-let highScore = parseInt(localStorage.getItem("highScore")) || 0;
-let musicOn = JSON.parse(localStorage.getItem("musicOn")) ?? true;
-let ambientMode = JSON.parse(localStorage.getItem("ambientMode")) || false;
-let selectedChapter = null;
-let selectedMode = null;
-let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
-let unlockedChapter = parseInt(localStorage.getItem("unlockedChapter")) || 1;
+const DEFAULT_LIVES = 5;
+const MAX_LIVES = 5;
+const DEFAULT_TIME = 60;
+const DEFAULT_HINTS = 3;
+const HINT_PENALTY = 5;
+const WRONG_PENALTY = 5;
+const CORRECT_SCORE = 10;
+const COMBO_BONUS = 5;
+const COMBO_THRESHOLD = 4;
+const MAX_SPARKLE_DURATION = 800;
+const EXPLOSION_PARTICLES_SIZE = 60;
+const EXPLOSION_PARTICLES_RADIUS = 55;
+const LEVEL_COUNT = 10;
+const MAX_COMBO = 10;
+const DIFF_RADIUS = 15;
 
-const correctSound = document.getElementById("correctSound");
-const wrongSound = document.getElementById("wrongSound");
-const bonusSound = document.getElementById("bonusSound");
-const scoreDisplay = document.getElementById("score");
-const timerDisplay = document.getElementById("timer");
-const message = document.getElementById("message");
-const livesDisplay = document.getElementById("lives");
-const musicToggleBtn = document.getElementById("musicToggleBtn");
-const themeToggleBtn = document.getElementById("themeToggleBtn");
+let state = {
+    currentLevel: 0,
+    selectedLevel: 0,
+    selectedChapter: null,
+    selectedMode: null,
+    activeLevels: [],
+    levelStartScore: 0,
+    score: 0,
+    timeLeft: DEFAULT_TIME,
+    lives: DEFAULT_LIVES,
+    hintsLeft: DEFAULT_HINTS,
+    comboStreak: 0,
+    found: [],
+    hintFound: [],
+    gameOver: false,
+    musicOn: JSON.parse(localStorage.getItem("musicOn")) ?? true,
+    ambientMode: JSON.parse(localStorage.getItem("ambientMode")) || false,
+    unlockedChapter: parseInt(localStorage.getItem("unlockedChapter")) || 1,
+    unlockedLevels: JSON.parse(localStorage.getItem("unlockedLevels")) || 5,
+    highScore: parseInt(localStorage.getItem("highScore")) || 0,
+    timerInterval: null
+};
+let debugMode = false;
 
-const leftImage = document.getElementById("leftImage");
-const leftCanvas = document.getElementById("leftCanvas");
-const leftCtx = leftCanvas.getContext("2d");
+const els = {
+    correctSound: document.getElementById("correctSound"),
+    wrongSound: document.getElementById("wrongSound"),
+    bonusSound: document.getElementById("bonusSound"),
+    score: document.getElementById("score"),
+    timer: document.getElementById("timer"),
+    lives: document.getElementById("lives"),
+    highScore: document.getElementById("highScore"),
+    message: document.getElementById("message"),
+    foundCounter: document.getElementById("foundCounter"),
+    progressBar: document.getElementById("progressBar"),
+    leftImg: document.getElementById("leftImage"),
+    rightImg: document.getElementById("rightImage"),
+    leftCanvas: document.getElementById("leftCanvas"),
+    rightCanvas: document.getElementById("rightCanvas"),
+    startScreen: document.getElementById("startScreen"),
+    chapterSelectScreen: document.getElementById("chapterSelectScreen"),
+    levelSelectScreen: document.getElementById("levelSelectScreen"),
+    endScreen: document.getElementById("endScreen"),
+    endTitle: document.getElementById("endTitle"),
+    finalScore: document.getElementById("finalScore"),
+    reset: document.getElementById("reset"),
+    hintButton: document.getElementById("hintButton"),
+    addHintButton: document.getElementById("addHintButton"),
+    musicToggle: document.getElementById("musicToggleBtn"),
+    themeToggle: document.getElementById("themeToggleBtn"),
+    ambientModeToggle: document.getElementById("ambientModeToggle"),
+    chapterButtons: document.getElementById("chapterButtons"),
+    modeButtons: document.getElementById("modeButtons"),
+    levelButtons: document.getElementById("levelButtons"),
+    adModal: document.getElementById("adModal"),
+    closeAdBtn: document.getElementById("closeAdBtn")
+};
 
-const rightImage = document.getElementById("rightImage");
-const rightCanvas = document.getElementById("rightCanvas");
-const rightCtx = rightCanvas.getContext("2d");
+const leftCtx = els.leftCanvas.getContext("2d");
+const rightCtx = els.rightCanvas.getContext("2d");
 
-function updateLivesDisplay() {
-    const heart = '❤️';
-    const lost = '🤍';
-    const total = 20;
-    livesDisplay.innerHTML = `${heart.repeat(Math.max(0, Math.min(lives, total)))}${lost.repeat(Math.max(0, total - Math.max(0, Math.min(lives, total))))}`;
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const getLevel = () => state.activeLevels[state.currentLevel] || null;
+const diffs = () => getLevel()?.differences || [];
+
+function updateLives() {
+    const heart = "❤️", lost = "🤍";
+    const liveCount = Math.min(state.lives, MAX_LIVES);
+    els.lives.innerHTML = heart.repeat(liveCount) + lost.repeat(MAX_LIVES - liveCount);
 }
 
-function updateScoreDisplay() {
-    scoreDisplay.textContent = `Score: ${score}`;
-}
-
-function updateFoundCounter() {
-    const total = (activeLevels && activeLevels[currentLevel] && activeLevels[currentLevel].differences) ? activeLevels[currentLevel].differences.length : 0;
-    const foundCount = found.length;
-    document.getElementById("foundCounter").textContent = `Found: ${foundCount} / ${total}`;
-}
-
-function updateHighScore() {
-    if (score > highScore) {
-        highScore = score;
-        localStorage.setItem("highScore", highScore);
+function updateScore() {
+    els.score.textContent = `Score: ${state.score}`;
+    if (state.score > state.highScore) {
+        state.highScore = state.score;
+        save("highScore", state.highScore);
     }
-    document.getElementById("highScore").textContent = `High Score: ${highScore}`;
+    els.highScore.textContent = `High Score: ${state.highScore}`;
 }
 
-function updateHintDisplay() {
-    const hintBtn = document.getElementById("hintButton");
-    const addHintBtn = document.getElementById("addHintButton");
-    if (hintBtn) {
-        hintBtn.textContent = `Hint: ${hintsLeft}`;
-        hintBtn.disabled = hintsLeft === 0 || gameOver;
+function updateHints() {
+    if (els.hintButton) {
+        els.hintButton.textContent = `Hint: ${state.hintsLeft}`;
+        els.hintButton.disabled = (state.hintsLeft === 0 || state.gameOver);
     }
-    if (addHintBtn) addHintBtn.style.display = hintsLeft === 0 && !gameOver ? "inline-block" : "none";
+    if (els.addHintButton) {
+        els.addHintButton.style.display =
+            (state.hintsLeft === 0 && !state.gameOver) ? "inline-block" : "none";
+    }
 }
 
-function updateMusicState() {
-    if (musicToggleBtn) musicToggleBtn.textContent = musicOn ? "🔊 Sound On" : "🔇 Sound Off";
-    [correctSound, wrongSound, bonusSound].forEach(audio => {
-        if (audio) audio.muted = !musicOn;
+function updateFound() {
+    els.foundCounter.textContent = `Found: ${state.found.length} / ${diffs().length}`;
+}
+
+function updateProgress() {
+    if (!state.activeLevels.length || state.activeLevels.length === 0) return;
+    let percent = (state.currentLevel / state.activeLevels.length) * 100;
+    percent = Math.max(5, Math.min(percent, 100));
+    els.progressBar.style.width = `${percent}%`;
+}
+
+function updateMusic() {
+    if (els.musicToggle) els.musicToggle.textContent = state.musicOn ? "🔊 Sound On" : "🔇 Sound Off";
+    [els.correctSound, els.wrongSound, els.bonusSound].forEach(audio => {
+        if (audio) audio.muted = !state.musicOn;
     });
 }
 
-function updateThemeUI(theme) {
-    document.body.classList.remove("light-theme", "dark-theme");
-    document.body.classList.add(`${theme}-theme`);
-    if (themeToggleBtn) themeToggleBtn.textContent = theme === "dark" ? "🌙Dark Theme" : "🌞Light Theme";
-    localStorage.setItem("theme", theme);
+function updateUI() {
+    updateLives();
+    updateScore();
+    updateHints();
+    updateFound();
+    updateProgress();
+    updateMusic();
+}
+
+function startTimer() {
+    clearInterval(state.timerInterval);
+    if (state.ambientMode) {
+        els.timer.textContent = "Ambient Mode 🎧";
+        return;
+    }
+
+    state.timeLeft = DEFAULT_TIME;
+    els.timer.textContent = `Time: ${state.timeLeft}s`;
+    state.timerInterval = setInterval(() => {
+        state.timeLeft--;
+        if (state.timeLeft <= 0) {
+            clearInterval(state.timerInterval);
+            endGame(false, "⏰ Time's up! Try again.");
+        } else {
+            els.timer.textContent = `Time: ${state.timeLeft}s`;
+        }
+    }, 1000);
+}
+
+function loadLevel(index) {
+    const level = state.activeLevels[index];
+    if (!level) return endGame(true);
+
+    preloadImages(level, (left, right) => {
+        els.leftImg.src = left.src;
+        els.rightImg.src = right.src;
+
+        state.found = [];
+        state.hintFound = [];
+        state.lives = DEFAULT_LIVES;
+        state.hintsLeft = DEFAULT_HINTS;
+        state.comboStreak = 0;
+        state.levelStartScore = state.score;
+        state.gameOver = false;
+        els.message.textContent = "";
+
+        updateUI();
+        resizeCanvases();
+        startTimer();
+    });
+}
+
+function endGame(win, msg = "") {
+    state.gameOver = true;
+    clearInterval(state.timerInterval);
+    els.message.textContent = msg;
+    els.endScreen.style.display = "flex";
+    els.endTitle.textContent = win ? "🎉 You Win!" : "💀 Game Over!";
+    els.finalScore.textContent = `Your final score: ${state.score}`;
+    if (win && state.currentLevel >= state.activeLevels.length - 1 && state.selectedChapter?.chapter === state.unlockedChapter) {
+        state.unlockedChapter++;
+        save("unlockedChapter", state.unlockedChapter);
+    }
+}
+
+function playSound(audio) {
+    if (state.musicOn && audio) {
+        try {
+            audio.currentTime = 0;
+            audio.play();
+        } catch (err) {
+        }
+    }
+}
+
+function preloadImages(level, callback) {
+    const imgL = new Image();
+    const imgR = new Image();
+    let loaded = 0;
+
+    function onLoad() {
+        loaded++;
+        if (loaded === 2) callback(imgL, imgR);
+    }
+
+    imgL.onload = onLoad;
+    imgR.onload = onLoad;
+    imgL.src = level.images.left;
+    imgR.src = level.images.right;
+}
+
+function showChapterSelectScreen() {
+    if (!els.chapterButtons || !els.modeButtons) return;
+    els.chapterButtons.innerHTML = "";
+    els.modeButtons.innerHTML = "";
+
+    PhotoHuntLevels.forEach((chapter, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = `Chapter ${chapter.chapter}`;
+        btn.className = "chapter-btn";
+        btn.disabled = chapter.chapter > state.unlockedChapter;
+        btn.addEventListener("click", () => {
+            state.selectedChapter = chapter;
+            highlightSelection(els.chapterButtons, btn);
+        });
+        els.chapterButtons.appendChild(btn);
+    });
+
+    ["easy", "medium", "hard"].forEach(mode => {
+        const btn = document.createElement("button");
+        btn.className = "chapter-btn";
+        btn.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+        btn.addEventListener("click", () => {
+            state.selectedMode = mode;
+            highlightSelection(els.modeButtons, btn);
+        });
+        els.modeButtons.appendChild(btn);
+    });
+
+    if (els.startScreen) els.startScreen.style.display = "none";
+    if (els.chapterSelectScreen) els.chapterSelectScreen.style.display = "flex";
+}
+
+function highlightSelection(containerEl, btn) {
+    Array.from(containerEl.children).forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
 }
 
 const Chapters = {};
@@ -87,55 +261,13 @@ PhotoHuntLevels.forEach(chapter => {
     };
 });
 
-function getLevels(chapterName, difficulty, count = 10) {
-    const levels = Chapters[chapterName]?.[difficulty];
-    if (!levels || !Array.isArray(levels) || levels.length === 0) {
-        console.warn(`No levels for chapter ${chapterName}, mode ${difficulty}`);
-        return [];
-    }
-    return pickLevels(levels, count);
-}
-
-function pickLevels(levels, count = 10) {
-    return shuffleArray(levels).slice(0, count);
-}
-
-function shuffleArray(array) {
-    const arr = [...array];
+function pickLevels(levels, count = LEVEL_COUNT) {
+    const arr = [...levels];
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return arr;
-}
-
-function startTimer() {
-    clearInterval(timerInterval);
-    if (ambientMode) {
-        timerDisplay.textContent = "Ambient Mode 🎧";
-        return;
-    }
-    timeLeft = 60;
-    timerDisplay.textContent = `Time: ${timeLeft}s`;
-    timerInterval = setInterval(() => {
-        timeLeft--;
-        timerDisplay.textContent = `Time: ${timeLeft}s`;
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            message.textContent = "⏰ Time's up! Try again.";
-            showEndScreen(false);
-            disableClicks();
-            setTimeout(() => restartCurrentLevel(), 1500);
-        }
-    }, 1000);
-}
-
-function disableClicks() {
-    gameOver = true;
-}
-
-function enableClicks() {
-    gameOver = false;
+    return arr.slice(0, count);
 }
 
 function drawShape(ctx, x, y, color = "red", radius = 20, shape = "circle", width = null, height = null) {
@@ -154,91 +286,53 @@ function drawShape(ctx, x, y, color = "red", radius = 20, shape = "circle", widt
     ctx.restore();
 }
 
-function redrawCanvasesOverlay() {
-    leftCtx.clearRect(0, 0, leftCanvas.width, leftCanvas.height);
-    if (leftImage.naturalWidth && leftImage.complete) {
-        leftCtx.drawImage(leftImage, 0, 0, leftCanvas.width, leftCanvas.height);
-    }
-    rightCtx.clearRect(0, 0, rightCanvas.width, rightCanvas.height);
-    if (rightImage.naturalWidth && rightImage.complete) {
-        rightCtx.drawImage(rightImage, 0, 0, rightCanvas.width, rightCanvas.height);
-    }
+function redrawOverlays() {
+    leftCtx.clearRect(0, 0, els.leftCanvas.width, els.leftCanvas.height);
+    if (els.leftImg.complete) leftCtx.drawImage(els.leftImg, 0, 0, els.leftCanvas.width, els.leftCanvas.height);
+    rightCtx.clearRect(0, 0, els.rightCanvas.width, els.rightCanvas.height);
+    if (els.rightImg.complete) rightCtx.drawImage(els.rightImg, 0, 0, els.rightCanvas.width, els.rightCanvas.height);
 
-    const differences = activeLevels[currentLevel] && activeLevels[currentLevel].differences ? activeLevels[currentLevel].differences : [];
-    found.forEach((index) => {
-        const diff = differences[index];
-        if (!diff) return;
-        const color = hintFound.includes(index) ? "green" : "lime";
-        drawShape(leftCtx, diff.x, diff.y, color, diff.radius || 15, diff.shape || "circle", diff.width, diff.height);
-        drawShape(rightCtx, diff.x, diff.y, color, diff.radius || 15, diff.shape || "circle", diff.width, diff.height);
-    });
-}
-
-function loadLevel(levelIndex) {
-    const level = activeLevels[levelIndex];
-    if (!level) {
-        showEndScreen(true);
-        return;
-    }
-    preloadImages(level, (preloadedLeft, preloadedRight) => {
-        leftImage.src = preloadedLeft.src;
-        rightImage.src = preloadedRight.src;
-        updateProgressBar();
-        clearInterval(timerInterval);
-        found = [];
-        hintFound = [];
-        lives = 20;
-        hintsLeft = 3;
-        levelStartScore = score;
-        message.textContent = "";
-        enableClicks();
-        updateUI();
-        let loaded = 0;
-        function checkBothLoaded() {
-            loaded++;
-            if (loaded < 2) return;
-            requestAnimationFrame(() => {
-                resizeCanvases();
-                redrawCanvasesOverlay();
-                startTimer();
-            });
+    diffs().forEach((diff, i) => {
+        if (state.found.includes(i)) {
+            const color = state.hintFound.includes(i) ? "green" : "lime";
+            drawShape(leftCtx, diff.x, diff.y, color, diff.radius || 15, diff.shape, diff.width, diff.height);
+            drawShape(rightCtx, diff.x, diff.y, color, diff.radius || 15, diff.shape, diff.width, diff.height);
         }
-        leftImage.onload = checkBothLoaded;
-        rightImage.onload = checkBothLoaded;
-
-        if (leftImage.complete) checkBothLoaded();
-        if (rightImage.complete) checkBothLoaded();
     });
 }
 
 function resizeCanvases() {
-    leftCanvas.width = leftImage.naturalWidth || leftImage.width || leftCanvas.clientWidth;
-    leftCanvas.height = leftImage.naturalHeight || leftImage.height || leftCanvas.clientHeight;
-    rightCanvas.width = rightImage.naturalWidth || rightImage.width || rightCanvas.clientWidth;
-    rightCanvas.height = rightImage.naturalHeight || rightImage.height || rightCanvas.clientHeight;
+    const lImg = els.leftImg, rImg = els.rightImg;
+    els.leftCanvas.width = lImg.naturalWidth || lImg.width || els.leftCanvas.clientWidth;
+    els.leftCanvas.height = lImg.naturalHeight || lImg.height || els.leftCanvas.clientHeight;
+    els.rightCanvas.width = rImg.naturalWidth || rImg.width || els.rightCanvas.clientWidth;
+    els.rightCanvas.height = rImg.naturalHeight || rImg.height || els.rightCanvas.clientHeight;
 
-    leftCanvas.style.width = leftImage.offsetWidth + "px";
-    leftCanvas.style.height = leftImage.offsetHeight + "px";
-    rightCanvas.style.width = rightImage.offsetWidth + "px";
-    rightCanvas.style.height = rightImage.offsetHeight + "px";
+    els.leftCanvas.style.width = `${lImg.offsetWidth}px`;
+    els.leftCanvas.style.height = `${lImg.offsetHeight}px`;
+    els.rightCanvas.style.width = `${rImg.offsetWidth}px`;
+    els.rightCanvas.style.height = `${rImg.offsetHeight}px`;
 
-    if (leftImage.naturalWidth) leftCtx.drawImage(leftImage, 0, 0, leftCanvas.width, leftCanvas.height);
-    if (rightImage.naturalWidth) rightCtx.drawImage(rightImage, 0, 0, rightCanvas.width, rightCanvas.height);
+    if (lImg.complete) leftCtx.drawImage(lImg, 0, 0, els.leftCanvas.width, els.leftCanvas.height);
+    if (rImg.complete) rightCtx.drawImage(rImg, 0, 0, els.rightCanvas.width, els.rightCanvas.height);
 }
 
-function getScaledCoordsFromEvent(e, canvas, image) {
+function getScaledCoords(e, canvas, image) {
     const rect = canvas.getBoundingClientRect();
-    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const x = clientX - rect.left;
     const y = clientY - rect.top;
-
     const scaleX = (image.naturalWidth || image.width) / rect.width;
     const scaleY = (image.naturalHeight || image.height) / rect.height;
-    const scaledX = x * scaleX;
-    const scaledY = y * scaleY;
-    return { scaledX, scaledY, clientX, clientY };
+    return {
+        scaledX: x * scaleX,
+        scaledY: y * scaleY,
+        clientX,
+        clientY
+    };
 }
+
 window.debugMode = false;
 
 document.addEventListener("keydown", (e) => {
@@ -247,222 +341,231 @@ document.addEventListener("keydown", (e) => {
         alert("Debug Mode: " + (debugMode ? "ON" : "OFF"));
     }
 });
+
 function handleCanvasClick(e, side) {
-    if (gameOver) return;
-    const canvas = side === "left" ? leftCanvas : rightCanvas;
+    if (state.gameOver) return;
+
+    const canvas = side === "left" ? els.leftCanvas : els.rightCanvas;
     const ctx = side === "left" ? leftCtx : rightCtx;
-    const image = side === "left" ? leftImage : rightImage;
-    const { scaledX, scaledY, clientX, clientY } = getScaledCoordsFromEvent(e, canvas, image);
-    const level = activeLevels[currentLevel];
-
+    const image = side === "left" ? els.leftImg : els.rightImg;
+    const {scaledX, scaledY, clientX, clientY} = getScaledCoords(e, canvas, image);
+    const level = getLevel();
     if (!level || !level.differences) return;
+
     if (debugMode) {
-        console.log("Scaled coords:", scaledX, scaledY);
+        console.log(`Scaled coords X: ${scaledX}, Y: ${scaledY}`);
     }
-    const differences = level.differences || [];
+
     let hit = false;
-    for (let i = 0; i < differences.length; i++) {
-        if (found.includes(i)) continue;
-        const diff = differences[i];
+    diffs().forEach((diff, idx) => {
+        if (hit) return;
+        if (state.found.includes(idx)) return;
 
-        const dx = diff.x;
-        const dy = diff.y;
-        const radius = diff.radius || 15;
-        const dist = Math.hypot(scaledX - dx, scaledY - dy);
-        if (dist <= radius) {
+        const dist = Math.hypot(scaledX - diff.x, scaledY - diff.y);
+        if (dist <= diff.radius) {
             hit = true;
-            found.push(i);
-            drawShape(leftCtx, dx, dy, "lime", radius, diff.shape || "circle", diff.width, diff.height);
-            drawShape(rightCtx, dx, dy, "lime", radius, diff.shape || "circle", diff.width, diff.height);
+            state.found.push(idx);
+            drawShape(leftCtx, diff.x, diff.y, "lime", diff.radius || 15, diff.shape || "circle", diff.width, diff.height);
+            drawShape(rightCtx, diff.x, diff.y, "lime", diff.radius || 15, diff.shape || "circle", diff.width, diff.height);
 
-            if (musicOn && correctSound) {
-                try { correctSound.currentTime = 0; correctSound.play(); } catch (err) {}
+            playSound(els.correctSound);
+            state.comboStreak++;
+            const comboBonus = (state.comboStreak >= COMBO_THRESHOLD) ? COMBO_BONUS : 0;
+            state.score += CORRECT_SCORE + comboBonus;
+            els.message.textContent = comboBonus > 0 ? `🔥 Combo X${state.comboStreak}! +${comboBonus}` : "";
+            updateUI();
+            showSparkle(clientX, clientY, "limegreen");
+            showFirework(clientX, clientY);
+
+            if (state.found.length === diffs().length) {
+                clearInterval(state.timerInterval);
+                els.message.textContent = "🎉 Level Complete!";
+                endGame(true, "🎉 Level Complete!");
+                state.currentLevel++;
+                if (state.currentLevel < state.activeLevels.length) {
+                    setTimeout(() => loadLevel(state.currentLevel), 1000);
+                } else {
+                    endGame(true);
+                }
             }
-
-            comboStreak++;
-            const comboBonus = comboStreak >= 4 ? 5 : 0;
-            score += 10 + comboBonus;
-            message.textContent = comboBonus > 0 ? `🔥 Combo X${comboStreak}! +${comboBonus}` : "";
-            updateFoundCounter();
-            updateScoreDisplay();
-            updateHighScore();
-            showSparkle(clientX, clientY, 'limegreen');
-
-            if (found.length === differences.length) {
-                clearInterval(timerInterval);
-                message.textContent = "🎉 Level Complete!";
-                disableClicks();
-                setTimeout(() => {
-                    if (++currentLevel < activeLevels.length) loadLevel(currentLevel);
-                    else showEndScreen(true);
-                }, 1000);
-            }
-            break;
         }
-    }
+    });
 
     if (!hit) {
-        drawShape(ctx, scaledX, scaledY, "red", 20, "circle");
-        score = Math.max(0, score - 5);
-        lives--;
-        comboStreak = 0;
-        updateLivesDisplay();
-        updateScoreDisplay();
-        showSparkle(clientX, clientY, 'red');
+        drawShape(ctx, scaledX, scaledY, "red", 20);
+        state.score = Math.max(0, state.score - WRONG_PENALTY);
+        state.lives--;
+        state.comboStreak = 0;
+        updateUI();
+        showSparkle(clientX, clientY, "red");
+        playSound(els.wrongSound);
 
-        if (musicOn && wrongSound) {
-            try { wrongSound.currentTime = 0; wrongSound.play(); } catch (err) {}
-        }
-
-        setTimeout(() => {
-            redrawCanvasesOverlay();
-        }, 700);
-
-        if (lives <= 0) {
-            clearInterval(timerInterval);
-            message.textContent = "💀 Game Over!";
-            showEndScreen(false);
-            disableClicks();
+        if (state.lives <= 0) {
+            clearInterval(state.timerInterval);
+            els.message.textContent = "💀 Game Over!";
+            endGame(false);
+        } else {
+            setTimeout(() => {
+                redrawOverlays();
+            }, 700);
         }
     }
 }
 
-leftCanvas.addEventListener("pointerdown", (e) => {
+els.leftCanvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     handleCanvasClick(e, "left");
 });
-rightCanvas.addEventListener("pointerdown", (e) => {
+els.rightCanvas.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     handleCanvasClick(e, "right");
 });
 
 function showHint() {
-    if (gameOver || hintsLeft <= 0) return;
-    if (musicOn && bonusSound) {
-        try { bonusSound.currentTime = 0; bonusSound.play(); } catch (err) {}
-    }
-    const diffs = activeLevels[currentLevel].differences || [];
-    const remaining = diffs.map((d, i) => ({ diff: d, index: i })).filter(d => !found.includes(d.index));
+    if (state.gameOver || state.hintsLeft <= 0) return;
+    playSound(els.bonusSound);
+
+    const remaining = diffs().map((d, i) => ({diff: d, index: i}))
+        .filter(o => !state.found.includes(o.index));
     if (remaining.length === 0) return;
 
-    const random = remaining[Math.floor(Math.random() * remaining.length)];
-    found.push(random.index);
-    hintFound.push(random.index);
-    drawShape(leftCtx, random.diff.x, random.diff.y, "green", random.diff.radius || 15, random.diff.shape || "circle", random.diff.width, random.diff.height);
-    drawShape(rightCtx, random.diff.x, random.diff.y, "green", random.diff.radius || 15, random.diff.shape || "circle", random.diff.width, random.diff.height);
+    const pick = remaining[Math.floor(Math.random() * remaining.length)];
+    state.found.push(pick.index);
+    state.hintFound.push(pick.index);
+    const {x, y, radius = 15, shape = "circle", width, height} = pick.diff;
 
-    hintsLeft--;
-    score = Math.max(0, score - 5);
+    drawShape(leftCtx, x, y, "green", radius || 15, shape || "circle", width, height);
+    drawShape(rightCtx, x, y, "green", radius || 15, shape || "circle", width, height);
+
+    const rect = els.rightCanvas.getBoundingClientRect();
+    const screenX = rect.left + x;
+    const screenY = rect.top + y;
+    showSparkle(screenX, screenY, "green");
+    showFirework(screenX, screenY, "green");
+
+    state.hintsLeft--;
+    state.score = Math.max(0, state.score - HINT_PENALTY);
     updateUI();
 
-    if (found.length === diffs.length) {
-        clearInterval(timerInterval);
-        message.textContent = "🎉 Level Complete!";
-        disableClicks();
-        setTimeout(() => {
-            if (++currentLevel < activeLevels.length) loadLevel(currentLevel); else showEndScreen(true);
-        }, 1000);
+    if (state.found.length === diffs().length) {
+        state.gameOver = true;
+        clearInterval(state.timerInterval);
+        els.message.textContent = "🎉 Level Complete!";
+        state.currentLevel++;
+        if (state.currentLevel < state.activeLevels.length) {
+            setTimeout(() => loadLevel(state.currentLevel), 1000);
+        } else {
+            endGame(true);
+        }
     }
 }
 
 function addHint() {
-    if (gameOver || hintsLeft !== 0) return;
+    if (state.gameOver || state.hintsLeft !== 0) return;
     showAdModal();
 }
 
 function showAdModal() {
-    const modal = document.getElementById("adModal");
-    const closeBtn = document.getElementById("closeAdBtn");
-    if (!modal || !closeBtn) return;
-    modal.style.display = "flex";
-    closeBtn.disabled = true;
-    closeBtn.textContent = "Please wait...";
+    if (!els.adModal || !els.closeAdBtn) return;
+    els.adModal.style.display = "flex";
+    els.closeAdBtn.disabled = true;
+    els.closeAdBtn.textContent = "Please wait...";
     setTimeout(() => {
-        closeBtn.disabled = false;
-        closeBtn.textContent = "🎁Close Ad";
+        els.closeAdBtn.disabled = false;
+        els.closeAdBtn.textContent = "🎁Close Ad";
     }, 5000);
 }
-document.getElementById("closeAdBtn")?.addEventListener("click", () => {
-    const modal = document.getElementById("adModal");
-    if (!modal) return;
-    modal.style.display = "none";
-    hintsLeft++;
-    updateUI();
-    message.textContent = "✅ Hint added after watching ad!";
-});
 
-function showEndScreen(isWin) {
-    disableClicks();
-    const endScreen = document.getElementById("endScreen");
-    if (!endScreen) return;
-    endScreen.style.display = "flex";
-    document.getElementById("endTitle").textContent = isWin ? "🎉 You Win!" : "💀 Game Over!";
-    document.getElementById("finalScore").textContent = `Your final score: ${score}`;
-    const currentChapterNum = selectedChapter.chapter;
-    if (isWin && currentLevel >= activeLevels.length - 1 && currentChapterNum === unlockedChapter) {
-        localStorage.setItem("unlockedChapter", currentChapterNum + 1);
-    }
+if (els.closeAdBtn) {
+    els.closeAdBtn.addEventListener("click", () => {
+        els.adModal.style.display = "none";
+        state.hintsLeft++;
+        updateUI();
+        els.message.textContent = "✅ Hint added after watching ad!";
+    });
 }
 
 function updateLeaderboard(score) {
     let name = prompt("Enter your initials (3 chars):", "ABC") || "AAA";
     name = name.toUpperCase().slice(0, 3);
-    leaderboard.push({ name, score });
+    leaderboard.push({name, score});
     leaderboard.sort((a, b) => b.score - a.score);
     leaderboard = leaderboard.slice(0, 5); // keep top 5
     localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 }
 
-function preloadImages(level, callback) {
-    const left = new Image();
-    const right = new Image();
-    let loaded = 0;
-
-    function checkLoaded() {
-        if (++loaded === 2) callback(left, right);
-    }
-
-    left.onload = checkLoaded;
-    right.onload = checkLoaded;
-    left.src = level.images.left;
-    right.src = level.images.right;
-}
-
 function restartGame() {
-    score = 0;
-    currentLevel = 0;
-    selectedLevel = 0;
-    lives = 20;
-    hintsLeft = 3;
-    comboStreak = 0;
-    gameOver = false;
-    clearInterval(timerInterval);
-
+    Object.assign(state, {
+        currentLevel: 0,
+        selectedLevel: 0,
+        score: 0,
+        lives: DEFAULT_LIVES,
+        hintsLeft: DEFAULT_HINTS,
+        comboStreak: 0,
+        gameOver: false
+    });
+    clearInterval(state.timerInterval);
     updateUI();
-    document.getElementById("progressBar").style.width = "0%";
-    document.getElementById("endScreen").style.display = "none";
-    message.textContent = "";
+    if (els.progressBar) els.progressBar.style.width = "0%";
+    if (els.endScreen) els.endScreen.style.display = "none";
+    if (els.message) els.message.textContent = "";
+    if (els.startScreen) els.startScreen.style.display = "flex";
     showLevelSelectScreen();
 }
 
 document.getElementById("restartLevelBtn")?.addEventListener("click", () => {
-    if (gameOver) return;
+    if (state.gameOver) return;
+    // if (confirm("Are you sure you want to restart this level? Your progress on this level will be lost.")) {
+    //     restartCurrentLevel();
+    // }
     restartCurrentLevel();
 });
 
 function restartCurrentLevel() {
-    if (gameOver) return;
-    const earnedThisLevel = score - levelStartScore;
-    if (earnedThisLevel > 0) {
-        score = Math.max(0, score - earnedThisLevel);
-    }
-    lives = 20;
-    hintsLeft = 3;
-    comboStreak = 0;
+    if (state.gameOver) return;
+
+    state.score = state.levelStartScore;
+    state.lives = DEFAULT_LIVES;
+    state.hintsLeft = DEFAULT_HINTS;
+    state.comboStreak = 0;
+    state.gameOver = false;
     updateUI();
-    loadLevel(currentLevel);
-    message.textContent = "";
-    enableClicks();
+    loadLevel(state.currentLevel);
+    els.message.textContent = "🔄 Level restarted.";
+}
+
+function showFirework(x, y, color = 'gold') {
+    const burst = document.createElement('div');
+    burst.className = 'sparkle-burst';
+    burst.style.left = `${x}px`;
+    burst.style.top = `${y}px`;
+
+    const particles = EXPLOSION_PARTICLES_SIZE;
+    for (let i = 0; i < particles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'sparkle-particle';
+        particle.style.backgroundColor = color;
+        particle.style.opacity = `${0.7 + Math.random() * 0.3}`;
+
+        const angle = (Math.PI * 2 * i) / particles;
+        const distance = EXPLOSION_PARTICLES_RADIUS + Math.random() * 30; // Pixel radius
+
+        // Calculate x/y offsets for explosion direction
+        const offsetX = Math.cos(angle) * distance;
+        const offsetY = Math.sin(angle) * distance;
+
+        particle.style.setProperty('--x', `${offsetX}px`);
+        particle.style.setProperty('--y', `${offsetY}px`);
+
+        burst.appendChild(particle);
+    }
+
+    document.body.appendChild(burst);
+
+    // Clean up after animation
+    setTimeout(() => {
+        burst.remove();
+    }, MAX_SPARKLE_DURATION);
 }
 
 function showSparkle(x, y, color = 'yellow') {
@@ -473,100 +576,59 @@ function showSparkle(x, y, color = 'yellow') {
     sparkle.style.backgroundColor = color;
     sparkle.style.opacity = "0.9";
     document.body.appendChild(sparkle);
-    setTimeout(() => sparkle.remove(), 600);
-}
-
-function updateProgressBar() {
-    if (!activeLevels || activeLevels.length === 0) return;
-    let percent = (currentLevel / activeLevels.length) * 100;
-    if (percent <= 0) percent = 5;
-    if (percent > 100) percent = 100;
-    const bar = document.getElementById("progressBar");
-    if (bar) bar.style.width = `${percent}%`;
-}
-
-function toggleMusic() {
-    musicOn = !musicOn;
-    localStorage.setItem("musicOn", JSON.stringify(musicOn));
-    updateMusicState();
-}
-
-themeToggleBtn?.addEventListener("click", () => {
-    const current = localStorage.getItem("theme") || "light";
-    updateThemeUI(current === "light" ? "dark" : "light");
-});
-
-function showChapterSelectScreen() {
-    const chapterButtons = document.getElementById("chapterButtons");
-    const modeButtons = document.getElementById("modeButtons");
-
-    chapterButtons.innerHTML = "";
-    modeButtons.innerHTML = "";
-
-    PhotoHuntLevels.forEach((chapter, index) => {
-        const btn = document.createElement("button");
-        btn.textContent = `Chapter ${chapter.chapter}`;
-        btn.addEventListener("click", () => {
-            selectedChapter = chapter;
-            highlightSelection(chapterButtons, btn);
-        });
-        chapterButtons.appendChild(btn);
-    });
-
-    ["easy", "medium", "hard"].forEach(mode => {
-        const btn = document.createElement("button");
-        btn.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
-        btn.addEventListener("click", () => {
-            selectedMode = mode;
-            highlightSelection(modeButtons, btn);
-        });
-        modeButtons.appendChild(btn);
-    });
-
-    document.getElementById("chapterSelectScreen").style.display = "block";
-}
-
-function highlightSelection(container, selectedBtn) {
-    Array.from(container.children).forEach(btn => btn.classList.remove("selected"));
-    selectedBtn.classList.add("selected");
+    setTimeout(() => sparkle.remove(), MAX_SPARKLE_DURATION);
 }
 
 function goToLevelSelect() {
-    if (!selectedChapter || !selectedMode) {
+    if (!state.selectedChapter || !state.selectedMode) {
         alert("Please select both a chapter and a difficulty mode.");
         return;
     }
-
-    const levels = selectedChapter[selectedMode];
-    if (!levels || levels.length === 0) {
-        alert(`No levels found for ${selectedMode} mode in Chapter ${selectedChapter.chapter}`);
+    const levels = state.selectedChapter[state.selectedMode];
+    if (!Array.isArray(levels) || levels.length === 0) {
+        alert(`No levels found for mode "${state.selectedMode}" in Chapter ${state.selectedChapter.chapter}`);
         return;
     }
+    state.activeLevels = pickLevels(levels, LEVEL_COUNT);
+    state.currentLevel = 0;
 
-    activeLevels = pickLevels(levels, 10);
-    currentLevel = 0;
+    if (els.chapterSelectScreen) els.chapterSelectScreen.style.display = "none";
+    if (els.levelSelectScreen) els.levelSelectScreen.style.display = "flex";
 
-    document.getElementById("chapterSelectScreen").style.display = "none";
-    loadLevel(currentLevel);
+    if (els.levelButtons) {
+        els.levelButtons.innerHTML = "";
+        state.activeLevels.forEach((_, idx) => {
+            const btn = document.createElement("button");
+            btn.textContent = `Level ${idx + 1}`;
+            btn.className = "level-btn";
+            btn.addEventListener("click", () => {
+                state.selectedLevel = idx;
+                highlightSelection(els.levelButtons, btn);
+            });
+            els.levelButtons.appendChild(btn);
+        });
+        const firstBtn = els.levelButtons.querySelector("button");
+        if (firstBtn) firstBtn.classList.add("selected");
+    }
 }
 
 function showLevelSelectScreen() {
-    const container = document.getElementById("levelButtons");
+    const container = els.levelButtons;
     if (!container) return;
     container.innerHTML = "";
-    activeLevels.forEach((_, index) => {
+    state.activeLevels.forEach((_, idx) => {
         const btn = document.createElement("button");
-        btn.textContent = `Level ${index + 1}`;
+        btn.textContent = `Level ${idx + 1}`;
         btn.className = "level-btn";
         btn.onclick = () => {
-            selectedLevel = index;
-            highlightSelectedLevel(index);
+            state.selectedLevel = idx;
+            highlightSelectedLevel(idx);
         };
         container.appendChild(btn);
     });
-    highlightSelectedLevel(selectedLevel);
-    document.getElementById("startScreen") && (document.getElementById("startScreen").style.display = "none");
-    document.getElementById("levelSelectScreen") && (document.getElementById("levelSelectScreen").style.display = "flex");
+    highlightSelectedLevel(state.selectedLevel);
+    if (els.startScreen) els.startScreen.style.display = "none";
+    if (els.levelSelectScreen) els.levelSelectScreen.style.display = "flex";
 }
 
 function highlightSelectedLevel(index) {
@@ -577,48 +639,64 @@ function highlightSelectedLevel(index) {
 }
 
 function startGame() {
-    if (!activeLevels || activeLevels.length === 0) {
-        alert("No levels available in the selected chapter.");
+    if (!state.activeLevels || state.activeLevels.length === 0) {
+        alert("No levels available in the selected chapter/mode.");
         return;
     }
-    currentLevel = selectedLevel || 0;
-    document.getElementById("startScreen") && (document.getElementById("startScreen").style.display = "none");
-    document.getElementById("levelSelectScreen") && (document.getElementById("levelSelectScreen").style.display = "none");
-    loadLevel(currentLevel);
-}
-
-document.getElementById("reset").addEventListener("click", restartGame);
-
-function updateUI() {
-    updateLivesDisplay();
-    updateScoreDisplay();
-    updateFoundCounter();
-    updateHighScore();
-    updateHintDisplay();
-    updateMusicState();
+    state.currentLevel = state.selectedLevel || 0;
+    if (els.startScreen) els.startScreen.style.display = "none";
+    if (els.levelSelectScreen) els.levelSelectScreen.style.display = "none";
+    loadLevel(state.currentLevel);
 }
 
 window.addEventListener("DOMContentLoaded", () => {
     showChapterSelectScreen();
-    const ambientToggle = document.getElementById("ambientModeToggle");
-    if (ambientToggle) {
 
-        ambientToggle.checked = ambientMode;
-        ambientToggle.addEventListener("change", () => {
-            ambientMode = ambientToggle.checked;
-            localStorage.setItem("ambientMode", ambientMode);
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.body.classList.add(`${savedTheme}-theme`);
+    if (els.themeToggle) {
+        els.themeToggle.addEventListener("click", () => {
+            const cur = localStorage.getItem("theme") || "light";
+            const nxt = (cur === "light") ? "dark" : "light";
+            document.body.classList.remove("light-theme", "dark-theme");
+            document.body.classList.add(`${nxt}-theme`);
+            if (els.themeToggle) els.themeToggle.textContent = nxt === "dark" ? "🌙Dark Theme" : "🌞Light Theme";
+            localStorage.setItem("theme", nxt);
+        });
+    }
 
-            if (ambientMode) {
-                clearInterval(timerInterval);
-                timerDisplay.textContent = "Ambient Mode 🎧";
-            } else {
+    if (els.ambientModeToggle) {
+        els.ambientModeToggle.checked = state.ambientMode;
+
+        els.ambientModeToggle.addEventListener("change", () => {
+            state.ambientMode = els.ambientModeToggle.checked;
+            localStorage.setItem("ambientMode", JSON.stringify(state.ambientMode));
+
+            if (!state.gameOver) {
                 startTimer();
             }
         });
     }
-    const savedTheme = localStorage.getItem("theme") || "light";
-    updateThemeUI(savedTheme);
-    document.getElementById("highScore") && (document.getElementById("highScore").textContent = `High Score: ${highScore}`);
-    document.getElementById("musicToggleBtn")?.addEventListener("click", toggleMusic);
+
+    if (els.musicToggle) {
+        els.musicToggle.addEventListener("click", () => {
+            state.musicOn = !state.musicOn;
+            save("musicOn", state.musicOn);
+            updateMusic();
+        });
+    }
+
+    if (els.reset) {
+        els.reset.addEventListener("click", () => {
+            restartGame();
+        });
+    }
+
+    if (els.addHintButton) {
+        els.addHintButton.addEventListener("click", () => {
+            showAdModal();
+        });
+    }
+
     updateUI();
 });

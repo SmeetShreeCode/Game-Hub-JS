@@ -1,10 +1,10 @@
-<!-- CLEANED-UP HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Photo Hunt Game</title>
-    <link rel="stylesheet" href="css/photo-hunt.css" />
+    <link rel="stylesheet" href="css/photo-hunt.css"/>
 </head>
 <body>
 <h1>Photo Hunt Game</h1>
@@ -16,17 +16,16 @@
     <span id="score">Score: 0</span> |
     <span id="highScore">High Score: 0</span> |
     <span id="lives" class="hearts">❤️❤️❤️</span> |
-    <span id="foundCounter">Found: 0 / 0</span><br>
-    <button id="reset">Select PhotoHuntLevels</button> |
-    <button id="restartLevelBtn">Restart Level</button> |
-    <button onclick="showHint()" id="hintButton">Hint: 3</button> |
-    <button onclick="addHint()" id="addHintButton">Add Hint: +1</button> |
-    <button id="musicToggleBtn">🔊 Music On</button> |
-    <button id="themeToggleBtn">🌞Light Theme</button> |
-    <label>
-        <input type="checkbox" id="ambientModeToggle" />
-        🧘On/Off Timer
-    </label>
+    <span id="foundCounter">Found: 0 / 0</span>
+    <div>
+        <button id="reset">Select PhotoHuntLevels</button>
+        <button id="restartLevelBtn">Restart Level</button>
+        <button id="hintButton" onclick="showHint()">Hint: 3</button>
+        <button id="addHintButton" onclick="addHint()">Add Hint: +1</button>
+        <button id="musicToggleBtn">🔊 Music On</button>
+        <button id="themeToggleBtn">🌞Light Theme</button>
+        <label><input type="checkbox" id="ambientModeToggle"/> On/Off Timer</label>
+    </div>
 </nav>
 
 <div id="progressContainer">
@@ -59,14 +58,14 @@
     <h2>Select a Chapter</h2>
     <div id="chapterButtons"></div>
     <div id="modeButtons"></div>
-    <button onclick="goToLevelSelect()">Continue</button>
+    <button onclick="goToLevelSelect()" style="background: #2282c5;">Continue</button>
 </div>
 
 <div id="levelSelectScreen" class="overlay-screen" style="display: none;">
     <h2>Select a Level</h2>
     <h3>Unlock more levels by playing and progressing!</h3>
     <div id="levelButtons"></div>
-    <button onclick="startGame()">Play Selected</button>
+    <button onclick="startGame()" style="background: #2282c5;">Play Selected</button>
 </div>
 
 <div id="endScreen" class="overlay-screen" style="display: none;">
@@ -75,7 +74,6 @@
     <button onclick="restartGame()">Play Again</button>
 </div>
 
-<!-- Ad Modal -->
 <div id="adModal" class="modal">
     <div class="modal-content">
         <h2>📺 Watch Ad</h2>

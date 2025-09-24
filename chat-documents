@@ -1,0 +1,247 @@
+Yes, you can implement that restriction by tracking the player's completed levels per chapter and mode. Here's how to set up chapter unlock conditions based on the criteria you mentioned:
+
+✅ Your Condition
+
+To unlock Chapter 2, the player must have:
+
+Completed at least 10 Easy levels
+
+And at least 5 Medium levels
+(from Chapter 1)
+
+🛠️ Step-by-Step Implementation
+✅ 1. Track Level Completion
+
+In your state, add a new key to track completed levels:
+
+let state = {
+  ...
+  completedLevels: JSON.parse(localStorage.getItem("completedLevels")) || {}, // NEW
+  ...
+};
+
+✅ 2. Save Completed Levels on Finish
+
+Inside loadLevel() or right after the player completes a level (where you already check if (state.found.length === diffs().length)), add this:
+
+const key = `${state.selectedChapter.chapter}-${state.selectedMode}-${state.currentLevel}`;
+if (!state.completedLevels[key]) {
+    state.completedLevels[key] = true;
+    save("completedLevels", state.completedLevels);
+}
+
+
+This ensures that every completed level is stored by chapter-mode-index.
+
+✅ 3. Check Chapter Unlock Eligibility
+
+Create a function:
+
+function canUnlockChapter(nextChapterNumber) {
+    const required = {
+        easy: 10,
+        medium: 5
+    };
+
+    const completed = {
+        easy: 0,
+        medium: 0
+    };
+
+    Object.keys(state.completedLevels).forEach(key => {
+        const [chapter, mode] = key.split("-");
+        if (parseInt(chapter) === nextChapterNumber - 1) {
+            if (mode === "easy") completed.easy++;
+            if (mode === "medium") completed.medium++;
+        }
+    });
+
+    return completed.easy >= required.easy && completed.medium >= required.medium;
+}
+
+✅ 4. Modify Chapter Button Display
+
+Inside your showChapterSelectScreen() function, update the button creation logic like so:
+
+btn.disabled = chapter.chapter > state.unlockedChapter ||
+    (chapter.chapter === state.unlockedChapter + 1 && !canUnlockChapter(chapter.chapter));
+
+
+This prevents unlocking Chapter 2 until the required levels from Chapter 1 are completed.
+
+✅ 5. Optionally Auto-Unlock Chapter
+
+You can automatically unlock chapters in endGame(true) when they qualify:
+
+Replace this part:
+
+if (win && state.currentLevel >= state.activeLevels.length - 1 && state.selectedChapter?.chapter === state.unlockedChapter) {
+    state.unlockedChapter++;
+    save("unlockedChapter", state.unlockedChapter);
+}
+
+
+With this:
+
+if (
+    state.selectedChapter?.chapter === state.unlockedChapter &&
+    canUnlockChapter(state.unlockedChapter + 1)
+) {
+    state.unlockedChapter++;
+    save("unlockedChapter", state.unlockedChapter);
+}
+
+Yes — you can absolutely make this game look and feel like a polished, real game, with some focused UI/UX improvements and structural enhancements. You're already very close with the current code — it’s functional, modular, and scalable.
+
+✅ Here's How to Make It Look Like a "Real Game"
+🎮 1. Visual Progression System
+
+Show player's chapter progression like a campaign map or level tree.
+
+✅ Progress bar per chapter with stars (★) showing levels completed.
+
+✅ Lock icons 🔒 on chapters/modes that aren't unlocked.
+
+✅ Show ✅ / ✖️ / ⭐ next to each level in level select.
+
+➕ Add to showLevelSelectScreen():
+// After creating each level button
+if (state.completedLevels[`${state.selectedChapter.chapter}-${state.selectedMode}-${idx}`]) {
+    btn.innerHTML += " ✅";
+}
+
+✨ 2. Animated Transitions
+
+Use CSS animations or fades when changing screens.
+
+.screen {
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+.screen.active {
+  opacity: 1;
+  display: flex;
+}
+
+
+Then toggle .active class in JS to fade in/out screens.
+
+🔥 3. Juicy Game Feedback
+
+Already using fireworks and sparkles! Now add:
+
+Shake effect on wrong click:
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-10px); }
+  40%, 80% { transform: translateX(10px); }
+}
+.shake {
+  animation: shake 0.4s;
+}
+
+
+Add els.rightCanvas.classList.add('shake') and remove it after 500ms.
+
+Combo meter UI:
+Show 🔥 Combo x3! at top-center, fade out after 1s.
+
+🏆 4. Achievements & Goals
+
+Track and show things like:
+
+"Found 50 differences!"
+
+"Completed 10 Easy levels"
+
+"Unlocked all Medium levels in Chapter 1"
+
+Just track these in localStorage and show a modal or toast when unlocked.
+
+🎨 5. Better Theming
+
+Add CSS themes that feel more "game-like" (e.g. neon, dark mode with particles, or day/night cycles), and allow player to toggle.
+
+You can use CSS variables:
+
+:root {
+  --bg-color: #fff;
+  --accent: #5aafff;
+}
+body.dark-theme {
+  --bg-color: #121212;
+  --accent: #00f0ff;
+}
+
+
+Then apply in all styles like:
+
+body {
+  background-color: var(--bg-color);
+}
+button {
+  background-color: var(--accent);
+}
+
+🎵 6. Background Music & Sounds
+
+You're already playing sound on events — just add looping ambient music:
+
+const backgroundMusic = new Audio('music/loop.mp3');
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.3;
+if (state.musicOn) backgroundMusic.play();
+
+
+Allow volume control & mute toggle.
+
+📲 7. Mobile-Friendly UI
+
+Improve with:
+
+Larger touch targets (44px min)
+
+Mobile-optimized layout with media queries
+
+Add fullscreen mode
+
+function goFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+}
+
+📦 8. Persistent Player Profile
+
+Save things like:
+
+Player name
+
+Total time played
+
+Total stars
+
+Unlocked chapters, completed levels
+
+Then display it on start screen like:
+
+Welcome back, Alex!
+Stars: ⭐️ x25 | Chapters Unlocked: 3
+
+🧠 9. Tutorial & First-Time UX
+
+Show a quick tutorial overlay when player first starts.
+
+if (!localStorage.getItem("seenTutorial")) {
+  showTutorialOverlay();
+  localStorage.setItem("seenTutorial", "yes");
+}
+
+🏁 10. Endgame / Completion Feedback
+
+Once player completes all levels in a chapter or the entire game:
+
+Show endgame animation / cutscene / celebration
+
+Congratulate with stats:
+You've found 150 differences in total! 🎉
