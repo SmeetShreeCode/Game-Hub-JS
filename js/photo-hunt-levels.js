@@ -1,6 +1,7 @@
 const PhotoHuntLevels = [
     {
         chapter: 1,
+        banner: "images/Photo-hunt/Chapter-banner/banner.jpg",
         easy: [
             {
                 images: {
