@@ -1,21 +1,16 @@
+let SELECTED_THEME = "diamonds-card";
+let IMAGE_PATH = `images/Memory-card/${SELECTED_THEME}/`;
+let CARD_BACK_IMAGE = "back.jpg";
+let IMAGE_EXTENSION = ".jpg";
+
 let errors = 0;
-const cardList = [
-    "darkness",
-    "double",
-    "fairy",
-    "fighting",
-    "fire",
-    "grass",
-    "lightning",
-    "metal",
-    "psychic",
-    "water"
-];
+let cardList = [];
+let difficulty = "easy";
 
 let cardSet;
 const board = [];
-const rows = 4;
-const columns = 5;
+let rows = 4;
+let columns = 4;
 let matches = 0;
 let gameOver = false;
 
@@ -23,8 +18,8 @@ let card1Selected;
 let card2Selected;
 
 window.onload = function () {
-    shuffleCards();
-    startGame();
+    document.body.style.backgroundImage = `url("../images/Memory-card/${SELECTED_THEME}/backgroundImg.jpg")`;
+    document.getElementById("gameStartOverlay").style.display = "flex";
 }
 
 function shuffleCards() {
@@ -37,7 +32,49 @@ function shuffleCards() {
     }
 }
 
+function setDifficulty(level) {
+    difficulty = level;
+    let cardBoard = document.getElementById("board");
+
+    switch (level) {
+        case 'easy':
+            cardList.length = 0;
+            cardList.push(...Array.from({ length: 10 }, (_, i) => i + 1)); // 12 cards
+            rows = 4;
+            columns = 5;
+            break;
+        case 'medium':
+            cardList.length = 0;
+            cardList.push(...Array.from({ length: 12 }, (_, i) => i + 1)); // 12 cards
+            rows = 4;
+            columns = 6;
+            cardBoard.style.height = "800px";
+            cardBoard.style.width = "480px";
+            break;
+        case 'hard':
+            cardList.length = 0;
+            cardList.push(...Array.from({ length: 14 }, (_, i) => i + 1)); // 14 cards
+            rows = 4;
+            columns = 7;
+            cardBoard.style.height = "800px";
+            cardBoard.style.width = "480px";
+            break;
+    }
+}
+
 function startGame() {
+    const select = document.getElementById("themeSelect");
+    SELECTED_THEME = select.value;
+    IMAGE_PATH = `images/Memory-card/${SELECTED_THEME}/`;
+    const mode = document.getElementById("mode");
+    setDifficulty(mode.value || "easy");
+
+    document.body.style.backgroundImage = `url("../images/Memory-card/${SELECTED_THEME}/backgroundImg.jpg")`;
+    document.getElementById("gameStartOverlay").style.display = "none";
+    board.length = 0;
+    document.getElementById("board").innerHTML = "";
+
+    shuffleCards();
     for (let r = 0; r < rows; r++) {
         let row = [];
         for (let c = 0; c < columns; c++) {
@@ -46,7 +83,7 @@ function startGame() {
 
             let card = document.createElement("img");
             card.id = r.toString() + "-" + c.toString();
-            card.src = "images/Memory-card/" + cardImg + ".jpg";
+            card.src = IMAGE_PATH + cardImg + IMAGE_EXTENSION;
             card.classList.add("card");
             card.addEventListener("click", selectCard)
             document.getElementById("board").append(card);
@@ -60,7 +97,7 @@ function hideCards() {
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < columns; c++) {
             let card = document.getElementById(r.toString() + "-" + c.toString());
-            card.src = "images/Memory-card/back.jpg"
+            card.src = IMAGE_PATH + CARD_BACK_IMAGE;
         }
     }
 }
@@ -73,14 +110,14 @@ function selectCard() {
             let r = parseInt(coords[0]);
             let c = parseInt(coords[1]);
 
-            card1Selected.src = "images/Memory-card/" + board[r][c] + ".jpg";
-        }else if (!card2Selected && this !== card1Selected) {
+            card1Selected.src = IMAGE_PATH + board[r][c] + IMAGE_EXTENSION;
+        } else if (!card2Selected && this !== card1Selected) {
             card2Selected = this;
             let coords = card2Selected.id.split("-");
             let r = parseInt(coords[0]);
             let c = parseInt(coords[1]);
 
-            card2Selected.src = "images/Memory-card/" + board[r][c] + ".jpg";
+            card2Selected.src = IMAGE_PATH + board[r][c] + IMAGE_EXTENSION;
             setTimeout(update, 1000)
         }
     }
@@ -94,8 +131,8 @@ function update() {
             document.getElementById("gameOverOverlay").style.display = "flex";
         }
     } else {
-        card1Selected.src = "images/Memory-card/back.jpg";
-        card2Selected.src = "images/Memory-card/back.jpg";
+        card1Selected.src = IMAGE_PATH + CARD_BACK_IMAGE;
+        card2Selected.src = IMAGE_PATH + CARD_BACK_IMAGE;
         errors += 1;
         document.getElementById("errors").innerText = errors;
     }
@@ -116,6 +153,7 @@ function restartGame() {
     document.getElementById("errors").innerText = errors;
     document.getElementById("board").innerHTML = "";
     document.getElementById("gameOverOverlay").style.display = "none";
+    document.getElementById("gameStartOverlay").style.display = "none";
 
     shuffleCards();
     startGame();

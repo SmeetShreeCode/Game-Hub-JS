@@ -11,6 +11,30 @@
 <body>
 <h2>Error: <span id="errors">0</span></h2>
 <div id="board"></div>
+
+<div id="gameStartOverlay">
+    <div id="gameStartMessage">
+        <h2>Start The Game</h2>
+        <h4>You have 5 seconds to remember cards position</h4>
+
+        <label for="themeSelect">Choose Theme:</label>
+        <select id="themeSelect">
+            <option value="diamonds-card">Diamonds Card</option>
+            <option value="energy-card">Energy Card</option>
+            <option value="pokemon-card">Pokemon Card</option>
+        </select><br><br>
+
+        <label for="mode">Choose Difficulty:</label>
+        <select id="mode">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select><br><br>
+
+        <button onclick="startGame()">Play Game</button>
+    </div>
+</div>
+
 <div id="gameOverOverlay">
     <div id="gameOverMessage">
         <h2>Game Over!</h2>
@@ -19,7 +43,7 @@
 </div>
 
 <footer>
-    <p><a href="index.html">⬅ Back to Games</a></p>
+    <button><a href="index.html">⬅ Back to Games</a></button>
 </footer>
 </body>
 </html>

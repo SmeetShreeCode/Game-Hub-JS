@@ -737,5 +737,176 @@ const PhotoHuntLevels = [
         hard: [
             // hard levels for chapter 2
         ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
     },
 ];

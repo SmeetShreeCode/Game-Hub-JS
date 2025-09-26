@@ -215,18 +215,25 @@ function preloadImages(level, callback) {
     imgR.src = level.images.right;
 }
 
+function scrollChapters(direction) {
+    const track = document.getElementById("chapterButtons");
+    const scrollAmount = 220; // Adjust based on card width + gap
+    track.scrollBy({ left: direction * scrollAmount, behavior: "smooth" });
+}
+
 function showChapterSelectScreen() {
     if (!els.chapterButtons || !els.modeButtons) return;
 
     els.chapterButtons.innerHTML = "";
     els.modeButtons.innerHTML = "";
 
-    // Create chapter banner slider
+    // Create chapter cards inside chapterButtons directly
+    const track = document.getElementById("chapterButtons");
+    track.innerHTML = "";
+
     PhotoHuntLevels.forEach((chapter) => {
         const container = document.createElement("div");
-        container.style.display = "flex";
-        container.style.flexDirection = "column";
-        container.style.alignItems = "center";
+        container.className = "chapter-card";
 
         const img = document.createElement("img");
         img.src = chapter.banner ?? BANNER_IMAGE;
@@ -238,15 +245,14 @@ function showChapterSelectScreen() {
         btn.disabled = chapter.chapter > state.unlockedChapter;
         btn.addEventListener("click", () => {
             state.selectedChapter = chapter;
-            highlightSelection(els.chapterButtons, container);
+            highlightSelection(track, container);
         });
 
         container.appendChild(img);
         container.appendChild(btn);
-        els.chapterButtons.appendChild(container);
+        track.appendChild(container);
     });
 
-    // Create mode selection slider
     ["easy", "medium", "hard"].forEach(mode => {
         const btn = document.createElement("button");
         btn.className = "chapter-btn";

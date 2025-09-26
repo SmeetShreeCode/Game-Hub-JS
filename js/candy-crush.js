@@ -156,13 +156,13 @@ function crushFour() {
                 candy1.src = "./images/Candy-crush/blank.png";
                 candy2.src = "./images/Candy-crush/blank.png";
                 candy3.src = "./images/Candy-crush/blank.png";
-                candy4.src = "./images/Candy-crush/blank.png";
-                //let src = candy4.src;
-                // let colorMatch = src.match(/\/([^\/]+)\.png$/);
-                // if (colorMatch) {
-                //     let color = colorMatch[1];
-                //     candy4.src = "./images/Candy-crush/" + color + "-Striped-Horizontal.png";
-                // }
+                // candy4.src = "./images/Candy-crush/blank.png";
+                let src = candy4.src;
+                let colorMatch = src.match(/\/([^\/]+)\.png$/);
+                if (colorMatch) {
+                    let color = colorMatch[1];
+                    candy4.src = "./images/Candy-crush/" + color + "-Striped-Horizontal.png";
+                }
                 score += 40;
             }
         }
@@ -178,13 +178,13 @@ function crushFour() {
                 candy1.src = "./images/Candy-crush/blank.png";
                 candy2.src = "./images/Candy-crush/blank.png";
                 candy3.src = "./images/Candy-crush/blank.png";
-                candy4.src = "./images/Candy-crush/blank.png";
-                //let src = candy4.src;
-                // let colorMatch = src.match(/\/([^\/]+)\.png$/);
-                // if (colorMatch) {
-                //     let color = colorMatch[1];
-                //     candy4.src = "./images/Candy-crush/" + color + "-Striped-Vertical.png";
-                // }
+                // candy4.src = "./images/Candy-crush/blank.png";
+                let src = candy4.src;
+                let colorMatch = src.match(/\/([^\/]+)\.png$/);
+                if (colorMatch) {
+                    let color = colorMatch[1];
+                    candy4.src = "./images/Candy-crush/" + color + "-Striped-Vertical.png";
+                }
                 score += 40;
             }
         }

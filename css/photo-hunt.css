@@ -308,3 +308,46 @@ button.selected {
     transform: scale(1.02);
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
 }
+
+.chapter-slider-wrapper {
+    width: 81%;  /* Show only 4–5 cards depending on screen size */
+    overflow: hidden;
+    margin: 20px auto 20px auto;
+    position: relative;
+}
+
+.chapter-slider-track {
+    display: flex;
+    gap: 16px;
+    transition: transform 0.3s ease-in-out;
+    scroll-behavior: smooth;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+}
+
+.chapter-slider-track::-webkit-scrollbar {
+    display: none;
+}
+
+.chapter-card {
+    flex: 0 0 200px;
+    scroll-snap-align: start;
+}
+
+.chapter-slider-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.chapter-slider-controls button {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+}
