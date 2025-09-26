@@ -55,16 +55,23 @@
 </div>
 
 <div id="chapterSelectScreen" class="overlay-screen" style="display: none;">
+    <button style="background: rgb(197,54,54); height: 30px; width: 85px; font-size: 12px; padding: 5px" onclick="window.location.href='index.html'">⬅Back</button>
     <h2>Select a Chapter</h2>
-    <div id="chapterButtons"></div>
-    <div id="modeButtons"></div>
+    <div class="chapter-card">
+        <div id="chapterButtons" class="slider-container"></div>
+    </div>
+    <h3>Select Difficulty Level</h3>
+    <div id="modeButtons" class="slider-container"></div>
     <button onclick="goToLevelSelect()" style="background: #2282c5;">Continue</button>
 </div>
 
 <div id="levelSelectScreen" class="overlay-screen" style="display: none;">
+    <button style="background: rgb(197,54,54); height: 30px; width: 85px; font-size: 12px; padding: 5px" onclick="window.location.href='index.html'">⬅Back</button>
     <h2>Select a Level</h2>
     <h3>Unlock more levels by playing and progressing!</h3>
-    <div id="levelButtons"></div>
+    <div class="chapter-card">
+        <div id="levelButtons"></div>
+    </div>
     <button onclick="startGame()" style="background: #2282c5;">Play Selected</button>
 </div>
 

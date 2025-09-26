@@ -1,7 +1,7 @@
 const PhotoHuntLevels = [
     {
         chapter: 1,
-        banner: "images/Photo-hunt/Chapter-banner/banner.jpg",
+        banner: "images/Photo-hunt/Chapter-banners/chapter1.webp",
         easy: [
             {
                 images: {
@@ -728,5 +728,14 @@ const PhotoHuntLevels = [
         hard: [
             // hard levels for chapter 2
         ]
-    }
+    }, {
+        chapter: 3,
+        easy: [],
+        medium: [
+            // medium levels for chapter 2
+        ],
+        hard: [
+            // hard levels for chapter 2
+        ]
+    },
 ];

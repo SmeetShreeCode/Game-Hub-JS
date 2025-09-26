@@ -1,5 +1,5 @@
-var errors = 0;
-var cardList = [
+let errors = 0;
+const cardList = [
     "darkness",
     "double",
     "fairy",
@@ -12,13 +12,15 @@ var cardList = [
     "water"
 ];
 
-var cardSet;
-var board = [];
-var rows = 4;
-var columns = 5;
+let cardSet;
+const board = [];
+const rows = 4;
+const columns = 5;
+let matches = 0;
+let gameOver = false;
 
-var card1Selected;
-var card2Selected;
+let card1Selected;
+let card2Selected;
 
 window.onload = function () {
     shuffleCards();
@@ -51,7 +53,7 @@ function startGame() {
         }
         board.push(row);
     }
-    setTimeout(hideCards, 1000);
+    setTimeout(hideCards, 5000);
 }
 
 function hideCards() {
@@ -85,7 +87,13 @@ function selectCard() {
 }
 
 function update() {
-    if (card1Selected.src !== card2Selected.src) {
+    if (card1Selected.src === card2Selected.src) {
+        matches += 1;
+        if (matches === cardList.length) {
+            gameOver = true;
+            document.getElementById("gameOverOverlay").style.display = "flex";
+        }
+    } else {
         card1Selected.src = "images/Memory-card/back.jpg";
         card2Selected.src = "images/Memory-card/back.jpg";
         errors += 1;
@@ -94,4 +102,21 @@ function update() {
 
     card1Selected = null;
     card2Selected = null;
+}
+
+function restartGame() {
+    errors = 0;
+    matches = 0;
+    gameOver = false;
+    board.length = 0;
+    card1Selected = null;
+    card2Selected = null;
+    cardSet = [];
+
+    document.getElementById("errors").innerText = errors;
+    document.getElementById("board").innerHTML = "";
+    document.getElementById("gameOverOverlay").style.display = "none";
+
+    shuffleCards();
+    startGame();
 }

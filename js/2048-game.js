@@ -1,7 +1,9 @@
-var board;
-var score = 0;
-var rows = 4;
-var columns = 4;
+let board;
+let score = 0;
+const rows = 4;
+const columns = 4;
+let highScore = parseInt(localStorage.getItem("2048-highScore")) || 0;
+let gameOver = false;
 
 window.onload = function () {
     setGame();
@@ -20,6 +22,7 @@ function setGame() {
     //     [4, 4, 8, 8],
     //     [4, 4, 8, 8],
     // ]
+    document.getElementById("highScore").innerText = highScore;
 
     for (let r = 0; r < rows ; r++) {
         for (let c = 0; c < columns; c++) {
@@ -37,6 +40,7 @@ function setGame() {
 
 function hasEmptyTile() {
     for (let r = 0; r < rows; r++) {
+        if (!board[r]) continue;
         for (let c = 0; c < columns; c++) {
             if (board[r][c] === 0) {
                 return true;
@@ -81,21 +85,37 @@ function updateTile(tile, num) {
 }
 
 document.addEventListener("keyup", (e) => {
+    if (gameOver) return;
+
+    let moved = false;
     if (e.code === "ArrowLeft") {
         slideLeft();
-        setTwo();
+        moved = true;
     }else if (e.code === "ArrowRight") {
         slideRight();
-        setTwo();
+        moved = true;
     }else if (e.code === "ArrowUp") {
         slideUp();
-        setTwo();
+        moved = true;
     }else if (e.code === "ArrowDown") {
         slideDown();
-        setTwo();
+        moved = true;
     }
-    document.getElementById("score").innerHTML = score;
-})
+    if (moved) {
+        setTwo();
+        document.getElementById("score").innerHTML = score;
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("2048-highScore", highScore); // ✅ correct
+            document.getElementById("highScore").innerText = highScore;
+        }
+        checkWin();
+    }
+    if (isGameOver()) {
+        gameOver = true;
+        document.getElementById("gameOverOverlay").style.display = "flex";
+    }
+});
 
 function filterZero(row) {
     return row.filter(num => num !== 0);
@@ -120,7 +140,7 @@ function slide(row) {
 }
 
 function slideLeft() {
-    for (let r = 0; r < columns; r++) {
+    for (let r = 0; r < rows; r++) {
         let row = board[r];
         row = slide(row);
         board[r] = row;
@@ -134,7 +154,7 @@ function slideLeft() {
 }
 
 function slideRight() {
-    for (let r = 0; r < columns; r++) {
+    for (let r = 0; r < rows; r++) {
         let row = board[r];
         row.reverse();
         row = slide(row);
@@ -181,6 +201,48 @@ function slideDown() {
             let tile = document.getElementById(r.toString() + "-" + c.toString());
             let num = board[r][c];
             updateTile(tile, num);
+        }
+    }
+}
+
+function isGameOver() {
+    if (!board || board.length !== rows) return false;
+    if (hasEmptyTile()) return false;
+
+    // Check for possible moves
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < columns; c++) {
+            let current = board[r][c];
+
+            // Check right
+            if (c < columns - 1 && board[r][c + 1] === current) return false;
+            // Check down
+            if (r < rows - 1 && board[r + 1][c] === current) return false;
+        }
+    }
+
+    return true; // No moves left
+}
+
+function restartGame() {
+    score = 0;
+    gameOver = false;
+    document.getElementById("score").innerHTML = score;
+    document.getElementById("gameOverOverlay").style.display = "none";
+
+    // Clear board UI
+    document.getElementById("board").innerHTML = "";
+
+    setGame();
+}
+
+function checkWin() {
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < columns; c++) {
+            if (board[r][c] === 2048) {
+                alert("🎉 You reached 2048! Keep going?");
+                return;
+            }
         }
     }
 }

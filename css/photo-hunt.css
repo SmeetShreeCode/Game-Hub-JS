@@ -1,4 +1,3 @@
-/* CLEANED-UP CSS */
 body {
     /*background: url("../images/Banners/photo-hunt-left-banner.jpg");*/
     text-align: center;
@@ -124,7 +123,6 @@ body.dark-theme #progressBar {
     color: green;
 }
 
-/* Sparkle Effect */
 .sparkle {
     width: 20px;
     height: 20px;
@@ -185,7 +183,6 @@ body.dark-theme #progressBar {
     }
 }
 
-/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -226,7 +223,6 @@ button.selected {
     color: white;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     #leftImage, #rightImage {
         width: 100%;
@@ -243,4 +239,72 @@ button.selected {
         font-size: 16px;
         flex-wrap: wrap;
     }
+}
+
+.slider-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 10px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; /* Firefox */
+}
+
+.slider-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+}
+
+.slider-container button,
+.slider-container img {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+}
+
+.chapter-btn {
+    min-width: 120px;
+    padding: 10px;
+    border: none;
+    background: #eee;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.chapter-btn:hover {
+    background: #ddd;
+}
+
+.chapter-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.chapter-banner {
+    width: 200px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 6px;
+}
+
+.chapter-card {
+    width: 62%;
+    height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #888;
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.chapter-card:hover {
+    background-color: rgba(92, 92, 92, 0.35);
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
 }

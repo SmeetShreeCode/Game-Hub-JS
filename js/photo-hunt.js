@@ -11,6 +11,7 @@ const MAX_SPARKLE_DURATION = 800;
 const EXPLOSION_PARTICLES_SIZE = 60;
 const EXPLOSION_PARTICLES_RADIUS = 55;
 const LEVEL_COUNT = 10;
+const BANNER_IMAGE = "images/Photo-hunt/Chapter-banners/banner.jpg";
 const MAX_COMBO = 10;
 const DIFF_RADIUS = 15;
 
@@ -216,21 +217,36 @@ function preloadImages(level, callback) {
 
 function showChapterSelectScreen() {
     if (!els.chapterButtons || !els.modeButtons) return;
+
     els.chapterButtons.innerHTML = "";
     els.modeButtons.innerHTML = "";
 
-    PhotoHuntLevels.forEach((chapter, index) => {
+    // Create chapter banner slider
+    PhotoHuntLevels.forEach((chapter) => {
+        const container = document.createElement("div");
+        container.style.display = "flex";
+        container.style.flexDirection = "column";
+        container.style.alignItems = "center";
+
+        const img = document.createElement("img");
+        img.src = chapter.banner ?? BANNER_IMAGE;
+        img.className = "chapter-banner";
+
         const btn = document.createElement("button");
         btn.textContent = `Chapter ${chapter.chapter}`;
         btn.className = "chapter-btn";
         btn.disabled = chapter.chapter > state.unlockedChapter;
         btn.addEventListener("click", () => {
             state.selectedChapter = chapter;
-            highlightSelection(els.chapterButtons, btn);
+            highlightSelection(els.chapterButtons, container);
         });
-        els.chapterButtons.appendChild(btn);
+
+        container.appendChild(img);
+        container.appendChild(btn);
+        els.chapterButtons.appendChild(container);
     });
 
+    // Create mode selection slider
     ["easy", "medium", "hard"].forEach(mode => {
         const btn = document.createElement("button");
         btn.className = "chapter-btn";
@@ -380,7 +396,7 @@ function handleCanvasClick(e, side) {
             if (state.found.length === diffs().length) {
                 clearInterval(state.timerInterval);
                 els.message.textContent = "🎉 Level Complete!";
-                endGame(true, "🎉 Level Complete!");
+                // endGame(true, "🎉 Level Complete!");
                 state.currentLevel++;
                 if (state.currentLevel < state.activeLevels.length) {
                     setTimeout(() => loadLevel(state.currentLevel), 1000);
@@ -441,7 +457,7 @@ function showHint() {
     const screenX = rect.left + x;
     const screenY = rect.top + y;
     showSparkle(screenX, screenY, "green");
-    showFirework(screenX, screenY, "green");
+    showFirework(screenX, screenY, "#48ff00");
 
     state.hintsLeft--;
     state.score = Math.max(0, state.score - HINT_PENALTY);

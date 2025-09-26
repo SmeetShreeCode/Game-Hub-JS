@@ -20,3 +20,30 @@ body {
     width: 90px;
     margin: 2.5px;
 }
+
+#gameOverOverlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 10;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+#gameOverMessage {
+    background-color: #333;
+    padding: 30px 40px;
+    border-radius: 10px;
+    text-align: center;
+}
+/*
+https://openmoji.org/
+https://www.flaticon.com/
+https://icons8.com/icons
+https://free-images.com/display/hanafuda_card_game_japanese.html
+ */
