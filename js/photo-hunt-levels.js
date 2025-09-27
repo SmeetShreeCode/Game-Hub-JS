@@ -456,16 +456,23 @@ const PhotoHuntLevels = [
                     {x: 500, y: 50, radius: 15},
                 ]
             }, {
-                // ---------------------Point------Stop-----Break--------------------------
                 images: {
                     left: "images/Photo-hunt/Left/L7.jpg",
                     right: "images/Photo-hunt/Right/R7.jpg"
                 },
                 differences: [
-                    {x: 468, y: 710, radius: 30, shape: 'square'},
-                    {x: 308, y: 714, radius: 15},
-                    {x: 255, y: 265, radius: 20},
-                    {x: 500, y: 50, radius: 15},
+                    {x: 689, y: 440, radius: 15},
+                    {x: 414, y: 398, radius: 15},
+                    {x: 332, y: 293, radius: 15, width: 10, height: 25, shape: "rect" },
+                    {x: 232, y: 448, radius: 15},
+                    {x: 120, y: 309, radius: 15, width: 10, height: 25, shape: "rect" },
+                    {x: 10, y: 521, radius: 20},
+                    {x: 56, y: 295, radius: 20},
+                    {x: 217, y: 223, radius: 20},
+                    {x: 203, y: 87, radius: 15},
+                    {x: 160, y: 22, radius: 20},
+                    {x: 792, y: 279, radius: 15},
+                    {x: 923, y: 276, radius: 20},
                 ]
             }, {
                 images: {
@@ -473,10 +480,19 @@ const PhotoHuntLevels = [
                     right: "images/Photo-hunt/Right/R8.jpg"
                 },
                 differences: [
-                    {x: 468, y: 710, radius: 30, shape: 'square'},
-                    {x: 308, y: 714, radius: 15},
-                    {x: 255, y: 265, radius: 20},
-                    {x: 500, y: 50, radius: 15},
+                    {x: 314, y: 247, radius: 20},
+                    {x: 279, y: 328, radius: 20},
+                    {x: 635, y: 312, radius: 20},
+                    {x: 748, y: 305, radius: 20},
+                    {x: 60, y: 379, radius: 20},
+                    {x: 400, y: 606, radius: 20},
+                    {x: 495, y: 522, radius: 20},
+                    {x: 464, y: 35, radius: 20},
+                    {x: 193, y: 247, radius: 20},
+                    {x: 693, y: 177, radius: 20},
+                    {x: 482, y: 302, radius: 20},
+                    {x: 162, y: 101, radius: 20},
+                    {x: 893, y: 106, radius: 20, width: 30, height: 10, shape: "rect" },
                 ]
             }, {
                 images: {
@@ -484,10 +500,19 @@ const PhotoHuntLevels = [
                     right: "images/Photo-hunt/Right/R9.jpg"
                 },
                 differences: [
-                    {x: 468, y: 710, radius: 30, shape: 'square'},
-                    {x: 308, y: 714, radius: 15},
-                    {x: 255, y: 265, radius: 20},
-                    {x: 500, y: 50, radius: 15},
+                    {x: 579, y: 38, radius: 20},
+                    {x: 573, y: 144, radius: 20},
+                    {x: 410, y: 361, radius: 20},
+                    {x: 629, y: 333, radius: 20},
+                    {x: 406, y: 117, radius: 20},
+                    {x: 314, y: 159, radius: 20},
+                    {x: 70, y: 207, radius: 20},
+                    {x: 71, y: 69, radius: 20},
+                    {x: 114, y: 294, radius: 20},
+                    {x: 193, y: 347, radius: 20},
+                    {x: 753, y: 153, radius: 20, width: 100, height: 20, shape: "rect" },
+                    {x: 835, y: 496, radius: 20, width: 15, height: 100, shape: "rect" },
+                    {x: 943, y: 92, radius: 20, width: 15, height: 200, shape: "rect" },
                 ]
             }, {
                 images: {
@@ -495,11 +520,22 @@ const PhotoHuntLevels = [
                     right: "images/Photo-hunt/Right/R10.jpg"
                 },
                 differences: [
-                    {x: 468, y: 710, radius: 30, shape: 'square'},
-                    {x: 308, y: 714, radius: 15},
-                    {x: 255, y: 265, radius: 20},
+                    {x: 293, y: 323, radius: 15},
+                    {x: 428, y: 577, radius: 20},
+                    {x: 667, y: 581, radius: 25},
+                    {x: 448, y: 407, radius: 20},
+                    {x: 753, y: 223, radius: 20},
+                    {x: 618, y: 250, radius: 20},
+                    {x: 771, y: 421, radius: 20},
+                    {x: 612, y: 488, radius: 20},
+                    {x: 85, y: 435, radius: 20},
+                    {x: 109, y: 511, radius: 25},
+                    {x: 248, y: 15, radius: 20},
+                    {x: 118, y: 203, radius: 25},
+                    {x: 314, y: 530, radius: 20},
                 ]
             }, {
+                // ---------------------Point------Stop-----Break--------------------------
                 images: {
                     left: "images/Photo-hunt/Left/L11.jpg",
                     right: "images/Photo-hunt/Right/R11.jpg"
@@ -722,142 +758,88 @@ const PhotoHuntLevels = [
             },
             // more easy levels for chapter 2…
         ],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
+        medium: [{
+            // ---------------------Point------Stop-----Break--------------------------
+            images: {
+                left: "images/Photo-hunt/Left/L11.jpg",
+                right: "images/Photo-hunt/Right/R11.jpg"
+            },
+            differences: [
+                {x: 616, y: 193, radius: 20},
+                {x: 246, y: 156, radius: 20},
+                {x: 309, y: 152, radius: 20},
+                {x: 185, y: 57, radius: 30},
+                {x: 403, y: 145, radius: 20},
+                {x: 312, y: 737, radius: 20},
+                {x: 10, y: 805, radius: 20},
+                {x: 65, y: 606, radius: 20},
+                {x: 260, y: 292, radius: 20},
+                {x: 296, y: 570, radius: 20},
+                {x: 706, y: 782, radius: 20},
+                {x: 416, y: 387, radius: 20},
+                {x: 218, y: 380, radius: 20, width: 100, height: 20, shape: "rect" },
+                {x: 400, y: 306, radius: 20},
+            ]
+        }, {
+            images: {
+                left: "images/Photo-hunt/Left/L12.jpg",
+                right: "images/Photo-hunt/Right/R12.jpg"
+            },
+            differences: [
+                {x: 665, y: 36, radius: 20},
+                {x: 396, y: 117, radius: 20},
+                {x: 96, y: 110, radius: 30},
+                {x: 767, y: 237, radius: 20},
+                {x: 534, y: 263, radius: 20},
+                {x: 411, y: 415, radius: 40},
+                {x: 553, y: 45, radius: 20},
+                {x: 577, y: 527, radius: 40},
+                {x: 750, y: 513, radius: 20},
+                {x: 280, y: 78, radius: 35},
+                {x: 197, y: 372, radius: 20},
+                {x: 331, y: 276, radius: 20},
+            ]
+        }, {
+            images: {
+                left: "images/Photo-hunt/Left/L13.jpg",
+                right: "images/Photo-hunt/Right/R13.jpg"
+            },
+            differences: [
+                {x: 468, y: 710, radius: 30, shape: 'square'},
+                {x: 308, y: 714, radius: 15},
+                {x: 255, y: 265, radius: 20},
+            ]
+        }, {
+            images: {
+                left: "images/Photo-hunt/Left/L14.jpg",
+                right: "images/Photo-hunt/Right/R14.jpg"
+            },
+            differences: [
+                {x: 468, y: 710, radius: 30, shape: 'square'},
+                {x: 308, y: 714, radius: 15},
+                {x: 255, y: 265, radius: 20},
+            ]
+        }, {
+            images: {
+                left: "images/Photo-hunt/Left/L15.jpg",
+                right: "images/Photo-hunt/Right/R15.jpg"
+            },
+            differences: [
+                {x: 468, y: 710, radius: 30, shape: 'square'},
+                {x: 308, y: 714, radius: 15},
+                {x: 255, y: 265, radius: 20},
+            ]
+        }, {
+            images: {
+                left: "images/Photo-hunt/Left/L16.jpg",
+                right: "images/Photo-hunt/Right/R16.jpg"
+            },
+            differences: [
+                {x: 468, y: 710, radius: 30, shape: 'square'},
+                {x: 308, y: 714, radius: 15},
+                {x: 255, y: 265, radius: 20},
+            ]
+        },
             // medium levels for chapter 2
         ],
         hard: [
