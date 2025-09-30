@@ -802,17 +802,17 @@ const PhotoHuntLevels = [
                     {x: 289, y: 363, radius: 20},
                     {x: 110, y: 292, radius: 20},
                 ]
-            },
-            // more easy levels…
-        ],
-        medium: [
-            {
+            }, {
                 images: {
                     left: "images/Photo-hunt/Left/44.jpg",
                     right: "images/Photo-hunt/Right/44.jpg"
                 },
                 differences: [
-                    {x: 206, y: 312, radius: 20},
+                    {x: 68, y: 172, radius: 20},
+                    {x: 334, y: 391, radius: 20},
+                    {x: 131, y: 160, radius: 20},
+                    {x: 295, y: 214, radius: 20},
+                    {x: 364, y: 166, radius: 35},
                 ]
             }, {
                 images: {
@@ -820,7 +820,16 @@ const PhotoHuntLevels = [
                     right: "images/Photo-hunt/Right/45.jpg"
                 },
                 differences: [
-                    {x: 206, y: 312, radius: 20},
+                    {x: 185, y: 35, radius: 20},
+                    {x: 276, y: 264, radius: 20},
+                    {x: 239, y: 390, radius: 20},
+                    {x: 194, y: 192, radius: 20},
+                    {x: 29, y: 189, radius: 20},
+                    {x: 65, y: 73, radius: 20},
+                    {x: 160, y: 75, radius: 20},
+                    {x: 114, y: 199, radius: 20},
+                    {x: 300, y: 243, radius: 20},
+                    {x: 369, y: 261, radius: 20},
                 ]
             }, {
                 images: {
@@ -828,7 +837,15 @@ const PhotoHuntLevels = [
                     right: "images/Photo-hunt/Right/46.jpg"
                 },
                 differences: [
-                    {x: 206, y: 312, radius: 20},
+                    {x: 122, y: 33, radius: 20},
+                    {x: 55, y: 194, radius: 20},
+                    {x: 243, y: 361, radius: 20},
+                    {x: 28, y: 388, radius: 20},
+                    {x: 233, y: 428, radius: 20},
+                    {x: 343, y: 105, radius: 20},
+                    {x: 463, y: 402, radius: 20},
+                    {x: 223, y: 56, radius: 20},
+                    {x: 422, y: 260, radius: 20},
                 ]
             }, {
                 images: {
@@ -836,7 +853,10 @@ const PhotoHuntLevels = [
                     right: "images/Photo-hunt/Right/47.jpg"
                 },
                 differences: [
-                    {x: 206, y: 312, radius: 20},
+                    {x: 449, y: 193, radius: 20},
+                    {x: 475, y: 94, radius: 30},
+                    {x: 672, y: 207, radius: 30},
+                    {x: 142, y: 355, radius: 30},
                 ]
             }, {
                 images: {
@@ -844,52 +864,28 @@ const PhotoHuntLevels = [
                     right: "images/Photo-hunt/Right/48.jpg"
                 },
                 differences: [
-                    {x: 206, y: 312, radius: 20},
+                    {x: 493, y: 37, radius: 35},
+                    {x: 116, y: 235, radius: 25},
+                    {x: 106, y: 342, radius: 25},
+                    {x: 491, y: 319, radius: 30},
+                    {x: 92, y: 134, radius: 30},
+                ]
+            },
+            // more easy levels…
+        ],
+        medium: [
+            {
+                images: {
+                    left: "images/Photo-hunt/Left/48.jpg",
+                    right: "images/Photo-hunt/Right/48.jpg"
+                },
+                differences: [
+                    {x: 493, y: 307, radius: 20},
                 ]
             },
             // medium levels for chapter 1
         ],
         hard: [
-            {
-                images: {
-                    left: "images/Photo-hunt/Left/L5.jpg",
-                    right: "images/Photo-hunt/Right/R5.jpg"
-                },
-                differences: [
-                    {x: 138, y: 455, radius: 20, shape: 'square'},
-                    {x: 450, y: 410, radius: 15, shape: 'square'},
-                    {x: 560, y: 320, radius: 15},
-                    {x: 90, y: 822, radius: 15},
-                    {x: 298, y: 815, radius: 20, shape: 'square'},
-                    {x: 520, y: 820, radius: 20, shape: 'square'},
-                    {x: 42, y: 658, radius: 15},
-                    {x: 562, y: 155, radius: 15},
-                    {x: 520, y: 615, radius: 25, shape: 'square'},
-                    {x: 350, y: 90, radius: 30, shape: 'square'},
-                    {x: 190, y: 655, radius: 15},
-                    {x: 595, y: 435, radius: 18},
-                    {x: 128, y: 270, radius: 15},
-                ]
-            }, {
-                images: {
-                    left: "images/Photo-hunt/Left/L6.jpg",
-                    right: "images/Photo-hunt/Right/R6.jpg"
-                },
-                differences: [
-                    {x: 468, y: 710, radius: 30, shape: 'square'},
-                    {x: 308, y: 714, radius: 15},
-                    {x: 255, y: 265, radius: 20},
-                    {x: 165, y: 772, radius: 25, shape: 'square'},
-                    {x: 142, y: 938, radius: 15, shape: 'square'},
-                    {x: 465, y: 180, radius: 30},
-                    {x: 35, y: 375, radius: 15},
-                    {x: 555, y: 380, radius: 35, shape: 'square'},
-                    {x: 455, y: 565, radius: 35, shape: 'square'},
-                    {x: 108, y: 270, radius: 15},
-                    {x: 355, y: 346, radius: 15},
-                    {x: 500, y: 50, radius: 15},
-                ]
-            },
             // hard levels for chapter 1
         ]
     },
@@ -1574,14 +1570,737 @@ const PhotoHuntLevels = [
             // more easy levels for chapter 2…
         ],
         medium: [
+            {
+                images: {
+                    left: "images/Photo-hunt/Left/L33.jpg",
+                    right: "images/Photo-hunt/Right/R33.jpg"
+                },
+                differences: [
+                    {x: 1104, y: 116, radius: 20},
+                    {x: 854, y: 138, radius: 20},
+                    {x: 803, y: 285, radius: 20},
+                    {x: 1301, y: 265, radius: 20},
+                    {x: 418, y: 152, radius: 20},
+                    {x: 532, y: 307, radius: 20},
+                    {x: 58, y: 330, radius: 20},
+                    {x: 235, y: 242, radius: 20},
+                    {x: 583, y: 181, radius: 20},
+                    {x: 604, y: 118, radius: 20},
+                    {x: 480, y: 248, radius: 20},
+                    {x: 770, y: 405, radius: 20},
+                    {x: 1110, y: 230, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L34.jpg",
+                    right: "images/Photo-hunt/Right/R34.jpg"
+                },
+                differences: [
+                    {x: 312, y: 205, radius: 20},
+                    {x: 536, y: 110, radius: 20},
+                    {x: 430, y: 467, radius: 20},
+                    {x: 438, y: 381, radius: 30, width: 80, height: 30, shape: "rect"},
+                    {x: 738, y: 324, radius: 20},
+                    {x: 741, y: 79, radius: 20},
+                    {x: 456, y: 43, radius: 20},
+                    {x: 484, y: 9, radius: 20},
+                    {x: 136, y: 219, radius: 20},
+                    {x: 96, y: 42, radius: 20},
+                    {x: 729, y: 428, radius: 20},
+                    {x: 273, y: 434, radius: 20},
+                    {x: 210, y: 177, radius: 20},
+                    {x: 212, y: 100, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L35.jpg",
+                    right: "images/Photo-hunt/Right/R35.jpg"
+                },
+                differences: [
+                    {x: 586, y: 341, radius: 20},
+                    {x: 423, y: 326, radius: 20},
+                    {x: 24, y: 259, radius: 20},
+                    {x: 53, y: 160, radius: 20},
+                    {x: 11, y: 405, radius: 20},
+                    {x: 421, y: 172, radius: 20},
+                    {x: 720, y: 81, radius: 20},
+                    {x: 70, y: 76, radius: 20},
+                    {x: 321, y: 110, radius: 20},
+                    {x: 175, y: 191, radius: 25},
+                    {x: 480, y: 172, radius: 25},
+                    {x: 549, y: 231, radius: 20},
+                    {x: 764, y: 181, radius: 25, width: 20, height: 90, shape: "rect"},
+                    {x: 332, y: 48, radius: 25, width: 50, height: 50, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L36.jpg",
+                    right: "images/Photo-hunt/Right/R36.jpg"
+                },
+                differences: [
+                    {x: 39, y: 535, radius: 20},
+                    {x: 61, y: 75, radius: 20},
+                    {x: 404, y: 58, radius: 20},
+                    {x: 177, y: 245, radius: 20},
+                    {x: 189, y: 464, radius: 30},
+                    {x: 284, y: 110, radius: 20},
+                    {x: 273, y: 380, radius: 20},
+                    {x: 739, y: 169, radius: 20},
+                    {x: 676, y: 68, radius: 30},
+                    {x: 437, y: 483, radius: 35},
+                    {x: 578, y: 406, radius: 20},
+                    {x: 402, y: 331, radius: 25, shape: "square"},
+                    {x: 678, y: 353, radius: 25},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L37.jpg",
+                    right: "images/Photo-hunt/Right/R37.jpg"
+                },
+                differences: [
+                    {x: 666, y: 474, radius: 20},
+                    {x: 724, y: 457, radius: 20, shape: "square"},
+                    {x: 66, y: 269, radius: 20},
+                    {x: 299, y: 298, radius: 20},
+                    {x: 438, y: 56, radius: 20},
+                    {x: 325, y: 52, radius: 20},
+                    {x: 333, y: 140, radius: 20},
+                    {x: 27, y: 362, radius: 20},
+                    {x: 396, y: 676, radius: 20},
+                    {x: 572, y: 722, radius: 20},
+                    {x: 541, y: 592, radius: 20},
+                    {x: 37, y: 453, radius: 20},
+                    {x: 163, y: 397, radius: 20, width: 10, height: 100, shape: "rect"},
+                    {x: 745, y: 153, radius: 20, width: 20, height: 140, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L38.jpg",
+                    right: "images/Photo-hunt/Right/R38.jpg"
+                },
+                differences: [
+                    {x: 147, y: 864, radius: 25},
+                    {x: 325, y: 782, radius: 20},
+                    {x: 92, y: 763, radius: 20},
+                    {x: 128, y: 610, radius: 20},
+                    {x: 150, y: 689, radius: 20},
+                    {x: 435, y: 642, radius: 20},
+                    {x: 412, y: 128, radius: 20},
+                    {x: 45, y: 110, radius: 20},
+                    {x: 453, y: 309, radius: 30},
+                    {x: 454, y: 395, radius: 20},
+                    {x: 253, y: 117, radius: 20},
+                    {x: 274, y: 403, radius: 30},
+                    {x: 40, y: 265, radius: 35},
+                    {x: 85, y: 471, radius: 20, width: 75, height: 40, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L39.jpg",
+                    right: "images/Photo-hunt/Right/R39.jpg"
+                },
+                differences: [
+                    {x: 225, y: 835, radius: 20},
+                    {x: 253, y: 757, radius: 20},
+                    {x: 172, y: 660, radius: 20},
+                    {x: 341, y: 628, radius: 20},
+                    {x: 97, y: 496, radius: 20},
+                    {x: 351, y: 518, radius: 20},
+                    {x: 484, y: 365, radius: 20},
+                    {x: 99, y: 325, radius: 20},
+                    {x: 139, y: 242, radius: 20},
+                    {x: 466, y: 209, radius: 20},
+                    {x: 332, y: 176, radius: 25},
+                    {x: 176, y: 83, radius: 20},
+                    {x: 62, y: 77, radius: 30},
+                    {x: 456, y: 32, radius: 30, width: 90, height: 25, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L40.jpg",
+                    right: "images/Photo-hunt/Right/R40.jpg"
+                },
+                differences: [
+                    {x: 32, y: 549, radius: 20},
+                    {x: 26, y: 635, radius: 20},
+                    {x: 30, y: 689, radius: 25},
+                    {x: 206, y: 60, radius: 20},
+                    {x: 490, y: 21, radius: 20},
+                    {x: 484, y: 363, radius: 20},
+                    {x: 396, y: 285, radius: 20},
+                    {x: 449, y: 489, radius: 20},
+                    {x: 417, y: 836, radius: 20},
+                    {x: 426, y: 680, radius: 20},
+                    {x: 173, y: 593, radius: 20},
+                    {x: 297, y: 487, radius: 20},
+                    {x: 531, y: 500, radius: 20},
+                    {x: 144, y: 482, radius: 20},
+                    {x: 288, y: 253, radius: 30},
+                    {x: 595, y: 632, radius: 25, width: 75, height: 30, shape: "rect"},
+                    {x: 530, y: 407, radius: 25, width: 25, height: 60, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L41.jpg",
+                    right: "images/Photo-hunt/Right/R41.jpg"
+                },
+                differences: [
+                    {x: 65, y: 98, radius: 20},
+                    {x: 223, y: 107, radius: 20},
+                    {x: 356, y: 20, radius: 20},
+                    {x: 420, y: 42, radius: 20},
+                    {x: 662, y: 54, radius: 20, width: 40, height: 85, shape: "rect"},
+                    {x: 151, y: 215, radius: 20},
+                    {x: 560, y: 243, radius: 20},
+                    {x: 137, y: 348, radius: 20},
+                    {x: 270, y: 335, radius: 20},
+                    {x: 411, y: 291, radius: 20},
+                    {x: 534, y: 299, radius: 20},
+                    {x: 317, y: 268, radius: 30},
+                    {x: 736, y: 122, radius: 30, shape: "square"},
+                    {x: 833, y: 321, radius: 25, width: 35, height: 80, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L42.jpg",
+                    right: "images/Photo-hunt/Right/R42.jpg"
+                },
+                differences: [
+                    {x: 664, y: 19, radius: 25, shape: "square"},
+                    {x: 787, y: 74, radius: 10},
+                    {x: 601, y: 224, radius: 10},
+                    {x: 652, y: 380, radius: 28},
+                    {x: 213, y: 352, radius: 20},
+                    {x: 348, y: 339, radius: 20},
+                    {x: 341, y: 284, radius: 20},
+                    {x: 513, y: 330, radius: 20},
+                    {x: 302, y: 51, radius: 20},
+                    {x: 228, y: 144, radius: 20},
+                    {x: 235, y: 256, radius: 20},
+                    {x: 88, y: 171, radius: 25},
+                    {x: 20, y: 11, radius: 15},
+                    {x: 508, y: 100, radius: 10, width: 10, height: 35, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L43.jpg",
+                    right: "images/Photo-hunt/Right/R43.jpg"
+                },
+                differences: [
+                    {x: 565, y: 248, radius: 20},
+                    {x: 652, y: 340, radius: 20},
+                    {x: 595, y: 456, radius: 20},
+                    {x: 663, y: 128, radius: 20},
+                    {x: 366, y: 163, radius: 20},
+                    {x: 21, y: 261, radius: 20},
+                    {x: 281, y: 408, radius: 20},
+                    {x: 188, y: 251, radius: 20},
+                    {x: 245, y: 350, radius: 20},
+                    {x: 436, y: 35, radius: 20},
+                    {x: 257, y: 211, radius: 20},
+                    {x: 254, y: 62, radius: 20},
+                    {x: 738, y: 187, radius: 20, width: 10, height: 75, shape: "rect"},
+                    {x: 41, y: 126, radius: 20, width: 75, height: 22, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L44.jpg",
+                    right: "images/Photo-hunt/Right/R44.jpg"
+                },
+                differences: [
+                    {x: 779, y: 182, radius: 20},
+                    {x: 894, y: 207, radius: 20},
+                    {x: 636, y: 381, radius: 20},
+                    {x: 492, y: 105, radius: 20},
+                    {x: 530, y: 80, radius: 20},
+                    {x: 277, y: 108, radius: 20},
+                    {x: 742, y: 244, radius: 20},
+                    {x: 194, y: 228, radius: 20},
+                    {x: 590, y: 302, radius: 10},
+                    {x: 592, y: 106, radius: 10},
+                    {x: 567, y: 426, radius: 30},
+                    {x: 562, y: 238, radius: 25, width: 80, height: 15, shape: "rect"},
+                    {x: 315, y: 312, radius: 25, width: 10, height: 70, shape: "rect"},
+                    {x: 96, y: 345, radius: 30, shape: "square"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L45.jpg",
+                    right: "images/Photo-hunt/Right/R45.jpg"
+                },
+                differences: [
+                    {x: 553, y: 27, radius: 20},
+                    {x: 641, y: 325, radius: 20},
+                    {x: 435, y: 357, radius: 20},
+                    {x: 462, y: 252, radius: 20},
+                    {x: 287, y: 232, radius: 25},
+                    {x: 545, y: 379, radius: 15},
+                    {x: 313, y: 95, radius: 15},
+                    {x: 63, y: 257, radius: 15},
+                    {x: 196, y: 316, radius: 20},
+                    {x: 40, y: 445, radius: 20},
+                    {x: 280, y: 54, radius: 20},
+                    {x: 25, y: 44, radius: 20, width: 30, height: 55, shape: "rect"},
+                    {x: 249, y: 139, radius: 20, width: 50, height: 30, shape: "rect"},
+                    {x: 438, y: 441, radius: 25, width: 60, height: 25, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L46.jpg",
+                    right: "images/Photo-hunt/Right/R46.jpg"
+                },
+                differences: [
+                    {x: 481, y: 351, radius: 20},
+                    {x: 291, y: 333, radius: 20},
+                    {x: 221, y: 223, radius: 10},
+                    {x: 50, y: 230, radius: 15},
+                    {x: 83, y: 111, radius: 20},
+                    {x: 219, y: 47, radius: 20},
+                    {x: 382, y: 106, radius: 15},
+                    {x: 372, y: 185, radius: 20},
+                    {x: 482, y: 232, radius: 20},
+                    {x: 710, y: 208, radius: 20},
+                    {x: 489, y: 10, radius: 10},
+                    {x: 604, y: 80, radius: 20},
+                    {x: 742, y: 28, radius: 25, width: 70, height: 20, shape: "rect"},
+                    {x: 688, y: 115, radius: 25, width: 30, height: 50, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L47.jpg",
+                    right: "images/Photo-hunt/Right/R47.jpg"
+                },
+                differences: [
+                    {x: 316, y: 465, radius: 20},
+                    {x: 312, y: 562, radius: 20},
+                    {x: 456, y: 796, radius: 20},
+                    {x: 154, y: 658, radius: 20},
+                    {x: 177, y: 372, radius: 20},
+                    {x: 292, y: 223, radius: 20},
+                    {x: 50, y: 800, radius: 20},
+                    {x: 273, y: 300, radius: 25},
+                    {x: 435, y: 386, radius: 35},
+                    {x: 41, y: 34, radius: 25, shape: "square"},
+                    {x: 463, y: 136, radius: 25, width: 110, height: 30, shape: "rect"},
+                    {x: 464, y: 643, radius: 30, width: 95, height: 17, shape: "rect"},
+                    {x: 619, y: 687, radius: 25, width: 25, height: 60, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L48.jpg",
+                    right: "images/Photo-hunt/Right/R48.jpg"
+                },
+                differences: [
+                    {x: 193, y: 175, radius: 20},
+                    {x: 85, y: 60, radius: 20},
+                    {x: 316, y: 25, radius: 20},
+                    {x: 87, y: 203, radius: 20},
+                    {x: 157, y: 376, radius: 20},
+                    {x: 501, y: 337, radius: 20},
+                    {x: 720, y: 166, radius: 20},
+                    {x: 930, y: 68, radius: 20},
+                    {x: 925, y: 369, radius: 20},
+                    {x: 994, y: 380, radius: 20},
+                    {x: 712, y: 334, radius: 20},
+                    {x: 982, y: 187, radius: 30},
+                    {x: 419, y: 109, radius: 30, width: 70, height: 35, shape: "rect"},
+                    {x: 252, y: 370, radius: 30, width: 30, height: 65, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L49.jpg",
+                    right: "images/Photo-hunt/Right/R49.jpg"
+                },
+                differences: [
+                    {x: 1101, y: 431, radius: 20},
+                    {x: 837, y: 128, radius: 20},
+                    {x: 914, y: 53, radius: 20},
+                    {x: 986, y: 173, radius: 20},
+                    {x: 1079, y: 230, radius: 20},
+                    {x: 906, y: 206, radius: 25},
+                    {x: 550, y: 198, radius: 20},
+                    {x: 463, y: 340, radius: 20},
+                    {x: 128, y: 371, radius: 20},
+                    {x: 230, y: 218, radius: 20},
+                    {x: 328, y: 145, radius: 20},
+                    {x: 556, y: 40, radius: 20},
+                    {x: 125, y: 230, radius: 25},
+                    {x: 40, y: 267, radius: 25, width: 10, height: 75, shape: "rect"},
+                    {x: 588, y: 136, radius: 25, width: 100, height: 20, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L50.jpg",
+                    right: "images/Photo-hunt/Right/R50.jpg"
+                },
+                differences: [
+                    {x: 92, y: 316, radius: 20},
+                    {x: 22, y: 322, radius: 20},
+                    {x: 122, y: 578, radius: 20},
+                    {x: 436, y: 457, radius: 20},
+                    {x: 440, y: 261, radius: 20},
+                    {x: 253, y: 136, radius: 20},
+                    {x: 541, y: 624, radius: 30},
+                    {x: 344, y: 593, radius: 25},
+                    {x: 511, y: 468, radius: 20, width: 90, height: 15, shape: "rect"},
+                    {x: 568, y: 543, radius: 20, width: 50, height: 30, shape: "rect"},
+                    {x: 237, y: 306, radius: 20, width: 60, height: 15, shape: "rect"},
+                    {x: 218, y: 356, radius: 20, width: 40, height: 50, shape: "rect"},
+                    {x: 514, y: 62, radius: 20, width: 85, height: 25, shape: "rect"},
+                    {x: 354, y: 251, radius: 25, width: 20, height: 70, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L51.jpg",
+                    right: "images/Photo-hunt/Right/R51.jpg"
+                },
+                differences: [
+                    {x: 632, y: 117, radius: 10},
+                    {x: 158, y: 25, radius: 25},
+                    {x: 378, y: 140, radius: 15},
+                    {x: 611, y: 269, radius: 15},
+                    {x: 905, y: 230, radius: 15},
+                    {x: 880, y: 182, radius: 15},
+                    {x: 819, y: 95, radius: 15},
+                    {x: 306, y: 55, radius: 15},
+                    {x: 301, y: 359, radius: 25},
+                    {x: 484, y: 53, radius: 20},
+                    {x: 518, y: 125, radius: 20},
+                    {x: 775, y: 300, radius: 20, width: 10, height: 105, shape: "rect"},
+                    {x: 285, y: 159, radius: 20, width: 60, height: 20, shape: "rect"},
+                    {x: 420, y: 307, radius: 20, width: 60, height: 20, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L52.jpg",
+                    right: "images/Photo-hunt/Right/R52.jpg"
+                },
+                differences: [
+                    {x: 662, y: 145, radius: 20},
+                    {x: 291, y: 230, radius: 20},
+                    {x: 18, y: 11, radius: 20},
+                    {x: 180, y: 136, radius: 20},
+                    {x: 39, y: 198, radius: 20},
+                    {x: 624, y: 220, radius: 20},
+                    {x: 459, y: 96, radius: 20},
+                    {x: 286, y: 399, radius: 35},
+                    {x: 522, y: 355, radius: 35},
+                    {x: 193, y: 360, radius: 10},
+                    {x: 407, y: 157, radius: 30},
+                    {x: 291, y: 50, radius: 25},
+                    {x: 152, y: 225, radius: 25, width: 100, height: 10, shape: "rect"},
+                    {x: 55, y: 434, radius: 25, width: 45, height: 20, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L53.jpg",
+                    right: "images/Photo-hunt/Right/R53.jpg"
+                },
+                differences: [
+                    {x: 634, y: 107, radius: 10},
+                    {x: 492, y: 329, radius: 15},
+                    {x: 336, y: 330, radius: 15},
+                    {x: 330, y: 369, radius: 15},
+                    {x: 174, y: 171, radius: 20},
+                    {x: 486, y: 85, radius: 20},
+                    {x: 216, y: 211, radius: 15},
+                    {x: 149, y: 36, radius: 10},
+                    {x: 349, y: 177, radius: 15},
+                    {x: 928, y: 199, radius: 25, shape: "square"},
+                    {x: 106, y: 104, radius: 15, width: 55, height: 15, shape: "rect"},
+                    {x: 178, y: 302, radius: 25, width: 50, height: 35, shape: "rect"},
+                    {x: 562, y: 199, radius: 25, width: 50, height: 30, shape: "rect"},
+                    {x: 755, y: 103, radius: 25, width: 50, height: 30, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L54.jpg",
+                    right: "images/Photo-hunt/Right/R54.jpg"
+                },
+                differences: [
+                    {x: 18, y: 556, radius: 20},
+                    {x: 184, y: 536, radius: 20},
+                    {x: 250, y: 473, radius: 20},
+                    {x: 175, y: 71, radius: 20},
+                    {x: 72, y: 34, radius: 20},
+                    {x: 362, y: 289, radius: 25},
+                    {x: 315, y: 619, radius: 30},
+                    {x: 219, y: 149, radius: 20},
+                    {x: 399, y: 546, radius: 20},
+                    {x: 421, y: 409, radius: 20},
+                    {x: 109, y: 707, radius: 40, shape: "square"},
+                    {x: 376, y: 37, radius: 30, width: 120, height: 15, shape: "rect"},
+                    {x: 30, y: 256, radius: 20, width: 60, height: 45, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L55.jpg",
+                    right: "images/Photo-hunt/Right/R55.jpg"
+                },
+                differences: [
+                    {x: 640, y: 79, radius: 15},
+                    {x: 346, y: 305, radius: 15},
+                    {x: 848, y: 79, radius: 15},
+                    {x: 504, y: 97, radius: 15},
+                    {x: 442, y: 89, radius: 15},
+                    {x: 310, y: 192, radius: 15},
+                    {x: 472, y: 415, radius: 15},
+                    {x: 668, y: 363, radius: 15},
+                    {x: 453, y: 266, radius: 15},
+                    {x: 575, y: 284, radius: 15},
+                    {x: 18, y: 57, radius: 15},
+                    {x: 144, y: 87, radius: 25},
+                    {x: 167, y: 320, radius: 15},
+                    {x: 823, y: 324, radius: 30},
+                    {x: 31, y: 252, radius: 40, shape: "square"},
+                    {x: 962, y: 383, radius: 30},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L56.jpg",
+                    right: "images/Photo-hunt/Right/R56.jpg"
+                },
+                differences: [
+                    {x: 982, y: 176, radius: 20},
+                    {x: 270, y: 406, radius: 20},
+                    {x: 675, y: 107, radius: 20},
+                    {x: 515, y: 223, radius: 25},
+                    {x: 414, y: 135, radius: 35},
+                    {x: 139, y: 378, radius: 35},
+                    {x: 83, y: 203, radius: 15},
+                    {x: 504, y: 352, radius: 40},
+                    {x: 573, y: 272, radius: 30, shape: "square"},
+                    {x: 283, y: 46, radius: 30},
+                    {x: 11, y: 87, radius: 30},
+                    {x: 349, y: 235, radius: 20, width: 70, height: 25, shape: "rect"},
+                    {x: 789, y: 89, radius: 35, width: 80, height: 125, shape: "rect"},
+                    {x: 909, y: 407, radius: 35, width: 15, height: 60, shape: "rect"},
+                    {x: 628, y: 414, radius: 35, width: 25, height: 60, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L57.jpg",
+                    right: "images/Photo-hunt/Right/R57.jpg"
+                },
+                differences: [
+                    {x: 39, y: 136, radius: 20},
+                    {x: 136, y: 15, radius: 20},
+                    {x: 393, y: 17, radius: 20},
+                    {x: 187, y: 113, radius: 25},
+                    {x: 61, y: 66, radius: 10},
+                    {x: 327, y: 404, radius: 15},
+                    {x: 538, y: 139, radius: 10},
+                    {x: 480, y: 176, radius: 10},
+                    {x: 354, y: 218, radius: 15},
+                    {x: 20, y: 519, radius: 20},
+                    {x: 275, y: 537, radius: 25},
+                    {x: 422, y: 380, radius: 20},
+                    {x: 485, y: 593, radius: 25},
+                    {x: 34, y: 315, radius: 25, shape: "square"},
+                    {x: 451, y: 553, radius: 25, width: 60, height: 15, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L58.jpg",
+                    right: "images/Photo-hunt/Right/R58.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                    {x: 296, y: 695, radius: 20},
+                    {x: 159, y: 249, radius: 20},
+                    {x: 146, y: 118, radius: 20},
+                    {x: 203, y: 197, radius: 20},
+                    {x: 535, y: 713, radius: 20},
+                    {x: 499, y: 526, radius: 20},
+                    {x: 103, y: 827, radius: 20},
+                    {x: 96, y: 606, radius: 20},
+                    {x: 276, y: 529, radius: 20},
+                    {x: 19, y: 419, radius: 20},
+                    {x: 488, y: 440, radius: 20},
+                    {x: 280, y: 384, radius: 20},
+                    {x: 473, y: 36, radius: 30},
+                ]
+            },
             // medium levels for chapter 2
         ],
         hard: [
+            {
+                images: {
+                    left: "images/Photo-hunt/Left/L59.jpg",
+                    right: "images/Photo-hunt/Right/R59.jpg"
+                },
+                differences: [
+                    {x: 113, y: 301, radius: 20},
+                    {x: 7, y: 559, radius: 20},
+                    {x: 283, y: 33, radius: 20},
+                    {x: 329, y: 146, radius: 20},
+                    {x: 297, y: 251, radius: 20},
+                    {x: 383, y: 256, radius: 25},
+                    {x: 238, y: 298, radius: 20},
+                    {x: 197, y: 560, radius: 20},
+                    {x: 186, y: 193, radius: 30},
+                    {x: 547, y: 662, radius: 30, shape: "square"},
+                    {x: 547, y: 136, radius: 15, width: 15, height: 65, shape: "rect"},
+                    {x: 165, y: 19, radius: 40, width: 90, height: 10, shape: "rect"},
+                    {x: 486, y: 222, radius: 20, width: 20, height: 40, shape: "rect"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L60.jpg",
+                    right: "images/Photo-hunt/Right/R60.jpg"
+                },
+                differences: [
+                    {x: 541, y: 458, radius: 20},
+                    {x: 445, y: 429, radius: 20},
+                    {x: 351, y: 673, radius: 20},
+                    {x: 228, y: 613, radius: 20},
+                    {x: 81, y: 774, radius: 20},
+                    {x: 417, y: 395, radius: 20},
+                    {x: 249, y: 276, radius: 20},
+                    {x: 315, y: 62, radius: 20},
+                    {x: 432, y: 14, radius: 20},
+                    {x: 325, y: 499, radius: 20},
+                    {x: 165, y: 401, radius: 30},
+                    {x: 445, y: 541, radius: 50, shape: "square"},
+                    {x: 2, y: 289, radius: 35, width: 15, height: 130, shape: "square"},
+                    {x: 224, y: 155, radius: 35, width: 75, height: 20, shape: "square"},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L61.jpg",
+                    right: "images/Photo-hunt/Right/R61.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L62.jpg",
+                    right: "images/Photo-hunt/Right/R62.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L63.jpg",
+                    right: "images/Photo-hunt/Right/R63.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L64.jpg",
+                    right: "images/Photo-hunt/Right/R64.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L65.jpg",
+                    right: "images/Photo-hunt/Right/R65.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L66.jpg",
+                    right: "images/Photo-hunt/Right/R66.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L67.jpg",
+                    right: "images/Photo-hunt/Right/R67.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L68.jpg",
+                    right: "images/Photo-hunt/Right/R68.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L69.jpg",
+                    right: "images/Photo-hunt/Right/R69.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L70.jpg",
+                    right: "images/Photo-hunt/Right/R70.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L71.jpg",
+                    right: "images/Photo-hunt/Right/R71.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L72.jpg",
+                    right: "images/Photo-hunt/Right/R72.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L73.jpg",
+                    right: "images/Photo-hunt/Right/R73.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            },
             // hard levels for chapter 2
         ]
     }, {
         chapter: 3,
-        easy: [],
+        easy: [
+             {
+                images: {
+                    left: "images/Photo-hunt/Left/L61.jpg",
+                    right: "images/Photo-hunt/Right/R61.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L62.jpg",
+                    right: "images/Photo-hunt/Right/R62.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            }, {
+                images: {
+                    left: "images/Photo-hunt/Left/L63.jpg",
+                    right: "images/Photo-hunt/Right/R63.jpg"
+                },
+                differences: [
+                    {x: 276, y: 64, radius: 20},
+                ]
+            },
+        ],
         medium: [
             // medium levels for chapter 2
         ],
@@ -1589,40 +2308,22 @@ const PhotoHuntLevels = [
             // hard levels for chapter 2
         ]
     }, {
-        chapter: 3,
+        chapter: 4,
         easy: [],
         medium: [
-            // medium levels for chapter 2
+            // medium levels for chapter 4
         ],
         hard: [
-            // hard levels for chapter 2
+            // hard levels for chapter 4
         ]
     }, {
-        chapter: 3,
+        chapter: 5,
         easy: [],
         medium: [
-            // medium levels for chapter 2
+            // medium levels for chapter 5
         ],
         hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [],
-        medium: [
-            // medium levels for chapter 2
-        ],
-        hard: [
-            // hard levels for chapter 2
+            // hard levels for chapter 5
         ]
     },
 ];
