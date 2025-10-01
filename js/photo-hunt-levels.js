@@ -2120,11 +2120,7 @@ const PhotoHuntLevels = [
                     {x: 280, y: 384, radius: 20},
                     {x: 473, y: 36, radius: 30},
                 ]
-            },
-            // medium levels for chapter 2
-        ],
-        hard: [
-            {
+            }, {
                 images: {
                     left: "images/Photo-hunt/Left/L59.jpg",
                     right: "images/Photo-hunt/Right/R59.jpg"
@@ -2165,7 +2161,11 @@ const PhotoHuntLevels = [
                     {x: 2, y: 289, radius: 35, width: 15, height: 130, shape: "square"},
                     {x: 224, y: 155, radius: 35, width: 75, height: 20, shape: "square"},
                 ]
-            }, {
+            },
+            // medium levels for chapter 2
+        ],
+        hard: [
+             {
                 images: {
                     left: "images/Photo-hunt/Left/L61.jpg",
                     right: "images/Photo-hunt/Right/R61.jpg"
@@ -2282,6 +2282,8 @@ const PhotoHuntLevels = [
                 },
                 differences: [
                     {x: 276, y: 64, radius: 20},
+                    {x: 485, y: 275, radius: 30},
+                    {x: 540, y: 212, radius: 20},
                 ]
             }, {
                 images: {

@@ -2,10 +2,15 @@ let SELECTED_THEME = "diamonds-card";
 let IMAGE_PATH = `images/Memory-card/${SELECTED_THEME}/`;
 let CARD_BACK_IMAGE = "back.jpg";
 let IMAGE_EXTENSION = ".jpg";
+let DEFAULT_BACK_IMAGE = "images/Memory-card/diamonds-card/back.jpg";
 
 let errors = 0;
 let cardList = [];
 let difficulty = "easy";
+let timerInterval;
+let seconds = 0;
+let score = 0;
+let preventClick = false;
 
 let cardSet;
 const board = [];
@@ -18,7 +23,6 @@ let card1Selected;
 let card2Selected;
 
 window.onload = function () {
-    document.body.style.backgroundImage = `url("../images/Memory-card/${SELECTED_THEME}/backgroundImg.jpg")`;
     document.getElementById("gameStartOverlay").style.display = "flex";
 }
 
@@ -39,25 +43,24 @@ function setDifficulty(level) {
     switch (level) {
         case 'easy':
             cardList.length = 0;
-            cardList.push(...Array.from({ length: 10 }, (_, i) => i + 1)); // 12 cards
+            cardList.push(...Array.from({ length: 10 }, (_, i) => i + 1)); // 10 cards
             rows = 4;
             columns = 5;
+            cardBoard.style.maxWidth = "565px";
             break;
         case 'medium':
             cardList.length = 0;
             cardList.push(...Array.from({ length: 12 }, (_, i) => i + 1)); // 12 cards
             rows = 4;
             columns = 6;
-            cardBoard.style.height = "800px";
-            cardBoard.style.width = "480px";
+            cardBoard.style.maxWidth = "676px";
             break;
         case 'hard':
             cardList.length = 0;
             cardList.push(...Array.from({ length: 14 }, (_, i) => i + 1)); // 14 cards
             rows = 4;
             columns = 7;
-            cardBoard.style.height = "800px";
-            cardBoard.style.width = "480px";
+            cardBoard.style.maxWidth = "777px";
             break;
     }
 }
@@ -69,7 +72,6 @@ function startGame() {
     const mode = document.getElementById("mode");
     setDifficulty(mode.value || "easy");
 
-    document.body.style.backgroundImage = `url("../images/Memory-card/${SELECTED_THEME}/backgroundImg.jpg")`;
     document.getElementById("gameStartOverlay").style.display = "none";
     board.length = 0;
     document.getElementById("board").innerHTML = "";
@@ -85,12 +87,31 @@ function startGame() {
             card.id = r.toString() + "-" + c.toString();
             card.src = IMAGE_PATH + cardImg + IMAGE_EXTENSION;
             card.classList.add("card");
-            card.addEventListener("click", selectCard)
+            card.addEventListener("click", selectCard);
+            card.onerror = function () {
+                card.src = DEFAULT_BACK_IMAGE; // Fallback
+            };
             document.getElementById("board").append(card);
         }
         board.push(row);
     }
-    setTimeout(hideCards, 5000);
+    let countdown = '5';
+    const countDownElement = document.getElementById("countDown");
+    const timerOverlay = document.getElementById("timerOverlay");
+    timerOverlay.style.display = "flex";
+    countDownElement.textContent = countdown;
+
+    let countdownInterval = setInterval(() => {
+        countdown--;
+        countDownElement.textContent = countdown;
+
+        if (countdown < 0) {
+            clearInterval(countdownInterval);
+            timerOverlay.style.display = "none";
+            hideCards();
+            startTimer();
+        }
+    }, 1000);
 }
 
 function hideCards() {
@@ -103,42 +124,48 @@ function hideCards() {
 }
 
 function selectCard() {
+    if (preventClick || this.src.includes("back") === false) return;
     if (this.src.includes("back")) {
         if (!card1Selected) {
             card1Selected = this;
-            let coords = card1Selected.id.split("-");
-            let r = parseInt(coords[0]);
-            let c = parseInt(coords[1]);
+            let [r, c] = this.id.split("-").map(Number);
 
             card1Selected.src = IMAGE_PATH + board[r][c] + IMAGE_EXTENSION;
         } else if (!card2Selected && this !== card1Selected) {
             card2Selected = this;
-            let coords = card2Selected.id.split("-");
-            let r = parseInt(coords[0]);
-            let c = parseInt(coords[1]);
+            let [r, c] = this.id.split("-").map(Number);
 
             card2Selected.src = IMAGE_PATH + board[r][c] + IMAGE_EXTENSION;
-            setTimeout(update, 1000)
+            preventClick = true;
+            setTimeout(update, 600);
         }
     }
 }
 
 function update() {
     if (card1Selected.src === card2Selected.src) {
-        matches += 1;
+        score += 10;
+        matches++;
         if (matches === cardList.length) {
             gameOver = true;
+            clearInterval(timerInterval);
+            document.getElementById("finalScore").textContent = score;
+            document.getElementById("finalTime").textContent = seconds;
+            document.getElementById("finalErrors").textContent = errors;
+
             document.getElementById("gameOverOverlay").style.display = "flex";
         }
     } else {
         card1Selected.src = IMAGE_PATH + CARD_BACK_IMAGE;
         card2Selected.src = IMAGE_PATH + CARD_BACK_IMAGE;
-        errors += 1;
-        document.getElementById("errors").innerText = errors;
+        errors++;
+        // score -= 2;
     }
-
+    document.getElementById('score').textContent = score;
+    document.getElementById("errors").textContent = errors;
     card1Selected = null;
     card2Selected = null;
+    preventClick = false;
 }
 
 function restartGame() {
@@ -150,6 +177,13 @@ function restartGame() {
     card2Selected = null;
     cardSet = [];
 
+    clearInterval(timerInterval);
+    seconds = 0;
+    score = 0;
+    document.getElementById('timer').textContent = '0';
+    document.getElementById('score').textContent = '0';
+    document.getElementById('errors').textContent = '0';
+
     document.getElementById("errors").innerText = errors;
     document.getElementById("board").innerHTML = "";
     document.getElementById("gameOverOverlay").style.display = "none";
@@ -157,4 +191,15 @@ function restartGame() {
 
     shuffleCards();
     startGame();
+}
+
+function startTimer() {
+    if (!gameOver) {
+        seconds = 0;
+        document.getElementById('timer').textContent = seconds;
+        timerInterval = setInterval(() => {
+            seconds++;
+            document.getElementById('timer').textContent = seconds;
+        }, 1000);
+    }
 }

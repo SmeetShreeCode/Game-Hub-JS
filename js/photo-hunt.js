@@ -1,5 +1,5 @@
-const DEFAULT_LIVES = 20;
-const MAX_LIVES = 20;
+const DEFAULT_LIVES = 5;
+const MAX_LIVES = 5;
 const DEFAULT_TIME = 60;
 const DEFAULT_HINTS = 5;
 const HINT_PENALTY = 5;

@@ -1,3 +1,20 @@
+python --version
+
+pip --version
+python -m ensurepip --upgrade
+
+python -m venv opencv_env
+On Windows:
+opencv_env\Scripts\activate
+On macOS/Linux:
+source opencv_env/bin/activate
+
+pip install opencv-python
+python
+✅ You're Done!
+
+pip install numpy Pillow matplotlib
+
 Yes, finding differences manually and marking their (x, y) positions can be very time-consuming. To make this process faster and more efficient for your photo hunt game, you can use image processing techniques to automatically detect the differences between the two images.
 
 Here’s a complete and practical solution for your workflow:

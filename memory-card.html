@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Memory Card</title>
-    <link rel="stylesheet" href="css/memory-card.css">
-    <script src="js/memory-card.js"></script>
+    <link rel="stylesheet" href="Demo/memory-card.css">
+    <script src="Demo/memory-card.js"></script>
 </head>
 <body>
-<h2>Error: <span id="errors">0</span></h2>
+<h2>Time: <span id="timer">0</span> seconds | Error: <span id="errors">0</span> | Score: <span id="score">0</span></h2>
 <div id="board"></div>
 
 <div id="gameStartOverlay">
@@ -20,6 +19,7 @@
         <label for="themeSelect">Choose Theme:</label>
         <select id="themeSelect">
             <option value="diamonds-card">Diamonds Card</option>
+            <option value="clubs-card">Club Card</option>
             <option value="energy-card">Energy Card</option>
             <option value="pokemon-card">Pokemon Card</option>
         </select><br><br>
@@ -38,7 +38,17 @@
 <div id="gameOverOverlay">
     <div id="gameOverMessage">
         <h2>Game Over!</h2>
+        <h2>Congratulations You Win The Game.!!</h2>
+        <p>Score: <span id="finalScore"></span></p>
+        <p>Time: <span id="finalTime"></span> seconds</p>
+        <p>Errors: <span id="finalErrors"></span></p>
         <button onclick="restartGame()">Play Again</button>
+    </div>
+</div>
+
+<div id="timerOverlay" style="background-color: rgba(0, 0, 0, 0.44);">
+    <div id="countTimer">
+        <h2 id="countDown">0</h2>
     </div>
 </div>
 
