@@ -26,7 +26,7 @@ window.onload = function () {
     placeFood();
     document.addEventListener("keydown", changeDirection);
     // update();
-    intervalId = setInterval(update, 1000 / 10);
+    intervalId = setInterval(update, 1200 / 10);
 }
 
 function update() {
