@@ -8,8 +8,19 @@
     <script src="js/flappy-bird.js"></script>
 </head>
 <body>
+<h2>
+    Score: <span id="score">0</span>
+    High Score: <span id="high-score">0</span>
+    <button id="pauseBtn">Pause</button>
+</h2>
 <canvas id="board"></canvas>
 
+<div id="timerOverlay" style="background-color: rgba(0, 0, 0, 0.44);">
+    <div id="countTimer">
+        <h2 id="countDown">0</h2>
+        <h2>Use Space/ArrowUp/Key 'x' or Touch To move</h2>
+    </div>
+</div>
 <footer>
     <p><a href="index.html">⬅ Back to Games</a></p>
 </footer>

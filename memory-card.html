@@ -4,11 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>Memory Card</title>
-    <link rel="stylesheet" href="Demo/memory-card.css">
-    <script src="Demo/memory-card.js"></script>
+    <link rel="stylesheet" href="css/memory-card.css">
+    <script src="js/memory-card.js"></script>
 </head>
 <body>
-<h2>Time: <span id="timer">0</span> seconds | Error: <span id="errors">0</span> | Score: <span id="score">0</span></h2>
+<h2>
+    Time: <span id="timer">0</span> seconds |
+    Error: <span id="errors">0</span> |
+    Score: <span id="score">0</span> |
+    <button onclick="pauseGame()" id="pauseBtn" title="Pause Game">⏸</button>
+    <br>
+    Best Score: <span id="bestScore">0</span> |
+    Best Time: <span id="bestTime">0</span> s |
+    Lowest Errors: <span id="leastErrors">0</span>
+    <br>
+    <label for="liveThemeSelect">Change Theme:</label>
+    <select id="liveThemeSelect" onchange="changeTheme(this.value)"></select>
+
+    <label for="liveModeSelect">Change Mode:</label>
+    <select id="liveModeSelect" onchange="changeMode(this.value)">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+    </select>
+</h2>
+
 <div id="board"></div>
 
 <div id="gameStartOverlay">
@@ -17,21 +37,32 @@
         <h4>You have 5 seconds to remember cards position</h4>
 
         <label for="themeSelect">Choose Theme:</label>
-        <select id="themeSelect">
-            <option value="diamonds-card">Diamonds Card</option>
-            <option value="clubs-card">Club Card</option>
-            <option value="energy-card">Energy Card</option>
-            <option value="pokemon-card">Pokemon Card</option>
-        </select><br><br>
+        <select id="themeSelect"></select>
+        <br>
 
         <label for="mode">Choose Difficulty:</label>
         <select id="mode">
             <option value="easy">Easy</option>
             <option value="medium">Medium</option>
             <option value="hard">Hard</option>
-        </select><br><br>
+        </select><br>
 
         <button onclick="startGame()">Play Game</button>
+    </div>
+</div>
+
+<div id="timerOverlay" style="background-color: rgba(0, 0, 0, 0.44);">
+    <div id="countTimer">
+        <h2 id="countDown">0</h2>
+    </div>
+</div>
+
+<div id="pauseOverlay">
+    <div id="pauseMessage">
+        <h2>Game Paused</h2>
+        <p>You have paused the game. Take a break and come back!</p>
+        <button onclick="resumeGame()">▶ Resume</button>
+        <button onclick="restartGame()">🔄 Restart Game</button>
     </div>
 </div>
 
@@ -46,11 +77,6 @@
     </div>
 </div>
 
-<div id="timerOverlay" style="background-color: rgba(0, 0, 0, 0.44);">
-    <div id="countTimer">
-        <h2 id="countDown">0</h2>
-    </div>
-</div>
 
 <footer>
     <button><a href="index.html">⬅ Back to Games</a></button>

@@ -377,7 +377,11 @@ const PhotoHuntLevels = [
                     {x: 36, y: 304, radius: 20},
                     {x: 224, y: 271, radius: 20},
                 ]
-            }, {
+            },
+            // more easy levels…
+        ],
+        medium: [
+            {
                 images: {
                     left: "images/Photo-hunt/Left/13.jpg",
                     right: "images/Photo-hunt/Right/13.jpg"
@@ -774,7 +778,10 @@ const PhotoHuntLevels = [
                     {x: 285, y: 113, radius: 20},
                     {x: 81, y: 47, radius: 20},
                 ]
-            }, {
+            },
+        ],
+        hard: [
+            {
                 images: {
                     left: "images/Photo-hunt/Left/42.jpg",
                     right: "images/Photo-hunt/Right/42.jpg"
@@ -871,22 +878,6 @@ const PhotoHuntLevels = [
                     {x: 92, y: 134, radius: 30},
                 ]
             },
-            // more easy levels…
-        ],
-        medium: [
-            {
-                images: {
-                    left: "images/Photo-hunt/Left/48.jpg",
-                    right: "images/Photo-hunt/Right/48.jpg"
-                },
-                differences: [
-                    {x: 493, y: 307, radius: 20},
-                ]
-            },
-            // medium levels for chapter 1
-        ],
-        hard: [
-            // hard levels for chapter 1
         ]
     },
     {
@@ -1284,7 +1275,11 @@ const PhotoHuntLevels = [
                     {x: 586, y: 927, radius: 25},
                     {x: 735, y: 446, radius: 40, shape: "square"},
                 ]
-            }, {
+            },
+            // more easy levels for chapter 2…
+        ],
+        medium: [
+            {
                 images: {
                     left: "images/Photo-hunt/Left/L19.jpg",
                     right: "images/Photo-hunt/Right/R19.jpg"
@@ -1566,11 +1561,7 @@ const PhotoHuntLevels = [
                     {x: 501, y: 161, radius: 20, width: 170, height: 20, shape: "rect"},
                     {x: 109, y: 66, radius: 35, width: 25, height: 85, shape: "rect"},
                 ]
-            },
-            // more easy levels for chapter 2…
-        ],
-        medium: [
-            {
+            }, {
                 images: {
                     left: "images/Photo-hunt/Left/L33.jpg",
                     right: "images/Photo-hunt/Right/R33.jpg"
@@ -1694,7 +1685,11 @@ const PhotoHuntLevels = [
                     {x: 40, y: 265, radius: 35},
                     {x: 85, y: 471, radius: 20, width: 75, height: 40, shape: "rect"},
                 ]
-            }, {
+            },
+            // medium levels for chapter 2
+        ],
+        hard: [
+            {
                 images: {
                     left: "images/Photo-hunt/Left/L39.jpg",
                     right: "images/Photo-hunt/Right/R39.jpg"
@@ -2120,7 +2115,13 @@ const PhotoHuntLevels = [
                     {x: 280, y: 384, radius: 20},
                     {x: 473, y: 36, radius: 30},
                 ]
-            }, {
+            },
+            // hard levels for chapter 2
+        ]
+    }, {
+        chapter: 3,
+        easy: [
+            {
                 images: {
                     left: "images/Photo-hunt/Left/L59.jpg",
                     right: "images/Photo-hunt/Right/R59.jpg"
@@ -2161,11 +2162,7 @@ const PhotoHuntLevels = [
                     {x: 2, y: 289, radius: 35, width: 15, height: 130, shape: "square"},
                     {x: 224, y: 155, radius: 35, width: 75, height: 20, shape: "square"},
                 ]
-            },
-            // medium levels for chapter 2
-        ],
-        hard: [
-             {
+            }, {
                 images: {
                     left: "images/Photo-hunt/Left/L61.jpg",
                     right: "images/Photo-hunt/Right/R61.jpg"
@@ -2269,13 +2266,7 @@ const PhotoHuntLevels = [
                 differences: [
                     {x: 276, y: 64, radius: 20},
                 ]
-            },
-            // hard levels for chapter 2
-        ]
-    }, {
-        chapter: 3,
-        easy: [
-             {
+            },{
                 images: {
                     left: "images/Photo-hunt/Left/L61.jpg",
                     right: "images/Photo-hunt/Right/R61.jpg"
