@@ -5,7 +5,7 @@ const BOARD_HEIGHT = 640;
 const BIRD_WIDTH = 34;
 const BIRD_HEIGHT = 24;
 const BIRD_X = BOARD_WIDTH / 8;
-const FLAP_STRENGTH = -8;
+const FLAP_STRENGTH = -7.5;
 const GRAVITY = 0.5;
 
 const PIPE_WIDTH = 64;
@@ -14,7 +14,7 @@ const BASE_PIPE_SPEED = -3;
 const BASE_PIPE_GAP = 160;
 const BASE_PIPE_INTERVAL = 1600;
 
-const DIFFICULTY_STEP = 5;
+const DIFFICULTY_STEP = 25;
 const MIN_PIPE_GAP = 100;
 const MIN_PIPE_INTERVAL = 900;
 
@@ -32,6 +32,7 @@ let birdImg, topPipeImg, bottomPipeImg;
 let pipeIntervalId = null;
 let countdownTimer = null;
 let isPaused = false;
+let isMuted = false;
 
 let bird = {
     x: BIRD_X,
@@ -46,30 +47,85 @@ let gameOver = false;
 let score = 0;
 let highScore = Number(localStorage.getItem("flappyBirdHighScore")) || 0;
 
-const scoreElement = document.getElementById("score");
-const highScoreElement = document.getElementById("high-score");
+let scoreElement, highScoreElement;
+
+const themes = {
+    default: {
+        bird: "./images/Flappy-bird/flappybird.png",
+        topPipe: "./images/Flappy-bird/top-pipe.png",
+        bottomPipe: "./images/Flappy-bird/bottompipe.png",
+        backgroundImage: "./images/Flappy-bird/flappybirdbg.png",
+        backgroundColor: "#70c5ce"
+    },
+    dark: {
+        bird: "./images/Flappy-bird/blue-flappyBird.png",
+        topPipe: "./images/Flappy-bird/dark-pipe-top.png",
+        bottomPipe: "./images/Flappy-bird/dark-pipe-bottom.png",
+        backgroundImage: "./images/Flappy-bird/light.png",
+        backgroundColor: "#222"
+    },
+    ice: {
+        bird: "./images/Flappy-bird/flappybird1.png",
+        topPipe: "./images/Flappy-bird/pipe-top.png",
+        bottomPipe: "./images/Flappy-bird/pipe-bottom.png",
+        backgroundColor: "#e0f7ff"
+    },
+    lava: {
+        bird: "./images/Flappy-bird/flappybird2.png",
+        topPipe: "./images/Flappy-bird/pipe-top.png",
+        bottomPipe: "./images/Flappy-bird/pipe-bottom.png",
+        backgroundImage: "./images/Flappy-bird/light.png",
+        backgroundColor: "#ff5733"
+    }
+};
 
 window.addEventListener("DOMContentLoaded", () => {
-    scoreElement.textContent = 0;
-    highScoreElement.textContent = Math.floor(highScore);
-    isPaused = !isPaused;
-    document.getElementById("pauseBtn").textContent = isPaused ? "Resume" : "Pause";
-
     board = document.getElementById("board");
     board.width = BOARD_WIDTH;
     board.height = BOARD_HEIGHT;
     context = board.getContext("2d");
 
+    scoreElement = document.getElementById("score");
+    highScoreElement = document.getElementById("high-score");
+
+    scoreElement.textContent = 0;
+    highScoreElement.textContent = Math.floor(highScore);
+
+    // Pause button
+    const pauseBtn = document.getElementById("pauseBtn");
+    pauseBtn.addEventListener("click", () => {
+        isPaused = !isPaused;
+        pauseBtn.textContent = isPaused ? "Resume" : "Pause";
+    });
+
+    const muteBtn = document.getElementById("muteBtn");
+    muteBtn.addEventListener("click", () => {
+        isMuted = !isMuted;
+        muteBtn.textContent = isMuted ? "🔇 Sound Off" : "🔊 Sound On";
+    });
+
+    const themeSelect = document.getElementById("themeSelect");
+    themeSelect.addEventListener("change", (e) => {
+        const selectedTheme = e.target.value;
+        localStorage.setItem("flappyBirdTheme", selectedTheme);
+    });
+
+    // Restore saved theme
+    const savedTheme = localStorage.getItem("flappyBirdTheme") || "default";
+    themeSelect.value = savedTheme;
+    const theme = themes[savedTheme] || themes.default;
     // Load images
     birdImg = new Image();
-    birdImg.src = "./images/Flappy-bird/flappybird.png";
+    birdImg.src = theme.bird;
     birdImg.onerror = () => console.error("Bird image failed to load");
 
     topPipeImg = new Image();
-    topPipeImg.src = "./images/Flappy-bird/top-pipe.png";
+    topPipeImg.src = theme.topPipe;
 
     bottomPipeImg = new Image();
-    bottomPipeImg.src = "./images/Flappy-bird/bottompipe.png";
+    bottomPipeImg.src = theme.bottomPipe;
+    board.style.backgroundImage = `url("${theme.backgroundImage}")`;
+    board.style.backgroundColor = theme.backgroundColor || "#70c5ce";
     startCountdown();
 });
 
@@ -81,7 +137,7 @@ function update() {
 
     if (isPaused) {
         requestAnimationFrame(update);
-        return; // Stop updating if paused
+        return;
     }
 
     requestAnimationFrame(update);
@@ -93,8 +149,9 @@ function update() {
 
     if (bird.y + bird.height >= BOARD_HEIGHT) {
         gameOver = true;
-        dieSound.play();
+        if (!isMuted) dieSound.play();
     }
+
     let difficultyLevel = Math.floor(score / DIFFICULTY_STEP);
 
     if (difficultyLevel > currentDifficultyLevel) {
@@ -123,21 +180,16 @@ function update() {
 
         if (detectCollision(bird, pipe)) {
             gameOver = true;
-            hitSound.play();
+            if (!isMuted) hitSound.play();
         }
     }
 
     pipeArray = pipeArray.filter(pipe => pipe.x + pipe.width > 0);
-
-    context.fillStyle = "white";
-    context.font = "45px sans-serif";
-    context.fillText(Math.floor(score), 10, 50);
 }
 
 function placePipes() {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
 
-    // Random top pipe Y position
     let minY = -PIPE_HEIGHT + 100;
     let maxY = -100;
     let topY = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
@@ -173,7 +225,7 @@ function handleInput(e) {
             resetGame();
         } else {
             bird.velocityY = FLAP_STRENGTH;
-            flapSound.play();
+            if (!isMuted) flapSound.play();
         }
     }
 }
@@ -190,6 +242,9 @@ function resetGame() {
     currentPipeGap = BASE_PIPE_GAP;
     currentPipeInterval = BASE_PIPE_INTERVAL;
     currentDifficultyLevel = 0;
+
+    scoreElement.textContent = "0";
+
     startCountdown();
 }
 
@@ -236,7 +291,6 @@ function startCountdown() {
             clearInterval(countdownTimer);
             overlay.style.display = "none";
 
-            // start game fresh
             document.addEventListener("keydown", handleInput);
             document.addEventListener("touchstart", handleInput);
             document.addEventListener("mousedown", handleInput);
@@ -248,7 +302,7 @@ function startCountdown() {
 }
 
 function resizeCanvas() {
-    let scale = Math.min(window.innerWidth / 380, window.innerHeight / 780);
+    let scale = Math.min(window.innerWidth / 380, window.innerHeight / 800);
     board.style.transform = `scale(${scale})`;
     board.style.transformOrigin = "top left";
 }

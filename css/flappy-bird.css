@@ -6,7 +6,7 @@ body {
 
 #board {
     /*background-color: skyblue;*/
-    background-image: url("../images/Flappy-bird/flappybirdbg.png");
+    /*background-image: url("../images/Flappy-bird/flappybird-city.webp");*/
     width: 90vw;
     height: auto;
     max-width: 400px;
@@ -34,4 +34,77 @@ body {
 #countDown {
     font-size: 5rem;
     color: rgba(255, 255, 255, 0.49);
+}
+
+h2 {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #ffffff22;
+    backdrop-filter: blur(5px);
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: inline-block;
+    margin: 10px auto;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+h2 button,
+h2 select {
+    margin-left: 10px;
+    margin-right: 5px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #3e8ed0;
+    color: white;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+h2 button:hover,
+h2 select:hover {
+    background-color: #2f6ea1;
+    transform: scale(1.05);
+}
+
+h2 select {
+    background-color: #444;
+    color: #fff;
+    padding: 7px 10px;
+    border: 1px solid #888;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+h2 select:focus {
+    outline: none;
+    border-color: #ccc;
+}
+
+h2 span {
+    font-weight: bold;
+    color: #fce303;
+    font-size: 1.2rem;
+    margin: 0 4px;
+}
+
+#muteBtn, #pauseBtn {
+    background-color: #4caf50;
+}
+
+#muteBtn:hover, #pauseBtn:hover {
+    background-color: #388e3c;
+}
+
+a button {
+    background-color: #dc3545;
+}
+
+a button:hover {
+    background-color: #b52a38;
 }
