@@ -5,14 +5,23 @@ const BOARD_HEIGHT = 640;
 const BIRD_WIDTH = 34;
 const BIRD_HEIGHT = 24;
 const BIRD_X = BOARD_WIDTH / 8;
-const FLAP_STRENGTH = -6;
-const GRAVITY = 0.35;
+const FLAP_STRENGTH = -8;
+const GRAVITY = 0.5;
 
 const PIPE_WIDTH = 64;
 const PIPE_HEIGHT = 512;
-const PIPE_GAP = 160;
-const PIPE_INTERVAL = 1500;
-const PIPE_SPEED = -3;
+const BASE_PIPE_SPEED = -3;
+const BASE_PIPE_GAP = 160;
+const BASE_PIPE_INTERVAL = 1600;
+
+const DIFFICULTY_STEP = 5;
+const MIN_PIPE_GAP = 100;
+const MIN_PIPE_INTERVAL = 900;
+
+let currentPipeSpeed = BASE_PIPE_SPEED;
+let currentPipeGap = BASE_PIPE_GAP;
+let currentPipeInterval = BASE_PIPE_INTERVAL;
+let currentDifficultyLevel = 0;
 
 let flapSound = new Audio("music/flappy-bird/Wing.mp3");
 let hitSound = new Audio("music/flappy-bird/Hit.mp3");
@@ -22,6 +31,7 @@ let board, context;
 let birdImg, topPipeImg, bottomPipeImg;
 let pipeIntervalId = null;
 let countdownTimer = null;
+let isPaused = false;
 
 let bird = {
     x: BIRD_X,
@@ -34,9 +44,17 @@ let bird = {
 let pipeArray = [];
 let gameOver = false;
 let score = 0;
-let highScore = localStorage.getItem("flappyBirdHighScore") || 0;
+let highScore = Number(localStorage.getItem("flappyBirdHighScore")) || 0;
+
+const scoreElement = document.getElementById("score");
+const highScoreElement = document.getElementById("high-score");
 
 window.addEventListener("DOMContentLoaded", () => {
+    scoreElement.textContent = 0;
+    highScoreElement.textContent = Math.floor(highScore);
+    isPaused = !isPaused;
+    document.getElementById("pauseBtn").textContent = isPaused ? "Resume" : "Pause";
+
     board = document.getElementById("board");
     board.width = BOARD_WIDTH;
     board.height = BOARD_HEIGHT;
@@ -61,6 +79,11 @@ function update() {
         return;
     }
 
+    if (isPaused) {
+        requestAnimationFrame(update);
+        return; // Stop updating if paused
+    }
+
     requestAnimationFrame(update);
     context.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
 
@@ -72,15 +95,29 @@ function update() {
         gameOver = true;
         dieSound.play();
     }
+    let difficultyLevel = Math.floor(score / DIFFICULTY_STEP);
+
+    if (difficultyLevel > currentDifficultyLevel) {
+        currentDifficultyLevel = difficultyLevel;
+        currentPipeSpeed = BASE_PIPE_SPEED - (difficultyLevel * 0.25);
+        currentPipeGap = Math.max(BASE_PIPE_GAP - (difficultyLevel * 5), MIN_PIPE_GAP);
+        let newInterval = Math.max(BASE_PIPE_INTERVAL - (difficultyLevel * 50), MIN_PIPE_INTERVAL);
+        if (newInterval !== currentPipeInterval) {
+            currentPipeInterval = newInterval;
+            if (pipeIntervalId) clearInterval(pipeIntervalId);
+            pipeIntervalId = setInterval(placePipes, currentPipeInterval);
+        }
+    }
 
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
     for (let pipe of pipeArray) {
-        pipe.x += PIPE_SPEED;
+        pipe.x += currentPipeSpeed;
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
 
         if (!pipe.passed && pipe.x + pipe.width < bird.x) {
             score += 0.5; // Add 0.5 per pipe, so a pair = 1
+            scoreElement.textContent = Math.floor(score);
             pipe.passed = true;
         }
 
@@ -117,7 +154,7 @@ function placePipes() {
     let bottomPipe = {
         img: bottomPipeImg,
         x: BOARD_WIDTH,
-        y: topY + PIPE_HEIGHT + PIPE_GAP,
+        y: topY + PIPE_HEIGHT + currentPipeGap,
         width: PIPE_WIDTH,
         height: PIPE_HEIGHT,
         passed: false
@@ -148,6 +185,11 @@ function resetGame() {
     pipeArray = [];
     score = 0;
     gameOver = false;
+
+    currentPipeSpeed = BASE_PIPE_SPEED;
+    currentPipeGap = BASE_PIPE_GAP;
+    currentPipeInterval = BASE_PIPE_INTERVAL;
+    currentDifficultyLevel = 0;
     startCountdown();
 }
 
@@ -166,6 +208,7 @@ function updateHighScore() {
         highScore = score;
         localStorage.setItem("flappyBirdHighScore", highScore);
     }
+    highScoreElement.textContent = Math.floor(highScore);
 }
 
 function detectCollision(a, b) {
@@ -187,7 +230,7 @@ function startCountdown() {
         counter--;
         if (counter > 0) {
             countDown.textContent = counter;
-        }  else if (counter === 0) {
+        } else if (counter === 0) {
             countDown.textContent = "GO!";
         } else {
             clearInterval(countdownTimer);
@@ -198,7 +241,7 @@ function startCountdown() {
             document.addEventListener("touchstart", handleInput);
             document.addEventListener("mousedown", handleInput);
 
-            pipeIntervalId = setInterval(placePipes, PIPE_INTERVAL);
+            pipeIntervalId = setInterval(placePipes, currentPipeInterval);
             requestAnimationFrame(update);
         }
     }, 1000);
@@ -209,5 +252,6 @@ function resizeCanvas() {
     board.style.transform = `scale(${scale})`;
     board.style.transformOrigin = "top left";
 }
+
 window.addEventListener("resize", resizeCanvas);
 window.addEventListener("load", resizeCanvas);
