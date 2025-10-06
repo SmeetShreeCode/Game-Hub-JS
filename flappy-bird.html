@@ -14,16 +14,26 @@
     | High Score: <span id="high-score">0</span>
     <button id="muteBtn">🔊 Sound On</button>
     <button id="pauseBtn">Pause</button>
-
-    <label for="themeSelect">Theme:</label>
-    <select id="themeSelect">
-        <option value="default">Default</option>
-        <option value="dark">Dark Mode</option>
-        <option value="ice">Ice</option>
-        <option value="lava">Lava</option>
-    </select>
 </h2>
 <canvas id="board"></canvas>
+
+<div id="gameStartOverlay" style="display: flex;">
+    <div id="gameStartMessage">
+        <h2>Start The Game</h2>
+        <h4>Game Starts In 3 Second Get Ready To Play...</h4>
+
+        <label for="themeSelect">Theme:</label>
+        <select id="themeSelect">
+            <option value="default">Default</option>
+            <option value="dark">Dark Mode</option>
+<!--            <option value="ice">Ice</option>-->
+<!--            <option value="lava">Lava</option>-->
+        </select>
+        <br>
+
+        <button onclick="startGame()">Play Game</button>
+    </div>
+</div>
 
 <div id="timerOverlay" style="background-color: rgba(0, 0, 0, 0.44);">
     <div id="countTimer">

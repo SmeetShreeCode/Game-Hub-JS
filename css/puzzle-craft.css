@@ -44,11 +44,21 @@ input,
     border: 2px solid var(--border-color);
 }
 
+#puzzle-container.preview .tile {
+    background-position: 0 0 !important;
+    background-size: contain !important;
+}
+
 .tile {
     border: 1px solid var(--tile-border);
     background-size: 100% 100%;
     cursor: grab;
     transition: transform 0.3s ease, box-shadow 0.3s ease, background-position 0.3s ease, background-image 0.5s ease;
+}
+
+.tile:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 .tile:active {
@@ -198,5 +208,42 @@ body.sunset {
     padding: 20px 40px;
     border-radius: 10px;
     font-size: 1.5rem;
+}
+
+#puzzle-container {
+    background: linear-gradient(145deg, #e6e6e6, #ffffff);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+#game-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#game-info p,
+.controls {
+    margin: 10px 0;
+}
+
+/* Dragging tile */
+.tile.dragging {
+    opacity: 0.6;
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+/* When another tile is hovered over during drag */
+.tile.drag-over {
+    outline: 3px dashed #00aaff;
+    box-shadow: 0 0 10px rgba(0, 170, 255, 0.5);
+    transition: outline 0.2s ease;
+}
+
+/* Smooth transition for tile movement */
+.tile {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    will-change: transform;
 }
 

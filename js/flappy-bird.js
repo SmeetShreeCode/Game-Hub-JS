@@ -14,7 +14,7 @@ const BASE_PIPE_SPEED = -3;
 const BASE_PIPE_GAP = 160;
 const BASE_PIPE_INTERVAL = 1600;
 
-const DIFFICULTY_STEP = 25;
+const DIFFICULTY_STEP = 25; // Game Harder Every Score
 const MIN_PIPE_GAP = 100;
 const MIN_PIPE_INTERVAL = 900;
 
@@ -59,7 +59,7 @@ const themes = {
     },
     dark: {
         bird: "./images/Flappy-bird/blue-flappyBird.png",
-        topPipe: "./images/Flappy-bird/dark-pipe-top.png",
+        topPipe: "./images/Flappy-bird/dark-pipe-top1.png",
         bottomPipe: "./images/Flappy-bird/dark-pipe-bottom.png",
         backgroundImage: "./images/Flappy-bird/light.png",
         backgroundColor: "#222"
@@ -91,7 +91,6 @@ window.addEventListener("DOMContentLoaded", () => {
     scoreElement.textContent = 0;
     highScoreElement.textContent = Math.floor(highScore);
 
-    // Pause button
     const pauseBtn = document.getElementById("pauseBtn");
     pauseBtn.addEventListener("click", () => {
         isPaused = !isPaused;
@@ -105,29 +104,20 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     const themeSelect = document.getElementById("themeSelect");
-    themeSelect.addEventListener("change", (e) => {
-        const selectedTheme = e.target.value;
-        localStorage.setItem("flappyBirdTheme", selectedTheme);
-    });
-
-    // Restore saved theme
     const savedTheme = localStorage.getItem("flappyBirdTheme") || "default";
     themeSelect.value = savedTheme;
-    const theme = themes[savedTheme] || themes.default;
-    // Load images
-    birdImg = new Image();
-    birdImg.src = theme.bird;
-    birdImg.onerror = () => console.error("Bird image failed to load");
 
-    topPipeImg = new Image();
-    topPipeImg.src = theme.topPipe;
+    // Show the gameStartOverlay initially
+    document.getElementById("gameStartOverlay").style.display = "flex";
 
-    bottomPipeImg = new Image();
-    bottomPipeImg.src = theme.bottomPipe;
-    board.style.backgroundImage = `url("${theme.backgroundImage}")`;
+    // Apply the saved theme visually for background before "Play Game"
+    const theme = themes[savedTheme];
+    board.style.backgroundImage = theme.backgroundImage
+        ? `url("${theme.backgroundImage}")`
+        : "none";
     board.style.backgroundColor = theme.backgroundColor || "#70c5ce";
-    startCountdown();
 });
+
 
 function update() {
     if (gameOver) {
@@ -271,6 +261,37 @@ function detectCollision(a, b) {
         a.x + a.width - 2 > b.x &&
         a.y < b.y + b.height - 2 &&
         a.y + a.height - 2 > b.y;
+}
+
+function startGame() {
+    const themeSelect = document.getElementById("themeSelect");
+    const selectedTheme = themeSelect.value || "default";
+    localStorage.setItem("flappyBirdTheme", selectedTheme);
+
+    const theme = themes[selectedTheme] || themes.default;
+
+    // Load images based on theme
+    birdImg = new Image();
+    birdImg.src = theme.bird;
+
+    topPipeImg = new Image();
+    topPipeImg.src = theme.topPipe;
+
+    bottomPipeImg = new Image();
+    bottomPipeImg.src = theme.bottomPipe;
+
+    board.style.backgroundImage = theme.backgroundImage
+        ? `url("${theme.backgroundImage}")`
+        : "none";
+
+    board.style.backgroundColor = theme.backgroundColor || "#70c5ce";
+
+    // Hide start overlay
+    const startOverlay = document.getElementById("gameStartOverlay");
+    startOverlay.style.display = "none";
+
+    // Start countdown
+    startCountdown();
 }
 
 function startCountdown() {

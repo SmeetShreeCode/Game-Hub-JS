@@ -241,6 +241,23 @@ function loadSavedTheme() {
     if (themeSelect) themeSelect.value = savedTheme;
 }
 
+document.getElementById("pause-btn").addEventListener("click", () => {
+    paused = !paused;
+    document.getElementById("pause-btn").textContent = paused ? "▶️ Resume" : "⏸️ Pause";
+    document.getElementById("pause-overlay").style.display = paused ? "flex" : "none";
+});
+
+document.getElementById("resume-btn").addEventListener("click", () => {
+    paused = !paused;
+    document.getElementById("pause-btn").textContent = paused ? "▶️ Resume" : "⏸️ Pause";
+    document.getElementById("pause-overlay").style.display = paused ? "flex" : "none";
+});
+
+document.getElementById("preview-btn").addEventListener("click", () => {
+    container.classList.add("preview");
+    setTimeout(() => container.classList.remove("preview"), 2000);
+});
+
 window.addEventListener("DOMContentLoaded", () => {
     container = document.getElementById("puzzle-container");
     shuffleBtn = document.getElementById("shuffle");
@@ -283,17 +300,3 @@ window.addEventListener("DOMContentLoaded", () => {
     loadSavedTheme();
     initGame();
 });
-
-
-
-// if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-//     window.addEventListener('load', () => {
-//         navigator.serviceWorker.register('./service-worker.js').then(reg => {
-//                 console.log('ServiceWorker registered with scope:', reg.scope);
-//             }).catch(err => {
-//                 console.error('ServiceWorker registration failed:', err);
-//             });
-//     });
-// } else {
-//     console.warn('ServiceWorker not supported on file:// protocol. Use a local server.');
-// }

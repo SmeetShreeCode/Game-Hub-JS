@@ -16,6 +16,7 @@ body {
     margin: 0 auto;
 }
 
+#gameStartOverlay,
 #timerOverlay {
     display: none;
     position: fixed;
@@ -28,6 +29,18 @@ body {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    box-sizing: border-box;
+}
+
+#gameStartMessage {
+    background-color: #222;
+    padding: 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
 }
 

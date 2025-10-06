@@ -1,0 +1,128 @@
+/* ========== Global Reset & Styling ========== */
+body {
+    background: linear-gradient(90deg, rgb(203, 249, 202) 0%, rgb(62, 213, 217) 35%, rgb(138, 175, 120) 100%);
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+h2 {
+    margin-bottom: 10px;
+    font-size: clamp(18px, 4vw, 32px);
+}
+
+/* ========== Buttons ========== */
+button {
+    padding: 10px 20px;
+    background: #00aaff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: clamp(14px, 2.5vw, 18px);
+    margin: 5px;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #008ecc;
+}
+
+/* ========== Bottle Container ========== */
+.bottle-filler {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    padding: 10px;
+}
+
+/* ========== Each Bottle ========== */
+.board {
+    position: relative;
+    width: min(14vw, 70px);
+    height: min(45vh, 260px);
+    max-width: 70px;
+    max-height: 260px;
+    border: 3px solid #000;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #f0faff;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.board:hover {
+    transform: scale(0.95);
+}
+
+.board.selected {
+    transform: scale(1.08);
+    border-color: #ff8800;
+}
+
+/* ========== Water Layers ========== */
+.layer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    transition: all 0.3s ease;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* ========== Hint Highlight ========== */
+.hint {
+    outline: 3px solid gold;
+    box-shadow: 0 0 10px yellow;
+}
+
+/* ========== Message Text ========== */
+#message {
+    margin-top: 20px;
+    font-size: clamp(16px, 3.5vw, 22px);
+    color: darkgreen;
+    font-weight: bold;
+}
+
+/* ========== Responsive Adjustments ========== */
+@media (max-width: 768px) {
+    .bottle-filler {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    button {
+        padding: 8px 14px;
+    }
+
+    .board {
+        width: 14vw;
+        height: 30vh;
+    }
+}
+
+@media (max-width: 480px) {
+    button {
+        display: block;
+        width: 90%;
+        margin: 8px auto;
+    }
+
+    .bottle-filler {
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .board {
+        width: 18vw;
+        height: 26vh;
+    }
+
+    #message {
+        font-size: 18px;
+    }
+}

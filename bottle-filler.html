@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bottle Sort Puzzle</title>
+    <link rel="stylesheet" href="css/bottle-filler.css">
+</head>
+<body>
+<h2>Bottle Sort Puzzle 💧</h2>
+<button id="restart">🔄 Restart</button>
+<button id="undo">↩️ Undo</button>
+<button id="redo">↪️ Redo</button>
+<button id="hint">💡 Hint</button>
+<button id="next">➡️ Next Level</button>
+<p>Moves: <span id="moves">0</span></p>
+
+<div class="bottle-filler">
+    <!-- 8 bottle containers -->
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board"></div>
+    <div class="board" style=""></div>
+</div>
+
+<h3 id="message"></h3>
+
+<audio id="pour-sound" src="music/bottle-filler/pour.mp3" preload="auto"></audio>
+<audio id="win-sound" src="music/bottle-filler/win.mp3" preload="auto"></audio>
+
+<footer>
+    <p><a href="index.html">⬅ Back to Games</a></p>
+</footer>
+<script src="js/bottle-filler.js"></script>
+</body>
+</html>
