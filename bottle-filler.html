@@ -15,21 +15,14 @@
 <button id="next">➡️ Next Level</button>
 <p>Moves: <span id="moves">0</span></p>
 
-<div class="bottle-filler">
-    <!-- 8 bottle containers -->
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board"></div>
-    <div class="board" style=""></div>
-</div>
+<div class="bottle-filler" id="bottle-container"></div>
 
 <h3 id="message"></h3>
+
+<div id="win-screen" class="hidden">
+    <h2>🎉 You Win! 🎉</h2>
+    <button id="next-from-win">Next Level</button>
+</div>
 
 <audio id="pour-sound" src="music/bottle-filler/pour.mp3" preload="auto"></audio>
 <audio id="win-sound" src="music/bottle-filler/win.mp3" preload="auto"></audio>

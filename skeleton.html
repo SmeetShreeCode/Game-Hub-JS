@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>JS Game Starter</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    html,body { height:100%; margin:0; background:#111; }
+    #game { display:block; width:100%; height:100%; }
+    .hint { position:fixed; left:8px; top:8px; color:#ddd; font-family:monospace; font-size:13px; }
+  </style>
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div class="hint">Use arrow keys or WASD to move</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // high-DPI resize helper
+  let W = 0, H = 0;
+  function resize() {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // map drawing to CSS pixels
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Input
+  const keys = {};
+  window.addEventListener('keydown', e => keys[e.key] = true);
+  window.addEventListener('keyup',   e => keys[e.key] = false);
+
+  // Game objects
+  const player = { x: 80, y: 80, w: 40, h: 40, speed: 220 };
+
+  // Time
+  let last = performance.now();
+
+  function update(dt) {
+    player.vx = 0;
+    player.vy = 0;
+    if (keys['ArrowLeft'] || keys['a'])  player.vx = -player.speed;
+    if (keys['ArrowRight']|| keys['d'])  player.vx =  player.speed;
+    if (keys['ArrowUp']   || keys['w'])  player.vy = -player.speed;
+    if (keys['ArrowDown'] || keys['s'])  player.vy =  player.speed;
+
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
+
+    // keep on screen
+    player.x = Math.max(0, Math.min(W - player.w, player.x));
+    player.y = Math.max(0, Math.min(H - player.h, player.y));
+  }
+
+  function draw() {
+    // clear
+    ctx.clearRect(0, 0, W, H);
+
+    // background
+    ctx.fillStyle = '#0b1220';
+    ctx.fillRect(0, 0, W, H);
+
+    // player
+    ctx.fillStyle = '#7CFC00';
+    ctx.fillRect(Math.round(player.x), Math.round(player.y), player.w, player.h);
+  }
+
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); // clamp dt to avoid big jumps
+    last = now;
+    update(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

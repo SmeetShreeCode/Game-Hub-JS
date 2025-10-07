@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Minimal Pong</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>html,body{height:100%;margin:0;background:#111}canvas{display:block;width:100%;height:100%}#hint{position:fixed;left:8px;top:8px;color:#ddd;font-family:monospace}</style>
+</head>
+<body>
+<div id="hint">W/S and ↑/↓ to move. Space to pause. First to 7 wins.</div>
+<canvas id="c"></canvas>
+<script>
+(() => {
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+
+  let W=0,H=0;
+  function resize(){
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    canvas.width = Math.floor(W*dpr); canvas.height = Math.floor(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  const keys = {};
+  addEventListener('keydown', e => keys[e.key] = true);
+  addEventListener('keyup', e => keys[e.key] = false);
+
+  // Game state
+  const paddle = { w:14, h: 120, speed: 420 };
+  const left = { x: 30, y: (H-120)/2, score: 0 };
+  const right= { x: W-30-14, y: (H-120)/2, score: 0 };
+  const ball = { x: W/2, y: H/2, r: 9, vx: 300*(Math.random() > .5 ? 1 : -1), vy: 120*(Math.random()>0.5?1:-1) };
+  let paused = false;
+  let last = performance.now();
+
+  function serve(towardsRight=true) {
+    ball.x = W/2; ball.y = H/2;
+    const speed = 320;
+    const angle = (Math.random() * 0.8 - 0.4); // -0.4..0.4 radians-ish
+    ball.vx = (towardsRight ? 1 : -1) * speed;
+    ball.vy = speed * angle;
+  }
+
+  function resetScores() { left.score = 0; right.score = 0; serve(Math.random() > 0.5); }
+
+  function clampPaddles() {
+    left.y  = Math.max(0, Math.min(H - paddle.h, left.y));
+    right.y = Math.max(0, Math.min(H - paddle.h, right.y));
+  }
+
+  function update(dt) {
+    // Input for left paddle (W/S)
+    if (keys['w']) left.y -= paddle.speed * dt;
+    if (keys['s']) left.y += paddle.speed * dt;
+
+    // Right paddle: simple AI (follows ball when ball approaching)
+    const paddleCenter = right.y + paddle.h/2;
+    if (ball.vx > 0) {
+      if (paddleCenter < ball.y - 10) right.y += paddle.speed * dt * 0.95;
+      else if (paddleCenter > ball.y + 10) right.y -= paddle.speed * dt * 0.95;
+    } else {
+      // small drift toward center
+      const c = H/2;
+      if (paddleCenter < c - 6) right.y += paddle.speed * dt * 0.4;
+      else if (paddleCenter > c + 6) right.y -= paddle.speed * dt * 0.4;
+    }
+
+    clampPaddles();
+
+    // Ball physics
+    ball.x += ball.vx * dt;
+    ball.y += ball.vy * dt;
+
+    // Top/bottom wall collision
+    if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy *= -1; }
+    if (ball.y + ball.r > H) { ball.y = H - ball.r; ball.vy *= -1; }
+
+    // Paddle collisions (AABB vs circle approx)
+    function hitPaddle(p) {
+      const px = p.x, py = p.y, pw = paddle.w, ph = paddle.h;
+      // nearest point on rect to circle center
+      const nx = Math.max(px, Math.min(ball.x, px + pw));
+      const ny = Math.max(py, Math.min(ball.y, py + ph));
+      const dx = ball.x - nx, dy = ball.y - ny;
+      return dx*dx + dy*dy <= ball.r*ball.r;
+    }
+
+    if (ball.x - ball.r < left.x + paddle.w && ball.x < left.x + paddle.w + 20) {
+      if (hitPaddle(left)) {
+        ball.x = left.x + paddle.w + ball.r;
+        ball.vx = Math.abs(ball.vx) * 1.03; // add a little speed
+        // deflect based on hit position
+        const hit = (ball.y - (left.y + paddle.h/2)) / (paddle.h/2);
+        ball.vy += hit * 240;
+      }
+    }
+
+    if (ball.x + ball.r > right.x && ball.x > right.x - 20) {
+      if (hitPaddle(right)) {
+        ball.x = right.x - ball.r;
+        ball.vx = -Math.abs(ball.vx) * 1.03;
+        const hit = (ball.y - (right.y + paddle.h/2)) / (paddle.h/2);
+        ball.vy += hit * 240;
+      }
+    }
+
+    // scoring
+    if (ball.x < -50) {
+      right.score++;
+      if (right.score >= 7) { paused = true; setTimeout(()=>resetScores(), 800); }
+      serve(true);
+    }
+    if (ball.x > W + 50) {
+      left.score++;
+      if (left.score >= 7) { paused = true; setTimeout(()=>resetScores(), 800); }
+      serve(false);
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    // background
+    ctx.fillStyle = '#071221';
+    ctx.fillRect(0,0,W,H);
+
+    // net
+    ctx.fillStyle = '#2b2b2b';
+    const seg = 20, gap=12;
+    for (let y=10; y<H; y += seg+gap) ctx.fillRect(W/2 - 2, y, 4, seg);
+
+    // paddles
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(left.x, left.y, paddle.w, paddle.h);
+    ctx.fillRect(right.x, right.y, paddle.w, paddle.h);
+
+    // ball
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+    ctx.fill();
+
+    // scores
+    ctx.font = '48px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(left.score, W * 0.25, 60);
+    ctx.fillText(right.score, W * 0.75, 60);
+
+    if (paused) {
+      ctx.fillStyle = 'rgba(0,0,0,0.6)';
+      ctx.fillRect(W/2 - 180, H/2 - 40, 360, 80);
+      ctx.fillStyle = '#fff';
+      ctx.font = '22px monospace';
+      ctx.fillText('PAUSED', W/2, H/2 + 8);
+    }
+  }
+
+  // controls
+  window.addEventListener('keydown', e => {
+    if (e.key === ' ') { paused = !paused; e.preventDefault(); }
+    // manual right paddle (arrow keys)
+    if (e.key === 'ArrowUp') keys['ArrowUp'] = true;
+    if (e.key === 'ArrowDown') keys['ArrowDown'] = true;
+  });
+  window.addEventListener('keyup', e => {
+    if (e.key === 'ArrowUp') keys['ArrowUp'] = false;
+    if (e.key === 'ArrowDown') keys['ArrowDown'] = false;
+  });
+
+  // extra: allow human vs human by using arrow keys for right paddle
+  function handleManualRight(dt) {
+    if (keys['ArrowUp']) right.y -= paddle.speed * dt;
+    if (keys['ArrowDown']) right.y += paddle.speed * dt;
+    clampPaddles();
+  }
+
+  // loop
+  let lastTime = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.05, (now - lastTime) / 1000);
+    lastTime = now;
+    if (!paused) {
+      update(dt);
+      handleManualRight(dt);
+    }
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // start
+  serve(Math.random() > 0.5);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
