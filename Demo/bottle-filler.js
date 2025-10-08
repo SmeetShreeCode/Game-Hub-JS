@@ -6,14 +6,15 @@ const BASE_COLORS = [
     "#ff00dd", "#14ff01", "#5000a1", "#0063ff",
     "#9f2d6e", "#fdf03a", "#d87200", "#009f70",
 ];
+
 const BASE_COLOR_COUNT = 2;
-const BASE_BOTTLE_SPARE = 1;
+const BASE_BOTTLE_SPARE = 2;
 const LEVELS_PER_DIFFICULTY_INCREASE = 10;
 const MAX_LAYERS = 4;
 
 let history = [];
 let redoHistory = [];
-let currentLevel = 0;
+let currentLevel = 1;
 let isPouring = false;
 let bottles = [];
 let bottleData = [];
@@ -24,27 +25,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("bottle-container");
     const message = document.getElementById("message");
     const movesDisplay = document.getElementById("moves");
+    const levelDisplay = document.getElementById("level");
     const restartBtn = document.getElementById("restart");
     const undoBtn = document.getElementById("undo");
     const redoBtn = document.getElementById("redo");
     const hintBtn = document.getElementById("hint");
     const nextBtn = document.getElementById("next");
+    const nextFromWinBtn = document.getElementById("next-from-win");
 
     const pourSound = document.getElementById("pour-sound");
     const winSound = document.getElementById("win-sound");
 
+    // Button bindings
     restartBtn.addEventListener("click", initGame);
     undoBtn.addEventListener("click", undoMove);
     redoBtn.addEventListener("click", redoMove);
     hintBtn.addEventListener("click", showHint);
     nextBtn.addEventListener("click", () => {
         currentLevel++;
+        levelDisplay.textContent = currentLevel;
         initGame();
     });
-
-    const nextFromWinBtn = document.getElementById("next-from-win");
     nextFromWinBtn.addEventListener("click", () => {
         currentLevel++;
+        levelDisplay.textContent = currentLevel;
         document.getElementById("win-screen").classList.add("hidden");
         initGame();
     });
@@ -57,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return colorCount + BASE_BOTTLE_SPARE;
     }
 
+    // 🧩 Initialize new level
     function initGame() {
         message.textContent = "";
         moves = 0;
@@ -64,77 +69,122 @@ document.addEventListener("DOMContentLoaded", () => {
         history = [];
         redoHistory = [];
         movesDisplay.textContent = moves;
+        levelDisplay.textContent = currentLevel;
 
         const colorCount = getColorCount();
         const bottleCount = getBottleCount(colorCount);
 
         container.innerHTML = "";
         bottles = [];
+
         for (let i = 0; i < bottleCount; i++) {
             const bottle = document.createElement("div");
             bottle.classList.add("board");
+            bottle.addEventListener("click", () => handleBottleClick(i));
             container.appendChild(bottle);
             bottles.push(bottle);
         }
 
-        bottles.forEach((b, i) => {
-            b.classList.remove("selected", "hint");
-            b.style.pointerEvents = "auto";
-            b.addEventListener("click", () => handleBottleClick(i));
-        });
-
-        bottleData = generateRandomLevel(colorCount, MAX_LAYERS);
+        bottleData = generateSolvableLevel(colorCount, MAX_LAYERS);
         renderBottles();
     }
 
-    function generateRandomLevel(colorCount, layersPerBottle) {
+    // 🧩 Fast guaranteed solvable level generator
+    function generateSolvableLevel(colorCount, layersPerBottle) {
         const usedColors = BASE_COLORS.slice(0, colorCount);
-        const allLayers = [];
+        const bottleCount = getBottleCount(colorCount);
 
-        usedColors.forEach(color => {
-            for (let i = 0; i < layersPerBottle; i++) {
-                allLayers.push(color);
+        // Step 1: Create perfect groups (solved state)
+        let level = usedColors.map(color => Array(layersPerBottle).fill(color));
+
+        // Step 2: Add extra empty bottles
+        while (level.length < bottleCount) {
+            level.push([]);
+        }
+
+        // Step 3: Apply controlled random swaps to make it interesting
+        for (let k = 0; k < colorCount * layersPerBottle * 3; k++) {
+            const i = Math.floor(Math.random() * colorCount);
+            const j = Math.floor(Math.random() * colorCount);
+            if (i === j || level[i].length === 0) continue;
+            const color = level[i].pop();
+            const randBottle = Math.random() < 0.7 ? j : Math.floor(Math.random() * level.length);
+            if (level[randBottle].length < layersPerBottle) {
+                level[randBottle].push(color);
+            } else {
+                level[i].push(color); // undo if full
             }
-        });
+        }
 
-        // Shuffle the layers
-        for (let i = allLayers.length - 1; i > 0; i--) {
+        // Step 4: Shuffle bottles to add variation
+        for (let i = level.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [allLayers[i], allLayers[j]] = [allLayers[j], allLayers[i]];
-        }
-
-        let bottleCount = getBottleCount(colorCount);
-        let level = fillBottles(allLayers, bottleCount, layersPerBottle);
-
-        // If there isn't at least one bottle with enough free space, add one more empty bottle
-        if (!hasValidSpareBottle(level, layersPerBottle)) {
-            bottleCount += 1;
-            level = fillBottles(allLayers, bottleCount, layersPerBottle);
+            [level[i], level[j]] = [level[j], level[i]];
         }
 
         return level;
     }
 
-    function fillBottles(layers, bottleCount, maxPerBottle) {
-        const level = Array.from({length: bottleCount}, () => []);
-        let idx = 0;
 
-        for (const layer of layers) {
-            while (level[idx].length >= maxPerBottle) {
-                idx = (idx + 1) % bottleCount;
+    // 🧠 Solvable level detection (optimized BFS)
+    function isSolvableOptimized(initialState, maxLayers = 4, maxDepth = 2500) {
+        const serialize = state => state.map(b => b.join(",")).join("|");
+
+        const isSolved = state =>
+            state.every(b => b.length === 0 || (b.length === maxLayers && b.every(c => c === b[0])));
+
+        const canPour = (from, to) => {
+            if (from.length === 0 || to.length >= maxLayers) return false;
+            const color = from[from.length - 1];
+            if (to.length > 0 && to[to.length - 1] !== color) return false;
+            const same = from.filter(c => c === color).length;
+            return (maxLayers - to.length) > 0 && same > 0;
+        };
+
+        const pour = (state, fromIdx, toIdx) => {
+            const newState = state.map(b => [...b]);
+            const from = newState[fromIdx];
+            const to = newState[toIdx];
+            const color = from[from.length - 1];
+            let count = 1;
+            for (let i = from.length - 2; i >= 0; i--) {
+                if (from[i] === color) count++;
+                else break;
             }
-            level[idx].push(layer);
-            idx = (idx + 1) % bottleCount;
+            const space = maxLayers - to.length;
+            const amount = Math.min(space, count);
+            for (let i = 0; i < amount; i++) {
+                to.push(from.pop());
+            }
+            return newState;
+        };
+
+        const visited = new Set();
+        const queue = [{ state: initialState.map(b => [...b]), depth: 0 }];
+        visited.add(serialize(initialState));
+
+        while (queue.length > 0) {
+            const { state, depth } = queue.shift();
+            if (depth > maxDepth) return false;
+            if (isSolved(state)) return true;
+
+            for (let i = 0; i < state.length; i++) {
+                for (let j = 0; j < state.length; j++) {
+                    if (i !== j && canPour(state[i], state[j])) {
+                        const next = pour(state, i, j);
+                        const key = serialize(next);
+                        if (!visited.has(key)) {
+                            visited.add(key);
+                            queue.push({ state: next, depth: depth + 1 });
+                        }
+                    }
+                }
+            }
         }
-
-        return level;
+        return false;
     }
 
-    function hasValidSpareBottle(level, maxPerBottle) {
-        // Return true if at least one bottle has enough free space (e.g. 2 or more)
-        return level.some(bottle => bottle.length <= maxPerBottle - 2);
-    }
-
+    // 💧 Render bottles
     function renderBottles() {
         bottles.forEach((bottleEl, idx) => {
             bottleEl.innerHTML = "";
@@ -153,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 🫗 Handle bottle click
     function handleBottleClick(i) {
         if (isPouring) return;
         const bottle = bottleData[i];
@@ -172,6 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // 💦 Pour logic with animation
     function pour(fromIdx, toIdx) {
         const source = bottleData[fromIdx];
         const target = bottleData[toIdx];
@@ -207,65 +259,335 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 🎬 Pour animation
     function animateBottlePour(fromEl, toEl, color, amount, onComplete) {
         const fromRect = fromEl.getBoundingClientRect();
         const toRect = toEl.getBoundingClientRect();
 
         const dx = toRect.left - fromRect.left;
         const dy = toRect.top - fromRect.top;
+        const bendDir = dx > 0 ? 1 : -1;
 
-        const clone = fromEl.cloneNode(true);
-        clone.style.position = "fixed";
-        clone.style.left = `${fromRect.left}px`;
-        clone.style.top = `${fromRect.top}px`;
-        clone.style.width = `${fromRect.width}px`;
-        clone.style.height = `${fromRect.height}px`;
-        clone.style.zIndex = 9999;
-        clone.style.transformOrigin = dx > 0 ? "top left" : "top right";
-        clone.classList.add("clone-anim");
-        document.body.appendChild(clone);
+        const sourceLayers = fromEl.querySelectorAll(".layer");
+        const sourceTop = sourceLayers[sourceLayers.length - 1];
 
-        requestAnimationFrame(() => {
-            clone.style.transition = "transform 0.4s ease, left 0.4s ease, top 0.4s ease";
-            clone.style.left = `${fromRect.left + dx / 2}px`;
-            clone.style.top = `${fromRect.top + dy / 2 - 60}px`;
-            clone.style.transform = `rotate(${dx > 0 ? 25 : -25}deg)`;
-        });
-
-        const stream = document.createElement("div");
-        stream.classList.add("pour-stream");
-        stream.style.setProperty("--stream-length", `${Math.abs(dy) + 40}px`);
-        stream.style.left = `${fromRect.left + fromRect.width / 2}px`;
-        stream.style.top = `${fromRect.top + 40}px`;
-        document.body.appendChild(stream);
-
-        const toLayers = toEl.querySelectorAll(".layer");
         const newLayer = document.createElement("div");
         newLayer.className = "layer";
         newLayer.style.backgroundColor = color;
-        newLayer.style.height = "0px";
-        newLayer.style.bottom = `${toLayers.length * (100 / MAX_LAYERS)}%`;
+        newLayer.style.height = "0%";
+        newLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * (100 / MAX_LAYERS)}%`;
         toEl.appendChild(newLayer);
 
-        setTimeout(() => {
-            newLayer.style.transition = `height 700ms ease`;
-            newLayer.style.height = `${100 / MAX_LAYERS}%`;
-        }, 100);
+        const canvas = document.createElement("canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvas.style.position = "fixed";
+        canvas.style.left = "0";
+        canvas.style.top = "0";
+        canvas.style.pointerEvents = "none";
+        canvas.style.zIndex = 9999;
+        document.body.appendChild(canvas);
+        const ctx = canvas.getContext("2d");
 
+        // Play sound
         if (pourSound) {
-            pourSound.volume = 0.5;
+            pourSound.volume = 0.6;
             pourSound.currentTime = 0;
-            pourSound.play().catch(() => {
-            });
+            pourSound.play().catch(() => {});
         }
 
+        // ✨ Move and rotate source bottle toward target
+        fromEl.style.transition = `transform 0.4s ease`;
+        fromEl.style.transformOrigin = bendDir > 0 ? "top left" : "top right";
+        fromEl.style.zIndex = "10";
+        fromEl.style.transform = `translate(${dx}px, ${dy-80}px) rotate(${bendDir * 70}deg)`;
+
         setTimeout(() => {
-            clone.remove();
-            stream.remove();
-            onComplete && onComplete();
-        }, 1100);
+            const pourDuration = 800;
+            const start = performance.now();
+
+            const startX = bendDir > 0 ? toRect.left + toRect.width / 2 - 35 : toRect.left + toRect.width / 2 + 35;
+            const startY = toRect.top - 20;
+
+            // const rotationAngle = bendDir * 70;
+            // const pourDuration = 1200;
+            // const start = performance.now();
+            //
+            // // --- ✅ Calculate rotated pouring point
+            // const bottleCenterX = fromRect.left + fromRect.width / 2;
+            // const bottleCenterY = fromRect.top + fromRect.height / 2;
+            //
+            // const mouthX = bendDir > 0 ? fromRect.left + fromRect.width * 0.8 : fromRect.left + fromRect.width * 0.1;
+            // const mouthY = fromRect.top - 20;
+            //
+            // function getRotatedPoint(cx, cy, x, y, angleDeg) {
+            //     const rad = angleDeg * Math.PI / 180;
+            //     const cos = Math.cos(rad);
+            //     const sin = Math.sin(rad);
+            //     const dx = x - cx;
+            //     const dy = y - cy;
+            //     return {
+            //         x: dx * cos - dy * sin + cx,
+            //         y: dx * sin + dy * cos + cy
+            //     };
+            // }
+            //
+            // const rotatedMouth = getRotatedPoint(bottleCenterX, bottleCenterY, mouthX, mouthY, rotationAngle);
+            // const startX = rotatedMouth.x;
+            // const startY = rotatedMouth.y;
+
+            const endX = toRect.left + toRect.width / 2 ;
+            const endY = toRect.top + 50;
+
+            const gravity = Math.min(180, Math.max(10, 10 + dy / 2));
+            let droplets = [];
+
+            function animate(timestamp) {
+                const elapsed = timestamp - start;
+                const progress = Math.min(elapsed / pourDuration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+
+                const delta = ease * amount * (100 / MAX_LAYERS);
+                if (sourceTop) {
+                    const remaining = 100 / MAX_LAYERS - delta;
+                    sourceTop.style.height = `${Math.max(remaining, 0)}%`;
+                }
+                newLayer.style.height = `${delta}%`;
+
+                const cpX = bendDir > 0 ? (startX + endX) / 2 + bendDir * 100 - 80 : (startX + endX) / 2 + bendDir * 100 + 80;
+                const cpY = Math.min(startY, endY) - gravity;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw water stream
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+                const width = 12 + Math.sin(progress * Math.PI) * 10;
+                ctx.lineWidth = width;
+                const grad = ctx.createLinearGradient(startX, startY, endX, endY);
+                grad.addColorStop(0, color + "cc");
+                grad.addColorStop(0.8, color + "88");
+                grad.addColorStop(1, color + "00");
+                ctx.strokeStyle = grad;
+                ctx.lineCap = "round";
+                ctx.stroke();
+
+                ctx.lineWidth = 2;
+                ctx.setLineDash([12, 20]);
+                ctx.lineDashOffset = -elapsed / 12;
+                ctx.stroke();
+
+                if (Math.random() < 0.3) {
+                    droplets.push({
+                        x: startX + bendDir * (10 + Math.random() * 10),
+                        y: startY + Math.random() * 5,
+                        vx: bendDir * (1 + Math.random()),
+                        vy: Math.random() * -2,
+                        life: 1
+                    });
+                }
+                droplets.forEach(d => {
+                    d.x += d.vx;
+                    d.vy += 0.25;
+                    d.y += d.vy;
+                    d.life -= 0.025;
+                    ctx.beginPath();
+                    ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = color + Math.floor(d.life * 255).toString(16).padStart(2, "0");
+                    ctx.fill();
+                });
+                droplets = droplets.filter(d => d.life > 0);
+
+                if (progress < 1) requestAnimationFrame(animate);
+                else cleanup();
+            }
+
+            function cleanup() {
+                // Return bottle back to original position
+                fromEl.style.transition = `transform 0.4s ease`;
+                fromEl.style.transform = `translate(0, 0) rotate(0deg)`;
+
+                setTimeout(() => {
+                    canvas.remove();
+                    fromEl.style.zIndex = "";
+                    if (sourceTop && parseFloat(sourceTop.style.height) <= 5) sourceTop.remove();
+                    onComplete && onComplete();
+                }, 400); // wait for return animation to finish
+            }
+
+            requestAnimationFrame(animate);
+        }, 200);
     }
 
+    // delay animation code
+    //function animateBottlePour(fromEl, toEl, color, amount, onComplete) {
+    //     const fromRect = fromEl.getBoundingClientRect();
+    //     const toRect = toEl.getBoundingClientRect();
+    //
+    //     const dx = toRect.left - fromRect.left;
+    //     const dy = toRect.top - fromRect.top;
+    //     const bendDir = dx > 0 ? 1 : -1;
+    //
+    //     const sourceLayers = fromEl.querySelectorAll(".layer");
+    //     const sourceTop = sourceLayers[sourceLayers.length - 1];
+    //
+    //     const newLayer = document.createElement("div");
+    //     newLayer.className = "layer";
+    //     newLayer.style.backgroundColor = color;
+    //     newLayer.style.height = "0%";
+    //     newLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * (100 / MAX_LAYERS)}%`;
+    //     toEl.appendChild(newLayer);
+    //
+    //     const canvas = document.createElement("canvas");
+    //     canvas.width = window.innerWidth;
+    //     canvas.height = window.innerHeight;
+    //     canvas.style.position = "fixed";
+    //     canvas.style.left = "0";
+    //     canvas.style.top = "0";
+    //     canvas.style.pointerEvents = "none";
+    //     canvas.style.zIndex = 9999;
+    //     document.body.appendChild(canvas);
+    //     const ctx = canvas.getContext("2d");
+    //
+    //     if (pourSound) {
+    //         pourSound.volume = 0.6;
+    //         pourSound.currentTime = 0;
+    //         pourSound.play().catch(() => {});
+    //     }
+    //
+    //     // Prepare rotation + translation
+    //     const rotationAngle = bendDir * 70;
+    //     fromEl.style.transition = `transform 0.4s ease`;
+    //     fromEl.style.transformOrigin = bendDir > 0 ? "top left" : "top right";
+    //     fromEl.style.zIndex = "10";
+    //     fromEl.style.transform = `translate(${dx}px, ${dy - 80}px) rotate(${rotationAngle}deg)`;
+    //
+    //     // Delay here so browser applies transform
+    //     setTimeout(() => {
+    //         // Recalculate bounding box after transform
+    //         const afterRect = fromEl.getBoundingClientRect();
+    //
+    //         // Center for rotation
+    //         const bottleCenterX = afterRect.left + afterRect.width / 2;
+    //         const bottleCenterY = afterRect.top + afterRect.height / 2;
+    //
+    //         // Mouth in unrotated local space
+    //         const mouthX = bendDir > 0
+    //             ? afterRect.left + afterRect.width * 0.8
+    //             : afterRect.left + afterRect.width * 0.1;
+    //         const mouthY = afterRect.top;  // Perhaps top of the bottle
+    //
+    //         function getRotatedPoint(cx, cy, x, y, angleDeg) {
+    //             const rad = angleDeg * Math.PI / 180;
+    //             const cos = Math.cos(rad);
+    //             const sin = Math.sin(rad);
+    //             const dx_ = x - cx;
+    //             const dy_ = y - cy;
+    //             return {
+    //                 x: dx_ * cos - dy_ * sin + cx,
+    //                 y: dx_ * sin + dy_ * cos + cy
+    //             };
+    //         }
+    //
+    //         const rotatedMouth = getRotatedPoint(
+    //             bottleCenterX,
+    //             bottleCenterY,
+    //             mouthX,
+    //             mouthY,
+    //             rotationAngle
+    //         );
+    //
+    //         const startX = rotatedMouth.x;
+    //         const startY = rotatedMouth.y;
+    //
+    //         const endX = toRect.left + toRect.width / 2;
+    //         const endY = toRect.top + 20;
+    //
+    //         const pourDuration = 1200;
+    //         const startTime = performance.now();
+    //
+    //         const gravity = Math.min(180, Math.max(60, 120 + dy / 2));
+    //         let droplets = [];
+    //
+    //         function animate(timestamp) {
+    //             const elapsed = timestamp - startTime;
+    //             const progress = Math.min(elapsed / pourDuration, 1);
+    //             const ease = 1 - Math.pow(1 - progress, 3);
+    //
+    //             const delta = ease * amount * (100 / MAX_LAYERS);
+    //             if (sourceTop) {
+    //                 const remaining = 100 / MAX_LAYERS - delta;
+    //                 sourceTop.style.height = `${Math.max(remaining, 0)}%`;
+    //             }
+    //             newLayer.style.height = `${delta}%`;
+    //
+    //             const cpX = (startX + endX) / 2 + bendDir * 50;
+    //             const cpY = Math.min(startY, endY) - gravity;
+    //
+    //             ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //
+    //             ctx.beginPath();
+    //             ctx.moveTo(startX, startY);
+    //             ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+    //             const width = 12 + Math.sin(progress * Math.PI) * 10;
+    //             ctx.lineWidth = width;
+    //             const grad = ctx.createLinearGradient(startX, startY, endX, endY);
+    //             grad.addColorStop(0, color + "cc");
+    //             grad.addColorStop(0.8, color + "88");
+    //             grad.addColorStop(1, color + "00");
+    //             ctx.strokeStyle = grad;
+    //             ctx.lineCap = "round";
+    //             ctx.stroke();
+    //
+    //             ctx.lineWidth = 2;
+    //             ctx.setLineDash([12, 20]);
+    //             ctx.lineDashOffset = -elapsed / 12;
+    //             ctx.stroke();
+    //
+    //             if (Math.random() < 0.3) {
+    //                 droplets.push({
+    //                     x: startX + bendDir * (10 + Math.random() * 10),
+    //                     y: startY + Math.random() * 5,
+    //                     vx: bendDir * (1 + Math.random()),
+    //                     vy: Math.random() * -2,
+    //                     life: 1
+    //                 });
+    //             }
+    //             droplets.forEach(d => {
+    //                 d.x += d.vx;
+    //                 d.vy += 0.25;
+    //                 d.y += d.vy;
+    //                 d.life -= 0.025;
+    //                 ctx.beginPath();
+    //                 ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+    //                 ctx.fillStyle = color + Math.floor(d.life * 255).toString(16).padStart(2, "0");
+    //                 ctx.fill();
+    //             });
+    //             droplets = droplets.filter(d => d.life > 0);
+    //
+    //             if (progress < 1) requestAnimationFrame(animate);
+    //             else cleanup();
+    //         }
+    //
+    //         function cleanup() {
+    //             fromEl.style.transition = `transform 0.4s ease`;
+    //             fromEl.style.transform = `translate(0, 0) rotate(0deg)`;
+    //
+    //             setTimeout(() => {
+    //                 canvas.remove();
+    //                 fromEl.style.zIndex = "";
+    //                 if (sourceTop && parseFloat(sourceTop.style.height) <= 5) sourceTop.remove();
+    //                 onComplete && onComplete();
+    //             }, 400);
+    //         }
+    //
+    //         requestAnimationFrame(animate);
+    //     }, 50); // delay ~50 ms to ensure transform applied
+    // }
+
+
+    // 🕹 Undo / Redo
     function undoMove() {
         if (history.length === 0 || isPouring) return;
         redoHistory.push(deepClone(bottleData));
@@ -284,6 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderBottles();
     }
 
+    // 💡 Hint
     function showHint() {
         bottles.forEach(b => b.classList.remove("hint"));
         message.textContent = "";
@@ -313,7 +636,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (tgt.length + possible === MAX_LAYERS) score += 1;
                     if (score > bestScore) {
                         bestScore = score;
-                        best = {from: f, to: t};
+                        best = { from: f, to: t };
                     }
                 }
             }
@@ -327,173 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function generateSolvableLevel(colorCount, layersPerBottle, baseSpare = 1) {
-        const maxTries = 20;
-        for (let attempt = 0; attempt < maxTries; attempt++) {
-            const spare = baseSpare + attempt;
-            const totalBottles = colorCount + spare;
-
-            const level = generateRandomLevel(colorCount, layersPerBottle, totalBottles);
-            if (isSolvable(level, layersPerBottle)) {
-                return level;
-            }
-        }
-
-        console.warn("Could not generate a solvable level within limit. Falling back.");
-        return generateRandomLevel(colorCount, layersPerBottle, colorCount + baseSpare + 1);
-    }
-
-    function isSolvable(initialState, maxLayers = 4, maxDepth = 2000) {
-        const serialize = state => JSON.stringify(state.map(b => b.join(",")));
-
-        const isSolved = state => {
-            return state.every(bottle =>
-                bottle.length === 0 ||
-                (bottle.length === maxLayers && bottle.every(c => c === bottle[0]))
-            );
-        };
-
-        const canPour = (from, to) => {
-            if (from.length === 0 || to.length >= maxLayers) return false;
-            const color = from[from.length - 1];
-            if (to.length > 0 && to[to.length - 1] !== color) return false;
-            let count = 1;
-            for (let i = from.length - 2; i >= 0; i--) {
-                if (from[i] === color) count++;
-                else break;
-            }
-            const space = maxLayers - to.length;
-            return count > 0 && space > 0;
-        };
-
-        const pour = (state, fromIdx, toIdx) => {
-            const newState = state.map(b => [...b]);
-            const from = newState[fromIdx];
-            const to = newState[toIdx];
-            const color = from[from.length - 1];
-
-            let count = 1;
-            for (let i = from.length - 2; i >= 0; i--) {
-                if (from[i] === color) count++;
-                else break;
-            }
-
-            const space = maxLayers - to.length;
-            const moveAmount = Math.min(count, space);
-
-            for (let i = 0; i < moveAmount; i++) {
-                to.push(from.pop());
-            }
-
-            return newState;
-        };
-
-        const seen = new Set();
-        const queue = [initialState.map(b => [...b])];
-        seen.add(serialize(initialState));
-
-        let steps = 0;
-
-        while (queue.length > 0 && steps < maxDepth) {
-            const current = queue.shift();
-            if (isSolved(current)) return true;
-
-            for (let i = 0; i < current.length; i++) {
-                for (let j = 0; j < current.length; j++) {
-                    if (i !== j && canPour(current[i], current[j])) {
-                        const next = pour(current, i, j);
-                        const key = serialize(next);
-                        if (!seen.has(key)) {
-                            seen.add(key);
-                            queue.push(next);
-                        }
-                    }
-                }
-            }
-
-            steps++;
-        }
-
-        return false; // No solution found within depth
-    }
-
-    function isSolvableOptimized(initialState, maxLayers = 4, maxDepth = 3000) {
-        const serialize = (state) =>
-            state.map(b => b.join(",")).join("|");
-
-        const isSolved = (state) =>
-            state.every(b => b.length === 0 || (b.length === maxLayers && b.every(c => c === b[0])));
-
-        const canPour = (from, to) => {
-            if (from.length === 0 || to.length >= maxLayers) return false;
-            const color = from[from.length - 1];
-            if (to.length > 0 && to[to.length - 1] !== color) return false;
-
-            let same = 1;
-            for (let i = from.length - 2; i >= 0; i--) {
-                if (from[i] === color) same++;
-                else break;
-            }
-
-            return (maxLayers - to.length) >= 1 && same >= 1;
-        };
-
-        const pour = (state, fromIdx, toIdx) => {
-            const newState = state.map(b => [...b]);
-            const from = newState[fromIdx];
-            const to = newState[toIdx];
-            const color = from[from.length - 1];
-
-            let count = 1;
-            for (let i = from.length - 2; i >= 0; i--) {
-                if (from[i] === color) count++;
-                else break;
-            }
-
-            const space = maxLayers - to.length;
-            const amount = Math.min(space, count);
-
-            for (let i = 0; i < amount; i++) {
-                to.push(from.pop());
-            }
-
-            return newState;
-        };
-
-        const visited = new Set();
-        const queue = [{state: initialState.map(b => [...b]), depth: 0}];
-        visited.add(serialize(initialState));
-
-        while (queue.length > 0) {
-            const {state, depth} = queue.shift();
-            if (depth > maxDepth) continue;
-
-            if (isSolved(state)) return true;
-
-            for (let i = 0; i < state.length; i++) {
-                for (let j = 0; j < state.length; j++) {
-                    if (i === j) continue;
-                    if (canPour(state[i], state[j])) {
-                        const next = pour(state, i, j);
-                        const key = serialize(next);
-                        if (!visited.has(key)) {
-                            visited.add(key);
-                            queue.push({state: next, depth: depth + 1});
-                        }
-                    }
-                }
-            }
-        }
-
-        return false; // Unsolved within depth
-    }
-
-    // let level;
-    // do {
-    //     level = generateRandomLevel(colorCount, maxLayers);
-    // } while (!isSolvableOptimized(level));
-
-
+    // 🏁 Win check
     function checkWin() {
         const won = bottleData.every(
             b => b.length === 0 || (b.length === MAX_LAYERS && b.every(c => c === b[0]))
@@ -502,8 +659,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (winSound) {
                 winSound.volume = 0.5;
                 winSound.currentTime = 0;
-                winSound.play().catch(() => {
-                });
+                winSound.play().catch(() => {});
             }
             bottles.forEach(b => (b.style.pointerEvents = "none"));
             message.textContent = "🎉 You completed the level!";
@@ -515,5 +671,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return JSON.parse(JSON.stringify(obj));
     }
 
+    // Start first level
     initGame();
 });

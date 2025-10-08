@@ -276,30 +276,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const dx = toRect.left - fromRect.left;
         const dy = toRect.top - fromRect.top;
-        const midX = fromRect.left + dx / 2;
-        const midY = fromRect.top + dy / 2 - 60;
+        const bendDir = dx > 0 ? 1 : -1;
 
-        // Create a temporary clone for tilt
-        const clone = fromEl.cloneNode(true);
-        clone.style.position = "fixed";
-        clone.style.left = `${fromRect.left}px`;
-        clone.style.top = `${fromRect.top}px`;
-        clone.style.width = `${fromRect.width}px`;
-        clone.style.height = `${fromRect.height}px`;
-        clone.style.zIndex = 9999;
-        clone.style.transformOrigin = dx > 0 ? "top left" : "top right";
-        document.body.appendChild(clone);
+        const sourceLayers = fromEl.querySelectorAll(".layer");
+        const sourceTop = sourceLayers[sourceLayers.length - 1];
 
-        // === Prepare target layer ===
-        const targetLayers = toEl.querySelectorAll(".layer");
         const newLayer = document.createElement("div");
         newLayer.className = "layer";
         newLayer.style.backgroundColor = color;
         newLayer.style.height = "0%";
-        newLayer.style.bottom = `${targetLayers.length * (100 / MAX_LAYERS)}%`;
+        newLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * (100 / MAX_LAYERS)}%`;
         toEl.appendChild(newLayer);
 
-        // === Canvas for curved flow ===
         const canvas = document.createElement("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -307,88 +295,106 @@ document.addEventListener("DOMContentLoaded", () => {
         canvas.style.left = "0";
         canvas.style.top = "0";
         canvas.style.pointerEvents = "none";
-        canvas.style.zIndex = 10000;
+        canvas.style.zIndex = 9999;
         document.body.appendChild(canvas);
         const ctx = canvas.getContext("2d");
 
-        // === Audio ===
+        // Play sound
         if (pourSound) {
             pourSound.volume = 0.6;
             pourSound.currentTime = 0;
             pourSound.play().catch(() => {});
         }
 
-        // === Animate tilt ===
-        requestAnimationFrame(() => {
-            clone.style.transition = `transform 0.5s ease, left 0.5s ease, top 0.5s ease`;
-            clone.style.left = `${midX}px`;
-            clone.style.top = `${midY}px`;
-            clone.style.transform = `rotate(${dx > 0 ? 25 : -25}deg)`;
-        });
+        // ✨ Move and rotate source bottle toward target
+        fromEl.style.transition = `transform 0.4s ease`;
+        fromEl.style.transformOrigin = bendDir > 0 ? "top left" : "top right";
+        fromEl.style.zIndex = "10";
+        fromEl.style.transform = `translate(${dx}px, ${dy-80}px) rotate(${bendDir * 70}deg)`;
 
-        const pourDuration = 1000;
+        const pourDuration = 1200;
         const start = performance.now();
 
-        const sourceLayers = fromEl.querySelectorAll(".layer");
-        const sourceTop = sourceLayers[sourceLayers.length - 1];
+        const startX = fromRect.left + (bendDir > 0 ? fromRect.width * 0.2 : fromRect.width * 0.9);
+        const startY = fromRect.top + fromRect.height * 0.25;
+        const endX = toRect.left + toRect.width / 2;
+        const endY = toRect.top + 20;
 
-        // === Animate ===
+        const gravity = Math.min(180, Math.max(60, 120 + dy / 2));
+        let droplets = [];
+
         function animate(timestamp) {
             const elapsed = timestamp - start;
             const progress = Math.min(elapsed / pourDuration, 1);
             const ease = 1 - Math.pow(1 - progress, 3);
 
-            // 1️⃣ Animate water levels
-            const drop = ease * amount * (100 / MAX_LAYERS);
-            const rise = ease * amount * (100 / MAX_LAYERS);
-
+            const delta = ease * amount * (100 / MAX_LAYERS);
             if (sourceTop) {
-                const remaining = 100 / MAX_LAYERS - drop;
+                const remaining = 100 / MAX_LAYERS - delta;
                 sourceTop.style.height = `${Math.max(remaining, 0)}%`;
             }
-            newLayer.style.height = `${rise}%`;
+            newLayer.style.height = `${delta}%`;
 
-            // 2️⃣ Draw curved stream
+            const cpX = (startX + endX) / 2 + bendDir * 50;
+            const cpY = Math.min(startY, endY) - gravity;
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const startX = fromRect.left + fromRect.width / 2;
-            const startY = fromRect.top + 40;
-            const endX = toRect.left + toRect.width / 2;
-            const endY = toRect.top + 20;
-            const cpX = (startX + endX) / 2;
-            const cpY = Math.min(startY, endY) - 100; // curve height
 
+            // Draw water stream
             ctx.beginPath();
             ctx.moveTo(startX, startY);
             ctx.quadraticCurveTo(cpX, cpY, endX, endY);
-            ctx.lineWidth = 8;
+            const width = 12 + Math.sin(progress * Math.PI) * 10;
+            ctx.lineWidth = width;
             const grad = ctx.createLinearGradient(startX, startY, endX, endY);
             grad.addColorStop(0, color + "cc");
+            grad.addColorStop(0.8, color + "88");
             grad.addColorStop(1, color + "00");
             ctx.strokeStyle = grad;
             ctx.lineCap = "round";
             ctx.stroke();
 
-            // Optional “droplets” shimmer
             ctx.lineWidth = 2;
-            ctx.strokeStyle = "rgba(255,255,255,0.6)";
-            ctx.setLineDash([10, 20]);
-            ctx.lineDashOffset = -elapsed / 10;
+            ctx.setLineDash([12, 20]);
+            ctx.lineDashOffset = -elapsed / 12;
             ctx.stroke();
 
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                cleanup();
+            if (Math.random() < 0.3) {
+                droplets.push({
+                    x: startX + bendDir * (10 + Math.random() * 10),
+                    y: startY + Math.random() * 5,
+                    vx: bendDir * (1 + Math.random()),
+                    vy: Math.random() * -2,
+                    life: 1
+                });
             }
+            droplets.forEach(d => {
+                d.x += d.vx;
+                d.vy += 0.25;
+                d.y += d.vy;
+                d.life -= 0.025;
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = color + Math.floor(d.life * 255).toString(16).padStart(2, "0");
+                ctx.fill();
+            });
+            droplets = droplets.filter(d => d.life > 0);
+
+            if (progress < 1) requestAnimationFrame(animate);
+            else cleanup();
         }
 
         function cleanup() {
-            clone.remove();
-            canvas.remove();
-            if (sourceTop && parseFloat(sourceTop.style.height) <= 5) {
-                sourceTop.remove();
-            }
-            onComplete && onComplete();
+            // Return bottle back to original position
+            fromEl.style.transition = `transform 0.4s ease`;
+            fromEl.style.transform = `translate(0, 0) rotate(0deg)`;
+
+            setTimeout(() => {
+                canvas.remove();
+                fromEl.style.zIndex = "";
+                if (sourceTop && parseFloat(sourceTop.style.height) <= 5) sourceTop.remove();
+                onComplete && onComplete();
+            }, 400); // wait for return animation to finish
         }
 
         requestAnimationFrame(animate);
