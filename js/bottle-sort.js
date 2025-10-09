@@ -1,20 +1,20 @@
 const BASE_COLORS = [
     "#00aaff", "#ff7675", "#f6e58d", "#6ab04c",
     "#6d55b1", "#00ffc1", "#918b62", "#ff9ff3",
-    "#e17055", "#fdcb6e", "#1abc9c", "#d980fa",
+    "#88321c", "#d5b06f", "#1abc9c", "#85056d",
     "#ff3600", "#714b00", "#00705c", "#9623c1",
     "#ff00dd", "#14ff01", "#5000a1", "#0063ff",
     "#9f2d6e", "#fdf03a", "#d87200", "#009f70",
 ];
 
 const BASE_COLOR_COUNT = 2;
-const BASE_BOTTLE_SPARE = 1;
+const BASE_BOTTLE_SPARE = 2;
 const LEVELS_PER_DIFFICULTY_INCREASE = 10;
 const MAX_LAYERS = 4;
 
 let history = [];
 let redoHistory = [];
-let currentLevel = 0;
+let currentLevel = 1;
 let isPouring = false;
 let bottles = [];
 let bottleData = [];
@@ -25,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("bottle-container");
     const message = document.getElementById("message");
     const movesDisplay = document.getElementById("moves");
+    const levelDisplay = document.getElementById("level");
     const restartBtn = document.getElementById("restart");
     const undoBtn = document.getElementById("undo");
     const redoBtn = document.getElementById("redo");
@@ -42,10 +43,12 @@ document.addEventListener("DOMContentLoaded", () => {
     hintBtn.addEventListener("click", showHint);
     nextBtn.addEventListener("click", () => {
         currentLevel++;
+        levelDisplay.textContent = currentLevel;
         initGame();
     });
     nextFromWinBtn.addEventListener("click", () => {
         currentLevel++;
+        levelDisplay.textContent = currentLevel;
         document.getElementById("win-screen").classList.add("hidden");
         initGame();
     });
@@ -66,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
         history = [];
         redoHistory = [];
         movesDisplay.textContent = moves;
+        levelDisplay.textContent = currentLevel;
 
         const colorCount = getColorCount();
         const bottleCount = getBottleCount(colorCount);
@@ -85,56 +89,42 @@ document.addEventListener("DOMContentLoaded", () => {
         renderBottles();
     }
 
-    // 🎨 Create solvable randomized level
+    // 🧩 Fast guaranteed solvable level generator
     function generateSolvableLevel(colorCount, layersPerBottle) {
         const usedColors = BASE_COLORS.slice(0, colorCount);
-        const allLayers = [];
+        const bottleCount = getBottleCount(colorCount);
 
-        usedColors.forEach(color => {
-            for (let i = 0; i < layersPerBottle; i++) {
-                allLayers.push(color);
+        // Step 1: Create perfect groups (solved state)
+        let level = usedColors.map(color => Array(layersPerBottle).fill(color));
+
+        // Step 2: Add extra empty bottles
+        while (level.length < bottleCount) {
+            level.push([]);
+        }
+
+        // Step 3: Apply controlled random swaps to make it interesting
+        for (let k = 0; k < colorCount * layersPerBottle * 3; k++) {
+            const i = Math.floor(Math.random() * colorCount);
+            const j = Math.floor(Math.random() * colorCount);
+            if (i === j || level[i].length === 0) continue;
+            const color = level[i].pop();
+            const randBottle = Math.random() < 0.7 ? j : Math.floor(Math.random() * level.length);
+            if (level[randBottle].length < layersPerBottle) {
+                level[randBottle].push(color);
+            } else {
+                level[i].push(color); // undo if full
             }
-        });
+        }
 
-        const shuffle = arr => {
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-        };
-
-        let level = [];
-        let attempts = 0;
-        const maxAttempts = 50;
-
-        do {
-            attempts++;
-            shuffle(allLayers);
-
-            const bottleCount = colorCount + BASE_BOTTLE_SPARE;
-            level = Array.from({ length: bottleCount }, () => []);
-
-            let idx = 0;
-            for (const layer of allLayers) {
-                while (level[idx].length >= layersPerBottle) {
-                    idx = (idx + 1) % bottleCount;
-                }
-                level[idx].push(layer);
-                idx = (idx + 1) % bottleCount;
-            }
-
-            // Add at least one empty bottle
-            if (!level.some(b => b.length === 0)) {
-                level.push([]);
-            }
-
-            // Stop if solvable
-            if (isSolvableOptimized(level)) break;
-
-        } while (attempts < maxAttempts);
+        // Step 4: Shuffle bottles to add variation
+        for (let i = level.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [level[i], level[j]] = [level[j], level[i]];
+        }
 
         return level;
     }
+
 
     // 🧠 Solvable level detection (optimized BFS)
     function isSolvableOptimized(initialState, maxLayers = 4, maxDepth = 2500) {
@@ -278,16 +268,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const dy = toRect.top - fromRect.top;
         const bendDir = dx > 0 ? 1 : -1;
 
-        const sourceLayers = fromEl.querySelectorAll(".layer");
-        const sourceTop = sourceLayers[sourceLayers.length - 1];
-
-        const newLayer = document.createElement("div");
-        newLayer.className = "layer";
-        newLayer.style.backgroundColor = color;
-        newLayer.style.height = "0%";
-        newLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * (100 / MAX_LAYERS)}%`;
-        toEl.appendChild(newLayer);
-
         const canvas = document.createElement("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -306,98 +286,144 @@ document.addEventListener("DOMContentLoaded", () => {
             pourSound.play().catch(() => {});
         }
 
-        // ✨ Move and rotate source bottle toward target
+        // Tilt source bottle
         fromEl.style.transition = `transform 0.4s ease`;
         fromEl.style.transformOrigin = bendDir > 0 ? "top left" : "top right";
         fromEl.style.zIndex = "10";
-        fromEl.style.transform = `translate(${dx}px, ${dy-80}px) rotate(${bendDir * 70}deg)`;
+        fromEl.style.transform = `translate(${dx}px, ${dy - 80}px) rotate(${bendDir * 70}deg)`;
 
-        const pourDuration = 1200;
-        const start = performance.now();
+        setTimeout(() => {
+            const startX = bendDir > 0 ? toRect.left + toRect.width / 2 - 35 : toRect.left + toRect.width / 2 + 35;
+            const startY = toRect.top - 30;
+            const endX = toRect.left + toRect.width / 2;
+            const endY = toRect.top + 150;
+            const gravity = Math.min(180, Math.max(10, 10 + dy / 2));
 
-        const startX = fromRect.left + (bendDir > 0 ? fromRect.width * 0.2 : fromRect.width * 0.9);
-        const startY = fromRect.top + fromRect.height * 0.25;
-        const endX = toRect.left + toRect.width / 2;
-        const endY = toRect.top + 20;
+            let droplets = [];
 
-        const gravity = Math.min(180, Math.max(60, 120 + dy / 2));
-        let droplets = [];
+            const oneLayerHeight = 100 / MAX_LAYERS;
 
-        function animate(timestamp) {
-            const elapsed = timestamp - start;
-            const progress = Math.min(elapsed / pourDuration, 1);
-            const ease = 1 - Math.pow(1 - progress, 3);
+            // Create one new target layer that grows with the full amount poured
+            const targetLayer = document.createElement("div");
+            targetLayer.className = "layer";
+            targetLayer.style.backgroundColor = color;
+            targetLayer.style.height = "0%";
+            targetLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * oneLayerHeight}%`;
+            toEl.appendChild(targetLayer);
 
-            const delta = ease * amount * (100 / MAX_LAYERS);
-            if (sourceTop) {
-                const remaining = 100 / MAX_LAYERS - delta;
-                sourceTop.style.height = `${Math.max(remaining, 0)}%`;
+            const sourceLayers = fromEl.querySelectorAll(".layer");
+
+            // Animate source layers one by one decreasing height
+            function animateSourceLayer(index, callback) {
+                if (index >= amount) {
+                    callback();
+                    return;
+                }
+                const sourceTop = sourceLayers[sourceLayers.length - 1 - index];
+                const duration = 450;
+                const start = performance.now();
+
+                function step(time) {
+                    const elapsed = time - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3);
+
+                    if (sourceTop) {
+                        sourceTop.style.height = `${Math.max(oneLayerHeight - (ease * oneLayerHeight), 0)}%`;
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        if (sourceTop && parseFloat(sourceTop.style.height) <= 5) {
+                            sourceTop.remove();
+                        }
+                        animateSourceLayer(index + 1, callback);
+                    }
+                }
+                requestAnimationFrame(step);
             }
-            newLayer.style.height = `${delta}%`;
 
-            const cpX = (startX + endX) / 2 + bendDir * 50;
-            const cpY = Math.min(startY, endY) - gravity;
+            // Animate target layer growing smoothly for the entire amount
+            const pourDuration = amount * 500; // total duration proportional to amount
+            const start = performance.now();
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            function animateTargetLayer(timestamp) {
+                const elapsed = timestamp - start;
+                const progress = Math.min(elapsed / pourDuration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
 
-            // Draw water stream
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            ctx.quadraticCurveTo(cpX, cpY, endX, endY);
-            const width = 12 + Math.sin(progress * Math.PI) * 10;
-            ctx.lineWidth = width;
-            const grad = ctx.createLinearGradient(startX, startY, endX, endY);
-            grad.addColorStop(0, color + "cc");
-            grad.addColorStop(0.8, color + "88");
-            grad.addColorStop(1, color + "00");
-            ctx.strokeStyle = grad;
-            ctx.lineCap = "round";
-            ctx.stroke();
+                targetLayer.style.height = `${ease * amount * oneLayerHeight}%`;
 
-            ctx.lineWidth = 2;
-            ctx.setLineDash([12, 20]);
-            ctx.lineDashOffset = -elapsed / 12;
-            ctx.stroke();
+                const cpX = bendDir > 0
+                    ? (startX + endX) / 2 + bendDir * 100 - 80
+                    : (startX + endX) / 2 + bendDir * 100 + 80;
+                const cpY = Math.min(startY, endY) - gravity;
 
-            if (Math.random() < 0.3) {
-                droplets.push({
-                    x: startX + bendDir * (10 + Math.random() * 10),
-                    y: startY + Math.random() * 5,
-                    vx: bendDir * (1 + Math.random()),
-                    vy: Math.random() * -2,
-                    life: 1
-                });
-            }
-            droplets.forEach(d => {
-                d.x += d.vx;
-                d.vy += 0.25;
-                d.y += d.vy;
-                d.life -= 0.025;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Draw water stream
                 ctx.beginPath();
-                ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
-                ctx.fillStyle = color + Math.floor(d.life * 255).toString(16).padStart(2, "0");
-                ctx.fill();
+                ctx.moveTo(startX, startY);
+                ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+                const width = 12 + Math.sin(progress * Math.PI) * 10;
+                ctx.lineWidth = width;
+                const grad = ctx.createLinearGradient(startX, startY, endX, endY);
+                grad.addColorStop(0, color + "cc");
+                grad.addColorStop(0.8, color + "88");
+                grad.addColorStop(1, color + "00");
+                ctx.strokeStyle = grad;
+                ctx.lineCap = "round";
+                ctx.stroke();
+
+                ctx.lineWidth = 2;
+                ctx.setLineDash([12, 20]);
+                ctx.lineDashOffset = -elapsed / 12;
+                ctx.stroke();
+
+                if (Math.random() < 0.3) {
+                    droplets.push({
+                        x: startX + bendDir * (10 + Math.random() * 10),
+                        y: startY + Math.random() * 5,
+                        vx: bendDir * (1 + Math.random()),
+                        vy: Math.random() * -2,
+                        life: 1
+                    });
+                }
+                droplets.forEach(d => {
+                    d.x += d.vx;
+                    d.vy += 0.25;
+                    d.y += d.vy;
+                    d.life -= 0.025;
+                    ctx.beginPath();
+                    ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = color + Math.floor(d.life * 255).toString(16).padStart(2, "0");
+                    ctx.fill();
+                });
+                droplets = droplets.filter(d => d.life > 0);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateTargetLayer);
+                }
+            }
+
+            // Start source animation, then cleanup
+            animateSourceLayer(0, () => {
+                // After source layers have animated out, start cleanup & reset bottle position
+                fromEl.style.transition = `transform 0.4s ease`;
+                fromEl.style.transform = `translate(0, 0) rotate(0deg)`;
+
+                setTimeout(() => {
+                    canvas.remove();
+                    fromEl.style.zIndex = "";
+                    onComplete && onComplete();
+                }, 80);
             });
-            droplets = droplets.filter(d => d.life > 0);
 
-            if (progress < 1) requestAnimationFrame(animate);
-            else cleanup();
-        }
+            // Start target animation simultaneously
+            requestAnimationFrame(animateTargetLayer);
 
-        function cleanup() {
-            // Return bottle back to original position
-            fromEl.style.transition = `transform 0.4s ease`;
-            fromEl.style.transform = `translate(0, 0) rotate(0deg)`;
-
-            setTimeout(() => {
-                canvas.remove();
-                fromEl.style.zIndex = "";
-                if (sourceTop && parseFloat(sourceTop.style.height) <= 5) sourceTop.remove();
-                onComplete && onComplete();
-            }, 400); // wait for return animation to finish
-        }
-
-        requestAnimationFrame(animate);
+        }, 200);
     }
 
     // 🕹 Undo / Redo
