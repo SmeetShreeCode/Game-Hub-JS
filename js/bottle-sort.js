@@ -6,11 +6,32 @@ const BASE_COLORS = [
     "#ff00dd", "#14ff01", "#5000a1", "#0063ff",
     "#9f2d6e", "#fdf03a", "#d87200", "#009f70",
 ];
+const introLevels = [
+    [ //level 1
+        ["#ff7675", "#ff7675"],
+        ["#ff7675", "#ff7675"], []
+    ],
+    [ //level 2
+        ["#00aaff", "#00aaff", "#00aaff"],
+        ["#00aaff"], []
+    ],
+    [ //level 3
+        ["#00aaff", "#00aaff", "#00aaff", "#ff7675"],
+        ["#00aaff", "#ff7675", "#ff7675", "#ff7675"],
+        []
+    ],
+    [ //level 4
+        ["#00aaff", "#00aaff", "#ff7675"],
+        ["#ff7675", "#00aaff", "#00aaff"],
+        ["#ff7675", "#ff7675"],
+    ]
+];
 
 const BASE_COLOR_COUNT = 2;
-const BASE_BOTTLE_SPARE = 2;
+const BASE_BOTTLE_SPARE = 1;
 const LEVELS_PER_DIFFICULTY_INCREASE = 10;
 const MAX_LAYERS = 4;
+const ADD_BOTTLE_LIMIT = 10;
 
 let history = [];
 let redoHistory = [];
@@ -20,6 +41,7 @@ let bottles = [];
 let bottleData = [];
 let selected = null;
 let moves = 0;
+let addedBottleCount = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
     const container = document.getElementById("bottle-container");
@@ -32,12 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const hintBtn = document.getElementById("hint");
     const nextBtn = document.getElementById("next");
     const nextFromWinBtn = document.getElementById("next-from-win");
+    const addBottleBtn = document.getElementById("add-bottle");
 
     const pourSound = document.getElementById("pour-sound");
     const winSound = document.getElementById("win-sound");
+    const savedLevel = parseInt(localStorage.getItem("bottle_sort_lastLevel"), 10);
+    if (!isNaN(savedLevel) && savedLevel > 0) {
+        currentLevel = savedLevel;
+    }
 
     // Button bindings
-    restartBtn.addEventListener("click", initGame);
+    addBottleBtn.addEventListener("click", addEmptyBottle);
+    restartBtn.addEventListener("click", () => {
+        document.getElementById("restart-confirm-screen").classList.remove("hidden");
+    });
     undoBtn.addEventListener("click", undoMove);
     redoBtn.addEventListener("click", redoMove);
     hintBtn.addEventListener("click", showHint);
@@ -53,23 +83,40 @@ document.addEventListener("DOMContentLoaded", () => {
         initGame();
     });
 
+    document.getElementById("confirm-restart").addEventListener("click", () => {
+        document.getElementById("restart-confirm-screen").classList.add("hidden");
+        initGame();
+    });
+
+    document.getElementById("cancel-restart").addEventListener("click", () => {
+        document.getElementById("restart-confirm-screen").classList.add("hidden");
+    });
+
+    document.getElementById("restart-stuck").addEventListener("click", () => {
+        document.getElementById("stuck-screen").classList.add("hidden");
+        initGame();
+    });
+
     function getColorCount() {
         return BASE_COLOR_COUNT + Math.floor(currentLevel / LEVELS_PER_DIFFICULTY_INCREASE);
     }
 
     function getBottleCount(colorCount) {
         return colorCount + BASE_BOTTLE_SPARE;
+
     }
 
     // 🧩 Initialize new level
     function initGame() {
         message.textContent = "";
         moves = 0;
+        addedBottleCount = 0;
         selected = null;
         history = [];
         redoHistory = [];
         movesDisplay.textContent = moves;
         levelDisplay.textContent = currentLevel;
+        localStorage.setItem("bottle_sort_lastLevel", currentLevel);
 
         const colorCount = getColorCount();
         const bottleCount = getBottleCount(colorCount);
@@ -84,9 +131,33 @@ document.addEventListener("DOMContentLoaded", () => {
             container.appendChild(bottle);
             bottles.push(bottle);
         }
+        if (currentLevel > 4) {
+            hintBtn.classList.remove("hidden");
+            addBottleBtn.classList.remove("hidden");
+        } else {
+            hintBtn.classList.add("hidden");
+            addBottleBtn.classList.add("hidden");
+        }
 
-        bottleData = generateSolvableLevel(colorCount, MAX_LAYERS);
+        if (currentLevel <= introLevels.length) {
+            // Load predefined intro level
+            bottleData = deepClone(introLevels[currentLevel - 1]);
+        } else {
+            // Generate random solvable level
+            do {
+                bottleData = generateSolvableLevel(colorCount, MAX_LAYERS);
+            } while (
+                isSolved(bottleData) || !isSolvableOptimized(bottleData, MAX_LAYERS, 3000)
+                );
+        }
+
         renderBottles();
+    }
+
+    function isSolved(state) {
+        return state.every(b =>
+            b.length === 0 || (b.length === MAX_LAYERS && b.every(c => c === b[0]))
+        );
     }
 
     // 🧩 Fast guaranteed solvable level generator
@@ -103,7 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Step 3: Apply controlled random swaps to make it interesting
-        for (let k = 0; k < colorCount * layersPerBottle * 3; k++) {
+        const shuffleIntensity = 3 + Math.floor(currentLevel / 10);
+        for (let k = 0; k < colorCount * layersPerBottle * shuffleIntensity; k++) {
             const i = Math.floor(Math.random() * colorCount);
             const j = Math.floor(Math.random() * colorCount);
             if (i === j || level[i].length === 0) continue;
@@ -160,11 +232,11 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const visited = new Set();
-        const queue = [{ state: initialState.map(b => [...b]), depth: 0 }];
+        const queue = [{state: initialState.map(b => [...b]), depth: 0}];
         visited.add(serialize(initialState));
 
         while (queue.length > 0) {
-            const { state, depth } = queue.shift();
+            const {state, depth} = queue.shift();
             if (depth > maxDepth) return false;
             if (isSolved(state)) return true;
 
@@ -175,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         const key = serialize(next);
                         if (!visited.has(key)) {
                             visited.add(key);
-                            queue.push({ state: next, depth: depth + 1 });
+                            queue.push({state: next, depth: depth + 1});
                         }
                     }
                 }
@@ -251,6 +323,20 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let k = 0; k < amount; k++) {
                 target.push(source.pop());
             }
+            if (target.length === MAX_LAYERS && target.every(c => c === target[0])) {
+                const bottleElement = bottles[toIdx];
+                bottleElement.classList.add("bounce");
+
+                const rect = bottleElement.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+
+                triggerFireworks(35, x, y);
+
+                setTimeout(() => {
+                    bottleElement.classList.remove("bounce");
+                }, 800);
+            }
             moves++;
             movesDisplay.textContent = moves;
             renderBottles();
@@ -283,7 +369,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pourSound) {
             pourSound.volume = 0.6;
             pourSound.currentTime = 0;
-            pourSound.play().catch(() => {});
+            pourSound.play().catch(() => {
+            });
         }
 
         // Tilt source bottle
@@ -293,10 +380,21 @@ document.addEventListener("DOMContentLoaded", () => {
         fromEl.style.transform = `translate(${dx}px, ${dy - 80}px) rotate(${bendDir * 70}deg)`;
 
         setTimeout(() => {
-            const startX = bendDir > 0 ? toRect.left + toRect.width / 2 - 35 : toRect.left + toRect.width / 2 + 35;
-            const startY = toRect.top - 30;
+            const offsetX = Math.min(35, window.innerWidth * 0.08); // max 30px or 8% of screen
+            const offsetY = Math.min(35, window.innerHeight * 0.04); // for startY
+            const pourHeight = Math.min(150, window.innerHeight * 0.12); // pour distance
+
+            const startX = bendDir > 0
+                ? toRect.left + toRect.width / 2 - offsetX
+                : toRect.left + toRect.width / 2 + offsetX;
+
+            const startY = toRect.top - offsetY;
             const endX = toRect.left + toRect.width / 2;
-            const endY = toRect.top + 150;
+            const endY = toRect.top + pourHeight;
+            // const startX = bendDir > 0 ? toRect.left + toRect.width / 2 - 35 : toRect.left + toRect.width / 2 + 35;
+            // const startY = toRect.top - 30;
+            // const endX = toRect.left + toRect.width / 2;
+            // const endY = toRect.top + 120;
             const gravity = Math.min(180, Math.max(10, 10 + dy / 2));
 
             let droplets = [];
@@ -341,6 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         animateSourceLayer(index + 1, callback);
                     }
                 }
+
                 requestAnimationFrame(step);
             }
 
@@ -475,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (tgt.length + possible === MAX_LAYERS) score += 1;
                     if (score > bestScore) {
                         bestScore = score;
-                        best = { from: f, to: t };
+                        best = {from: f, to: t};
                     }
                 }
             }
@@ -485,8 +584,61 @@ document.addEventListener("DOMContentLoaded", () => {
             bottles[best.from].classList.add("hint");
             bottles[best.to].classList.add("hint");
         } else {
-            message.textContent = "❌ No useful moves!";
+            if (isSolved(bottleData)) {
+                checkWin(); // In case it's actually solved
+            } else if (isStuck()) {
+                document.getElementById("stuck-screen").classList.remove("hidden");
+                bottles.forEach(b => (b.style.pointerEvents = "none"));
+            } else {
+                message.textContent = "❌ No useful moves!";
+            }
         }
+    }
+
+    // ➕Add Empty Bottle If Player Want
+    function addEmptyBottle() {
+        if (isPouring || addedBottleCount >= ADD_BOTTLE_LIMIT) return;
+
+        bottleData.push([]);
+        const bottleIndex = bottles.length;
+        const bottle = document.createElement("div");
+        bottle.classList.add("board");
+        bottle.addEventListener("click", () => handleBottleClick(bottleIndex));
+        document.getElementById("bottle-container").appendChild(bottle);
+        bottles.push(bottle);
+        renderBottles();
+
+        addedBottleCount++;
+    }
+
+    function isStuck() {
+        for (let f = 0; f < bottleData.length; f++) {
+            const src = bottleData[f];
+            if (src.length === 0) continue;
+            const c = src[src.length - 1];
+
+            let sameCount = 1;
+            for (let i = src.length - 2; i >= 0; i--) {
+                if (src[i] === c) sameCount++;
+                else break;
+            }
+
+            for (let t = 0; t < bottleData.length; t++) {
+                if (t === f) continue;
+                const tgt = bottleData[t];
+
+                if (tgt.length >= MAX_LAYERS) continue;
+                const top = tgt[tgt.length - 1];
+
+                if (tgt.length === 0 || top === c) {
+                    const space = MAX_LAYERS - tgt.length;
+                    const possible = Math.min(sameCount, space);
+                    if (possible > 0) return false; // At least one move exists
+                }
+            }
+        }
+
+        return true; // No moves found = stuck
     }
 
     // 🏁 Win check
@@ -495,15 +647,85 @@ document.addEventListener("DOMContentLoaded", () => {
             b => b.length === 0 || (b.length === MAX_LAYERS && b.every(c => c === b[0]))
         );
         if (won) {
+            triggerFireworks();
+            bottles.forEach(b => {
+                b.style.pointerEvents = "none";
+                b.classList.add("bounce");
+            });
+
+            // Remove bounce class after animation to allow re-trigger
+            setTimeout(() => {
+                bottles.forEach(b => b.classList.remove("bounce"));
+            }, 1000);
+
             if (winSound) {
                 winSound.volume = 0.5;
                 winSound.currentTime = 0;
-                winSound.play().catch(() => {});
+                winSound.play().catch(() => {
+                });
             }
             bottles.forEach(b => (b.style.pointerEvents = "none"));
             message.textContent = "🎉 You completed the level!";
             document.getElementById("win-screen").classList.remove("hidden");
         }
+    }
+
+    function triggerFireworks(particle = 250, x, y) {
+        const canvas = document.createElement("canvas");
+        canvas.id = "fireworks-canvas";
+        canvas.style.position = "fixed";
+        canvas.style.left = 0;
+        canvas.style.top = 0;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvas.style.zIndex = 9999;
+        canvas.style.pointerEvents = "none";
+        document.body.appendChild(canvas);
+
+        const ctx = canvas.getContext("2d");
+        const centerX = x || canvas.width / 2;
+        const centerY = y || canvas.height / 2;
+        const particles = [];
+
+        for (let i = 0; i < particle; i++) {
+            particles.push({
+                x: centerX,
+                y: centerY,
+                angle: Math.random() * 2 * Math.PI,
+                speed: Math.random() * 5 + 5,
+                radius: Math.random() * 3 + 5,
+                life: 1,
+                color: BASE_COLORS[Math.floor(Math.random() * BASE_COLORS.length)]
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                const dx = Math.cos(p.angle) * p.speed;
+                const dy = Math.sin(p.angle) * p.speed;
+                p.x += dx;
+                p.y += dy;
+                p.life -= 0.02;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.fill();
+            });
+
+            ctx.globalAlpha = 1;
+
+            if (particles.some(p => p.life > 0)) {
+                requestAnimationFrame(animate);
+            } else {
+                canvas.remove();
+            }
+        }
+
+        animate();
     }
 
     function deepClone(obj) {

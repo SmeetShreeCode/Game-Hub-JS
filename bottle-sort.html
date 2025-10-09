@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bottle Sort Puzzle</title>
-    <link rel="stylesheet" href="css/bottle-filler.css">
+    <link rel="stylesheet" href="css/bottle-sort.css">
 </head>
 <body>
 <h2>Bottle Sort Puzzle 💧</h2>
@@ -14,15 +14,32 @@
 <button id="hint">💡 Hint</button>
 <button id="next">➡️ Next Level</button>
 <h3>Moves: <span id="moves">0</span>
-    Level: <span id="level">0</span></h3>
+    Level: <span id="level">0</span>
+    <button id="add-bottle">➕ Add Bottle</button>
+</h3>
 
 <div class="bottle-filler" id="bottle-container"></div>
 
-<h3 id="message"></h3>
+<div id="stuck-screen" class="hidden">
+    <h2>😵 You're stuck! No more moves!</h2>
+    <button id="restart-stuck">Restart Level</button>
+</div>
 
 <div id="win-screen" class="hidden">
-    <h2>🎉 You Win! 🎉</h2>
+    <h2 id="message"></h2>
+    <h2>🎉 Congratulations! 🎉</h2>
     <button id="next-from-win">Next Level</button>
+</div>
+
+<div id="restart-confirm-screen" class="overlay hidden">
+    <div class="popup">
+        <h2>🔁 Restart Level?</h2>
+        <p>This will restart the current level with a new layout.</p>
+        <div class="popup-buttons">
+            <button id="confirm-restart">Yes, Restart</button>
+            <button id="cancel-restart">Cancel</button>
+        </div>
+    </div>
 </div>
 
 <audio id="pour-sound" src="music/bottle-filler/pour.mp3" preload="auto"></audio>
@@ -31,6 +48,6 @@
 <footer>
     <p><a href="index.html">⬅ Back to Games</a></p>
 </footer>
-<script src="Demo/bottle-filler.js"></script>
+<script src="js/bottle-sort.js"></script>
 </body>
 </html>
