@@ -40,7 +40,7 @@ button:hover {
 
 /* ========== Bottle Container ========== */
 .bottle-filler {
-    margin-top: 80px;
+    margin-top: 55px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -85,6 +85,7 @@ button:hover {
     border-radius: 0;
     transition: all 0.3s ease;
     z-index: 1;
+    overflow: hidden;
 }
 
 .layer::after {

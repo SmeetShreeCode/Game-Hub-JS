@@ -1,7 +1,7 @@
 const BASE_COLORS = [
     "#00aaff", "#ff7675", "#f6e58d", "#6ab04c",
     "#6d55b1", "#00ffc1", "#918b62", "#ff9ff3",
-    "#e17055", "#fdcb6e", "#1abc9c", "#d980fa",
+    "#88321c", "#d5b06f", "#1abc9c", "#85056d",
     "#ff3600", "#714b00", "#00705c", "#9623c1",
     "#ff00dd", "#14ff01", "#5000a1", "#0063ff",
     "#9f2d6e", "#fdf03a", "#d87200", "#009f70",
@@ -268,16 +268,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const dy = toRect.top - fromRect.top;
         const bendDir = dx > 0 ? 1 : -1;
 
-        const sourceLayers = fromEl.querySelectorAll(".layer");
-        const sourceTop = sourceLayers[sourceLayers.length - 1];
-
-        const newLayer = document.createElement("div");
-        newLayer.className = "layer";
-        newLayer.style.backgroundColor = color;
-        newLayer.style.height = "0%";
-        newLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * (100 / MAX_LAYERS)}%`;
-        toEl.appendChild(newLayer);
-
         const canvas = document.createElement("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -296,65 +286,78 @@ document.addEventListener("DOMContentLoaded", () => {
             pourSound.play().catch(() => {});
         }
 
-        // ✨ Move and rotate source bottle toward target
+        // Tilt source bottle
         fromEl.style.transition = `transform 0.4s ease`;
         fromEl.style.transformOrigin = bendDir > 0 ? "top left" : "top right";
         fromEl.style.zIndex = "10";
-        fromEl.style.transform = `translate(${dx}px, ${dy-80}px) rotate(${bendDir * 70}deg)`;
+        fromEl.style.transform = `translate(${dx}px, ${dy - 80}px) rotate(${bendDir * 70}deg)`;
 
         setTimeout(() => {
-            const pourDuration = 800;
-            const start = performance.now();
-
             const startX = bendDir > 0 ? toRect.left + toRect.width / 2 - 35 : toRect.left + toRect.width / 2 + 35;
-            const startY = toRect.top - 20;
-
-            // const rotationAngle = bendDir * 70;
-            // const pourDuration = 1200;
-            // const start = performance.now();
-            //
-            // // --- ✅ Calculate rotated pouring point
-            // const bottleCenterX = fromRect.left + fromRect.width / 2;
-            // const bottleCenterY = fromRect.top + fromRect.height / 2;
-            //
-            // const mouthX = bendDir > 0 ? fromRect.left + fromRect.width * 0.8 : fromRect.left + fromRect.width * 0.1;
-            // const mouthY = fromRect.top - 20;
-            //
-            // function getRotatedPoint(cx, cy, x, y, angleDeg) {
-            //     const rad = angleDeg * Math.PI / 180;
-            //     const cos = Math.cos(rad);
-            //     const sin = Math.sin(rad);
-            //     const dx = x - cx;
-            //     const dy = y - cy;
-            //     return {
-            //         x: dx * cos - dy * sin + cx,
-            //         y: dx * sin + dy * cos + cy
-            //     };
-            // }
-            //
-            // const rotatedMouth = getRotatedPoint(bottleCenterX, bottleCenterY, mouthX, mouthY, rotationAngle);
-            // const startX = rotatedMouth.x;
-            // const startY = rotatedMouth.y;
-
-            const endX = toRect.left + toRect.width / 2 ;
-            const endY = toRect.top + 50;
-
+            const startY = toRect.top - 30;
+            const endX = toRect.left + toRect.width / 2;
+            const endY = toRect.top + 80;
             const gravity = Math.min(180, Math.max(10, 10 + dy / 2));
+
             let droplets = [];
 
-            function animate(timestamp) {
+            const oneLayerHeight = 100 / MAX_LAYERS;
+
+            // Create one new target layer that grows with the full amount poured
+            const targetLayer = document.createElement("div");
+            targetLayer.className = "layer";
+            targetLayer.style.backgroundColor = color;
+            targetLayer.style.height = "0%";
+            targetLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * oneLayerHeight}%`;
+            toEl.appendChild(targetLayer);
+
+            const sourceLayers = fromEl.querySelectorAll(".layer");
+
+            // Animate source layers one by one decreasing height
+            function animateSourceLayer(index, callback) {
+                if (index >= amount) {
+                    callback();
+                    return;
+                }
+                const sourceTop = sourceLayers[sourceLayers.length - 1 - index];
+                const duration = 500;
+                const start = performance.now();
+
+                function step(time) {
+                    const elapsed = time - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3);
+
+                    if (sourceTop) {
+                        sourceTop.style.height = `${Math.max(oneLayerHeight - (ease * oneLayerHeight), 0)}%`;
+                    }
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        if (sourceTop && parseFloat(sourceTop.style.height) <= 5) {
+                            sourceTop.remove();
+                        }
+                        animateSourceLayer(index + 1, callback);
+                    }
+                }
+                requestAnimationFrame(step);
+            }
+
+            // Animate target layer growing smoothly for the entire amount
+            const pourDuration = amount * 500; // total duration proportional to amount
+            const start = performance.now();
+
+            function animateTargetLayer(timestamp) {
                 const elapsed = timestamp - start;
                 const progress = Math.min(elapsed / pourDuration, 1);
                 const ease = 1 - Math.pow(1 - progress, 3);
 
-                const delta = ease * amount * (100 / MAX_LAYERS);
-                if (sourceTop) {
-                    const remaining = 100 / MAX_LAYERS - delta;
-                    sourceTop.style.height = `${Math.max(remaining, 0)}%`;
-                }
-                newLayer.style.height = `${delta}%`;
+                targetLayer.style.height = `${ease * amount * oneLayerHeight}%`;
 
-                const cpX = bendDir > 0 ? (startX + endX) / 2 + bendDir * 100 - 80 : (startX + endX) / 2 + bendDir * 100 + 80;
+                const cpX = bendDir > 0
+                    ? (startX + endX) / 2 + bendDir * 100 - 80
+                    : (startX + endX) / 2 + bendDir * 100 + 80;
                 const cpY = Math.min(startY, endY) - gravity;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -399,28 +402,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 droplets = droplets.filter(d => d.life > 0);
 
-                if (progress < 1) requestAnimationFrame(animate);
-                else cleanup();
+                if (progress < 1) {
+                    requestAnimationFrame(animateTargetLayer);
+                }
             }
 
-            function cleanup() {
-                // Return bottle back to original position
+            // Start source animation, then cleanup
+            animateSourceLayer(0, () => {
+                // After source layers have animated out, start cleanup & reset bottle position
                 fromEl.style.transition = `transform 0.4s ease`;
                 fromEl.style.transform = `translate(0, 0) rotate(0deg)`;
 
                 setTimeout(() => {
                     canvas.remove();
                     fromEl.style.zIndex = "";
-                    if (sourceTop && parseFloat(sourceTop.style.height) <= 5) sourceTop.remove();
                     onComplete && onComplete();
-                }, 400); // wait for return animation to finish
-            }
+                }, 80);
+            });
 
-            requestAnimationFrame(animate);
+            // Start target animation simultaneously
+            requestAnimationFrame(animateTargetLayer);
+
         }, 200);
     }
 
-    // delay animation code
     //function animateBottlePour(fromEl, toEl, color, amount, onComplete) {
     //     const fromRect = fromEl.getBoundingClientRect();
     //     const toRect = toEl.getBoundingClientRect();
@@ -428,16 +433,6 @@ document.addEventListener("DOMContentLoaded", () => {
     //     const dx = toRect.left - fromRect.left;
     //     const dy = toRect.top - fromRect.top;
     //     const bendDir = dx > 0 ? 1 : -1;
-    //
-    //     const sourceLayers = fromEl.querySelectorAll(".layer");
-    //     const sourceTop = sourceLayers[sourceLayers.length - 1];
-    //
-    //     const newLayer = document.createElement("div");
-    //     newLayer.className = "layer";
-    //     newLayer.style.backgroundColor = color;
-    //     newLayer.style.height = "0%";
-    //     newLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * (100 / MAX_LAYERS)}%`;
-    //     toEl.appendChild(newLayer);
     //
     //     const canvas = document.createElement("canvas");
     //     canvas.width = window.innerWidth;
@@ -450,124 +445,127 @@ document.addEventListener("DOMContentLoaded", () => {
     //     document.body.appendChild(canvas);
     //     const ctx = canvas.getContext("2d");
     //
+    //     // Play sound
     //     if (pourSound) {
     //         pourSound.volume = 0.6;
     //         pourSound.currentTime = 0;
     //         pourSound.play().catch(() => {});
     //     }
     //
-    //     // Prepare rotation + translation
-    //     const rotationAngle = bendDir * 70;
+    //     // Tilt source bottle
     //     fromEl.style.transition = `transform 0.4s ease`;
     //     fromEl.style.transformOrigin = bendDir > 0 ? "top left" : "top right";
     //     fromEl.style.zIndex = "10";
-    //     fromEl.style.transform = `translate(${dx}px, ${dy - 80}px) rotate(${rotationAngle}deg)`;
+    //     fromEl.style.transform = `translate(${dx}px, ${dy - 80}px) rotate(${bendDir * 70}deg)`;
     //
-    //     // Delay here so browser applies transform
     //     setTimeout(() => {
-    //         // Recalculate bounding box after transform
-    //         const afterRect = fromEl.getBoundingClientRect();
-    //
-    //         // Center for rotation
-    //         const bottleCenterX = afterRect.left + afterRect.width / 2;
-    //         const bottleCenterY = afterRect.top + afterRect.height / 2;
-    //
-    //         // Mouth in unrotated local space
-    //         const mouthX = bendDir > 0
-    //             ? afterRect.left + afterRect.width * 0.8
-    //             : afterRect.left + afterRect.width * 0.1;
-    //         const mouthY = afterRect.top;  // Perhaps top of the bottle
-    //
-    //         function getRotatedPoint(cx, cy, x, y, angleDeg) {
-    //             const rad = angleDeg * Math.PI / 180;
-    //             const cos = Math.cos(rad);
-    //             const sin = Math.sin(rad);
-    //             const dx_ = x - cx;
-    //             const dy_ = y - cy;
-    //             return {
-    //                 x: dx_ * cos - dy_ * sin + cx,
-    //                 y: dx_ * sin + dy_ * cos + cy
-    //             };
-    //         }
-    //
-    //         const rotatedMouth = getRotatedPoint(
-    //             bottleCenterX,
-    //             bottleCenterY,
-    //             mouthX,
-    //             mouthY,
-    //             rotationAngle
-    //         );
-    //
-    //         const startX = rotatedMouth.x;
-    //         const startY = rotatedMouth.y;
-    //
+    //         const startX = bendDir > 0 ? toRect.left + toRect.width / 2 - 35 : toRect.left + toRect.width / 2 + 35;
+    //         const startY = toRect.top - 30;
     //         const endX = toRect.left + toRect.width / 2;
-    //         const endY = toRect.top + 20;
+    //         const endY = toRect.top + 50;
+    //         const gravity = Math.min(180, Math.max(10, 10 + dy / 2));
     //
-    //         const pourDuration = 1200;
-    //         const startTime = performance.now();
-    //
-    //         const gravity = Math.min(180, Math.max(60, 120 + dy / 2));
     //         let droplets = [];
     //
-    //         function animate(timestamp) {
-    //             const elapsed = timestamp - startTime;
-    //             const progress = Math.min(elapsed / pourDuration, 1);
-    //             const ease = 1 - Math.pow(1 - progress, 3);
+    //         const oneLayerHeight = 100 / MAX_LAYERS;
     //
-    //             const delta = ease * amount * (100 / MAX_LAYERS);
-    //             if (sourceTop) {
-    //                 const remaining = 100 / MAX_LAYERS - delta;
-    //                 sourceTop.style.height = `${Math.max(remaining, 0)}%`;
+    //         // Animate one layer at a time
+    //         function animateLayer(index) {
+    //             if (index >= amount) {
+    //                 return cleanup();
     //             }
-    //             newLayer.style.height = `${delta}%`;
     //
-    //             const cpX = (startX + endX) / 2 + bendDir * 50;
-    //             const cpY = Math.min(startY, endY) - gravity;
+    //             // Get top source layer
+    //             const sourceLayers = fromEl.querySelectorAll(".layer");
+    //             const sourceTop = sourceLayers[sourceLayers.length - 1];
     //
-    //             ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //             // Create new target layer
+    //             const targetLayer = document.createElement("div");
+    //             targetLayer.className = "layer";
+    //             targetLayer.style.backgroundColor = color;
+    //             targetLayer.style.height = "0%";
+    //             targetLayer.style.bottom = `${toEl.querySelectorAll(".layer").length * oneLayerHeight}%`;
+    //             toEl.appendChild(targetLayer);
     //
-    //             ctx.beginPath();
-    //             ctx.moveTo(startX, startY);
-    //             ctx.quadraticCurveTo(cpX, cpY, endX, endY);
-    //             const width = 12 + Math.sin(progress * Math.PI) * 10;
-    //             ctx.lineWidth = width;
-    //             const grad = ctx.createLinearGradient(startX, startY, endX, endY);
-    //             grad.addColorStop(0, color + "cc");
-    //             grad.addColorStop(0.8, color + "88");
-    //             grad.addColorStop(1, color + "00");
-    //             ctx.strokeStyle = grad;
-    //             ctx.lineCap = "round";
-    //             ctx.stroke();
+    //             const duration = 500;
+    //             const start = performance.now();
     //
-    //             ctx.lineWidth = 2;
-    //             ctx.setLineDash([12, 20]);
-    //             ctx.lineDashOffset = -elapsed / 12;
-    //             ctx.stroke();
+    //             function drawStream(progress) {
+    //                 const ease = 1 - Math.pow(1 - progress, 3);
+    //                 const cpX = bendDir > 0
+    //                     ? (startX + endX) / 2 + bendDir * 100 - 80
+    //                     : (startX + endX) / 2 + bendDir * 100 + 80;
+    //                 const cpY = Math.min(startY, endY) - gravity;
     //
-    //             if (Math.random() < 0.3) {
-    //                 droplets.push({
-    //                     x: startX + bendDir * (10 + Math.random() * 10),
-    //                     y: startY + Math.random() * 5,
-    //                     vx: bendDir * (1 + Math.random()),
-    //                     vy: Math.random() * -2,
-    //                     life: 1
-    //                 });
-    //             }
-    //             droplets.forEach(d => {
-    //                 d.x += d.vx;
-    //                 d.vy += 0.25;
-    //                 d.y += d.vy;
-    //                 d.life -= 0.025;
+    //                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //
     //                 ctx.beginPath();
-    //                 ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
-    //                 ctx.fillStyle = color + Math.floor(d.life * 255).toString(16).padStart(2, "0");
-    //                 ctx.fill();
-    //             });
-    //             droplets = droplets.filter(d => d.life > 0);
+    //                 ctx.moveTo(startX, startY);
+    //                 ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+    //                 const width = 12 + Math.sin(progress * Math.PI) * 10;
+    //                 ctx.lineWidth = width;
+    //                 const grad = ctx.createLinearGradient(startX, startY, endX, endY);
+    //                 grad.addColorStop(0, color + "cc");
+    //                 grad.addColorStop(0.8, color + "88");
+    //                 grad.addColorStop(1, color + "00");
+    //                 ctx.strokeStyle = grad;
+    //                 ctx.lineCap = "round";
+    //                 ctx.stroke();
     //
-    //             if (progress < 1) requestAnimationFrame(animate);
-    //             else cleanup();
+    //                 ctx.lineWidth = 2;
+    //                 ctx.setLineDash([12, 20]);
+    //                 ctx.lineDashOffset = -performance.now() / 12;
+    //                 ctx.stroke();
+    //
+    //                 // Droplets
+    //                 if (Math.random() < 0.3) {
+    //                     droplets.push({
+    //                         x: startX + bendDir * (10 + Math.random() * 10),
+    //                         y: startY + Math.random() * 5,
+    //                         vx: bendDir * (1 + Math.random()),
+    //                         vy: Math.random() * -2,
+    //                         life: 1
+    //                     });
+    //                 }
+    //
+    //                 droplets.forEach(d => {
+    //                     d.x += d.vx;
+    //                     d.vy += 0.25;
+    //                     d.y += d.vy;
+    //                     d.life -= 0.025;
+    //                     ctx.beginPath();
+    //                     ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+    //                     ctx.fillStyle = color + Math.floor(d.life * 255).toString(16).padStart(2, "0");
+    //                     ctx.fill();
+    //                 });
+    //
+    //                 droplets = droplets.filter(d => d.life > 0);
+    //             }
+    //
+    //             function step(time) {
+    //                 const elapsed = time - start;
+    //                 const progress = Math.min(elapsed / duration, 1);
+    //                 const ease = 1 - Math.pow(1 - progress, 3);
+    //
+    //                 if (sourceTop) {
+    //                     sourceTop.style.height = `${Math.max(oneLayerHeight - (ease * oneLayerHeight), 0)}%`;
+    //                 }
+    //
+    //                 targetLayer.style.height = `${ease * oneLayerHeight}%`;
+    //
+    //                 drawStream(progress);
+    //
+    //                 if (progress < 1) {
+    //                     requestAnimationFrame(step);
+    //                 } else {
+    //                     if (sourceTop && parseFloat(sourceTop.style.height) <= 5) {
+    //                         sourceTop.remove();
+    //                     }
+    //                     animateLayer(index + 1);
+    //                 }
+    //             }
+    //
+    //             requestAnimationFrame(step);
     //         }
     //
     //         function cleanup() {
@@ -577,13 +575,12 @@ document.addEventListener("DOMContentLoaded", () => {
     //             setTimeout(() => {
     //                 canvas.remove();
     //                 fromEl.style.zIndex = "";
-    //                 if (sourceTop && parseFloat(sourceTop.style.height) <= 5) sourceTop.remove();
     //                 onComplete && onComplete();
     //             }, 400);
     //         }
     //
-    //         requestAnimationFrame(animate);
-    //     }, 50); // delay ~50 ms to ensure transform applied
+    //         animateLayer(0); // start pouring layer by layer
+    //     }, 200);
     // }
 
 
