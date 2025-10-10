@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15 Puzzle</title>
+    <link rel="stylesheet" href="css/15-puzzle.css">
+</head>
+<body>
+<div class="info">
+    <button><a href="index.html">Back</a></button>
+</div>
+<div class="container">
+    <div class="puzzle-container" id="puzzle-container"></div>
+    <button id="restart-btn">Restart</button>
+</div>
+
+<div id="messageOverlay">
+    <div id="message">
+        Congratulations! You solve the puzzle.<br>
+        <button onclick="shuffleTiles()">Play Again</button>
+    </div>
+</div>
+
+<script src="js/15-puzzle.js"></script>
+</body>
+</html>

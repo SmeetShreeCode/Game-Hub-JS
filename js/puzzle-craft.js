@@ -129,8 +129,8 @@ function updateMoveDisplay() {
 }
 
 function updateTimerDisplay() {
-    let mins = String(Math.floor(seconds / 60)).padStart(2, "0");
-    let secs = String(seconds % 60).padStart(2, "0");
+    const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+    const secs = String(seconds % 60).padStart(2, "0");
     document.getElementById("timer").textContent = `${mins}:${secs}`;
 }
 
@@ -241,17 +241,14 @@ function loadSavedTheme() {
     if (themeSelect) themeSelect.value = savedTheme;
 }
 
-document.getElementById("pause-btn").addEventListener("click", () => {
+function togglePause() {
     paused = !paused;
     document.getElementById("pause-btn").textContent = paused ? "▶️ Resume" : "⏸️ Pause";
     document.getElementById("pause-overlay").style.display = paused ? "flex" : "none";
-});
+}
 
-document.getElementById("resume-btn").addEventListener("click", () => {
-    paused = !paused;
-    document.getElementById("pause-btn").textContent = paused ? "▶️ Resume" : "⏸️ Pause";
-    document.getElementById("pause-overlay").style.display = paused ? "flex" : "none";
-});
+document.getElementById("pause-btn").addEventListener("click", togglePause);
+document.getElementById("resume-btn").addEventListener("click", togglePause);
 
 document.getElementById("preview-btn").addEventListener("click", () => {
     container.classList.add("preview");
