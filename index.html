@@ -11,9 +11,11 @@
             margin: 0;
             padding: 20px;
         }
+
         h1 {
             margin-bottom: 30px;
         }
+
         .game-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -21,26 +23,31 @@
             max-width: 1000px;
             margin: 0 auto;
         }
+
         .game-card {
             background: white;
             border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
         }
+
         .game-card:hover {
             transform: scale(1.05);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.3);
         }
+
         .game-card img {
             width: 100%;
             height: 150px;
             object-fit: cover;
         }
+
         .game-card h3 {
             margin: 10px;
         }
+
         .game-card p {
             margin: 0 10px 15px;
             color: #555;
@@ -99,6 +106,30 @@
         <p>Play With Snakes Enjoy!</p>
     </div>
 
+    <div class="game-card" onclick="location.href='15-puzzle.html'">
+        <img src="images/Banners/15-puzzle.jpg" alt="15 Puzzle Game">
+        <h3>15 Puzzle Game</h3>
+        <p>Play 15 Puzzle Game.</p>
+    </div>
+
+    <div class="game-card" onclick="location.href='pong.html'">
+        <img src="images/Banners/pong.jpg" alt="Pong Game">
+        <h3>Pong Game</h3>
+        <p>Play Pong Game Enjoy!</p>
+    </div>
+
+    <div class="game-card" onclick="location.href='hexanaut-io.html'">
+        <img src="images/Banners/hexanaut-io.jpg" alt="Hexanaut.io Game">
+        <h3>Hexanaut.IO Game</h3>
+        <p>Play Hexanaut.IO Game Enjoy It!</p>
+    </div>
+
+    <div class="game-card" onclick="location.href='tileman-io.html'">
+        <img src="images/Banners/tileman-io.jpg" alt="Tileman.io Game">
+        <h3>Tileman.IO Game</h3>
+        <p>Play Tileman.IO Game Enjoy It!</p>
+    </div>
+
     <div class="game-card" onclick="location.href='puzzle-craft.html'">
         <img src="images/Banners/puzzle-craft.webp" alt="Puzzle Craft">
         <h3>Puzzle Craft</h3>
@@ -111,22 +142,10 @@
         <p>Play Candy Crush Game.</p>
     </div>
 
-    <div class="game-card" onclick="location.href='15-puzzle.html'">
-        <img src="images/Banners/15-puzzle.jpg" alt="15 Puzzle Game">
-        <h3>15 Puzzle Game</h3>
-        <p>Play 15 Puzzle Game.</p>
-    </div>
-
     <div class="game-card" onclick="location.href='flip-bottle.html'">
         <img src="images/Banners/flip-bottle.jpg" alt="Flip Bottle Game">
         <h3>Flip Bottle Game</h3>
         <p>Play Flip Bottle Game Enjoy It!</p>
-    </div>
-
-    <div class="game-card" onclick="location.href='pong.html'">
-        <img src="images/Banners/bottle-filler.webp" alt="Pong Game">
-        <h3>Pong Game</h3>
-        <p>Play Pong Game Enjoy!</p>
     </div>
 
 </div>

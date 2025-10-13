@@ -7,10 +7,17 @@
     <link rel="stylesheet" href="css/15-puzzle.css">
 </head>
 <body>
-<div class="info">
-    <button><a href="index.html">Back</a></button>
-</div>
 <div class="container">
+    <h1>15 Puzzle</h1>
+    <div class="info">
+        Move: <span id="move-count">0</span>
+        Time: <span id="timer">00:00</span>
+        Best Moves: <span id="best-move">-</span>
+        Best Time: <span id="best-time">--:--</span>
+        <a href="index.html" class="back-button">Back</a>
+        <a class="back-button" onclick="stopTimer(true)">⏸</a>
+    </div>
+
     <div class="puzzle-container" id="puzzle-container"></div>
     <button id="restart-btn">Restart</button>
 </div>
@@ -19,6 +26,15 @@
     <div id="message">
         Congratulations! You solve the puzzle.<br>
         <button onclick="shuffleTiles()">Play Again</button>
+    </div>
+</div>
+
+<div id="pauseOverlay">
+    <div id="pauseMessage">
+        <h2>Game Paused</h2>
+        <p>You have paused the game. Take a break and come back!</p>
+        <button onclick="startTimer(false)">▶ Resume</button>
+        <button onclick="shuffleTiles()">🔄 Restart Game</button>
     </div>
 </div>
 

@@ -1,0 +1,38 @@
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #222;
+    color: white;
+    font-family: sans-serif;
+}
+
+#game {
+    display: grid;
+    grid-template-columns: repeat(20, 20px);
+    grid-template-rows: repeat(20, 20px);
+    gap: 1px;
+    margin-top: 20px;
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+    background: #444;
+}
+
+.base {
+    background: #4caf50;
+}
+
+.trail {
+    background: #ffeb3b;
+}
+
+.player {
+    background: red;
+}
+
+.enemy {
+    background-color: blue !important;
+}
