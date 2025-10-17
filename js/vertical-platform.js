@@ -110,6 +110,7 @@ class Player extends Sprite {
             width: 200,
             height: 75,
         };
+        this.jumpsRemaining = 2;
     }
 
     switchSprite(key) {
@@ -244,6 +245,7 @@ class Player extends Sprite {
                     this.velocity.y = 0;
                     const offset = this.hitbox.position.y - this.position.y + this.hitbox.height;
                     this.position.y = collisionBlock.position.y - offset - 0.01;
+                    this.jumpsRemaining = 2;
                     break;
                 }
                 if (this.velocity.y < 0) {
@@ -266,10 +268,45 @@ class Player extends Sprite {
                     this.velocity.y = 0;
                     const offset = this.hitbox.position.y - this.position.y + this.hitbox.height;
                     this.position.y = platformCollisionBlock.position.y - offset - 0.01;
+                    this.jumpsRemaining = 2;
                     break;
                 }
             }
         }
+    }
+}
+
+class Enemy extends Sprite{
+    constructor({position, collisionBlocks, platformCollisionBlocks, imageSrc, frameRate, scale = 0.5, animations}) {
+        super({imageSrc, frameRate, scale});
+        this.position = position;
+        this.velocity = {
+            x: 0,
+            y: 1
+        }
+        this.collisionBlocks = collisionBlocks;
+        this.platformCollisionBlocks = platformCollisionBlocks;
+        this.hitbox = {
+            position: {
+                x: this.position.x,
+                y: this.position.y,
+            },
+            width: 10,
+            height: 10,
+        };
+        this.animations = animations;
+        this.lastDirection = 'right';
+
+        for (let key in this.animations) {
+            const image = new Image();
+            image.src = this.animations[key].imageSrc;
+            this.animations[key].image = image;
+        }
+    }
+
+    update() {
+        this.draw();
+        this.updateFrames();
     }
 }
 
@@ -318,6 +355,31 @@ platformCollisions2D.forEach((row, y) => {
                 },
                 height: 4,
             }));
+        }
+    });
+});
+
+const enemyCollision2D = [];
+for (let i = 0; i < platformCollisions.length; i += 36) {
+    enemyCollision2D.push(platformCollisions.slice(i, i + 36));
+}
+
+const enemyCollisionBlock = [];
+enemyCollision2D.forEach((row, y) => {
+    row.forEach((symbol, x) => {
+        if (symbol === 222) {
+            enemyCollisionBlock.push(new Enemy({
+                position: {
+                    x: x * 16,
+                    y: y * 16,
+                },
+                imageSrc: './images/vertical-platform/Kunoichi/Idle.png',
+                frameRate: 9,
+                scale: 0.5,
+                collisionBlocks,
+                platformCollisionBlocks,
+            }));
+
         }
     });
 });
@@ -434,6 +496,9 @@ function animate() {
     // platformCollisionBlocks.forEach(block => {
     //     block.update();
     // });
+    enemyCollisionBlock.forEach(block => {
+        block.update();
+    });
     player.checkForHorizontalCanvasCollision();
     player.update();
 
@@ -486,7 +551,10 @@ window.addEventListener('keydown', (e) => {
         case "w":
         case "W":
         case "ArrowUp":
-            player.velocity.y = -5;
+            if (player.jumpsRemaining > 0) {
+                player.velocity.y = -5;
+                player.jumpsRemaining--;
+            }
             break;
         case "f":
         case "F":

@@ -25,6 +25,7 @@ const chapters = {
             {size: 3, image: "images/Puzzle-craft/L16.jpg"},
             {size: 3, image: "images/Puzzle-craft/L17.jpg"},
             {size: 3, image: "images/Puzzle-craft/L18.jpg"},
+            {size: 3, image: "images/Puzzle-craft/L19.jpg"},
         ]
     },
 };
