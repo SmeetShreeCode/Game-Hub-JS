@@ -68,6 +68,11 @@ input,
     cursor: grabbing;
 }
 
+.tile.swapping {
+    transform: scale(1.1);
+    z-index: 10;
+}
+
 .drag-over {
     outline: 3px dashed var(--drag-over-color);
 }

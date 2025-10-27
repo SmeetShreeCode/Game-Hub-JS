@@ -18,7 +18,8 @@
         <p>Moves: <span id="moveCount">0</span> |
             Time: <span id="timer">00:00</span> |
             <button id="pause-btn">⏸️ Pause</button> |
-            <button id="preview-btn">👁️ Preview</button>
+            <button id="preview-btn">👁️ Preview</button> |
+            <button id="hint-btn">💡 Hint (<span id="hints-left">3</span>)</button>
         </p>
         <p>
             <label for="theme-select">Theme:</label>
@@ -43,6 +44,7 @@
             </div>
             <button id="shuffle">Shuffle</button>
         </div>
+        <div id="badges">Badges: <span id="badge-list">None</span></div>
     </div>
 
     <div id="puzzle-container"></div>
@@ -62,6 +64,9 @@
 <footer>
     <p><a href="index.html">⬅ Back to Games</a></p>
 </footer>
+
+<audio id="swap-sound" src="sounds/swap.mp3" preload="auto"></audio>
+<audio id="win-sound" src="sounds/win.mp3" preload="auto"></audio>
 
 <script src="js/puzzle-craft-levels.js"></script>
 <script src="js/puzzle-craft.js"></script>

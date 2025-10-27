@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tileman.io</title>
+    <link rel="stylesheet" href="tileman.css">
+</head>
+<body>
+<h1>Tileman.io</h1>
+<div id="game-container">
+    <canvas id="game-canvas" width="900" height="900"></canvas>
+    <div id="mini-map"></div>
+    <div id="ui">
+        <p>Player 1 - Health: <span id="p1-health">100</span> | Gold: <span id="p1-gold">0</span> | Tiles: <span id="p1-tiles">1</span></p>
+        <p id="p2-stats" hidden>Player 2 - Health: <span id="p2-health">100</span> | Gold: <span id="p2-gold">0</span> | Tiles: <span id="p2-tiles">1</span></p>
+        <button id="upgrade-speed">Upgrade Speed (50 Gold)</button>
+        <button id="upgrade-attack">Upgrade Attack (50 Gold)</button>
+        <button id="upgrade-health">Upgrade Health (50 Gold)</button>
+        <button id="toggle-multiplayer">Toggle Multiplayer</button>
+        <button id="restart">Restart</button>
+    </div>
+    <div id="leaderboard">
+        <h3>Leaderboard</h3>
+        <ul id="leader-list"></ul>
+    </div>
+</div>
+<div id="win-overlay" hidden>
+    <div class="message">
+        🎉 <span id="winner">Player 1</span> Wins! <br>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+</div>
+<audio id="move-sound" src="sounds/move.mp3" preload="auto"></audio>
+<audio id="attack-sound" src="sounds/attack.mp3" preload="auto"></audio>
+<audio id="capture-sound" src="sounds/capture.mp3" preload="auto"></audio>
+<audio id="win-sound" src="sounds/win.mp3" preload="auto"></audio>
+<script src="tileman.js"></script>
+</body>
+</html>

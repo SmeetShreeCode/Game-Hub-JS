@@ -446,6 +446,11 @@ const player = new Player({
             frameRate: 4,
             frameBuffer: 3,
         },
+        Death: {
+            imageSrc: './images/vertical-platform/warrior/Death.png',
+            frameRate: 6,
+            frameBuffer: 8,
+        }
     },
 });
 

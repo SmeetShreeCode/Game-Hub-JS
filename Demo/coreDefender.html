@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Core Defender Deluxe</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; font-family: sans-serif; }
+        #scoreboard { position: fixed; top: 10px; left: 10px; color: white; font-size: 20px; z-index: 10; }
+        #startGameOverlay { background-color: rgba(0,0,0,0.8); z-index: 20; }
+        #muteBtn { position: fixed; top: 10px; right: 10px; color: white; background: rgba(255,255,255,0.1); border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+    </style>
+</head>
+<body class="select-none">
+
+<div id="scoreboard">
+    <a href="index.html" class="bg-white rounded-xl text-black p-1">Back</a>
+    Score: <span id="scoreEl">0</span> |
+    Combo: <span id="comboEl">x1</span> |
+    High Score: <span id="highScore">0</span>
+</div>
+
+<button id="muteBtn">🔊</button>
+<canvas></canvas>
+
+<div class="fixed inset-0 flex items-center justify-center" id="startGameOverlay">
+    <div class="bg-white max-w-md w-full rounded-lg p-6 text-center">
+        <h1 class="text-4xl font-bold leading-none" id="endScore">0</h1>
+        <p class="text-l text-gray-700 mb-4">Points</p>
+        <button class="bg-blue-500 text-white w-full py-3 rounded-full text-sm" id="startGame">Start Game</button>
+    </div>
+</div>
+
+<audio id="bgMusic" src="https://cdn.pixabay.com/audio/2023/04/13/audio_ebbb6b44b4.mp3" loop></audio>
+
+<script>
+    const canvas = document.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+
+    window.addEventListener('resize', () => {
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+    });
+
+    const scoreEl = document.querySelector('#scoreEl');
+    const comboEl = document.querySelector('#comboEl');
+    const highScoreEl = document.querySelector('#highScore');
+    const startGameBtn = document.querySelector('#startGame');
+    const startGameOverlay = document.querySelector('#startGameOverlay');
+    const endScore = document.querySelector('#endScore');
+    const muteBtn = document.querySelector('#muteBtn');
+    const bgMusic = document.querySelector('#bgMusic');
+
+    let animationId, score = 0, combo = 1, comboTimer;
+    let highScore = localStorage.getItem('coreDefender_highScore') || 0;
+    highScoreEl.innerHTML = highScore;
+
+    let enemies = [], projectiles = [], particles = [];
+    let player, hasShield = false;
+    let paused = false;
+    let lastTime = 0;
+    let slowMotionFactor = 1;
+    let soundOn = true;
+    let enemySpawnInterval;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    //------------------UTILITY---------------------
+    function playSound(freq, type='sine', dur=0.1) {
+        if (!soundOn) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+    }
+
+    function showFloatingText(text, x, y, color='white') {
+        const div = document.createElement('div');
+        div.textContent = text;
+        div.style.position = 'absolute';
+        div.style.left = x + 'px';
+        div.style.top = y + 'px';
+        div.style.color = color;
+        div.style.fontWeight = 'bold';
+        div.style.transition = 'all 0.5s ease';
+        document.body.appendChild(div);
+        requestAnimationFrame(() => {
+            div.style.transform = 'translateY(-40px)';
+            div.style.opacity = '0';
+        });
+        setTimeout(() => div.remove(), 600);
+    }
+
+    function addScore(amount, x, y) {
+        score += amount * combo;
+        scoreEl.textContent = score;
+        showFloatingText('+' + amount * combo, x, y, 'gold');
+        combo++;
+        comboEl.textContent = 'x' + combo;
+        clearTimeout(comboTimer);
+        comboTimer = setTimeout(() => { combo = 1; comboEl.textContent = 'x1'; }, 2000);
+    }
+
+    function slowMotion(time=300) {
+        slowMotionFactor = 0.3;
+        setTimeout(() => slowMotionFactor = 1, time);
+    }
+
+    function flashScreen() {
+        gsap.to(document.body, { backgroundColor: 'white', duration: 0.05, yoyo: true, repeat: 1 });
+    }
+
+    //------------------CLASSES---------------------
+    class Player {
+        constructor(x, y, radius, color) { this.x=x; this.y=y; this.radius=radius; this.color=color; }
+        draw() {
+            const g = ctx.createRadialGradient(this.x,this.y,this.radius/2,this.x,this.y,this.radius*2);
+            g.addColorStop(0,this.color);
+            g.addColorStop(1,'rgba(255,255,255,0)');
+            ctx.fillStyle=g;
+            ctx.beginPath();
+            ctx.arc(this.x,this.y,this.radius*2,0,Math.PI*2);
+            ctx.fill();
+
+            ctx.fillStyle=this.color;
+            ctx.beginPath();
+            ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+            ctx.fill();
+
+            if (hasShield) {
+                ctx.strokeStyle='rgba(0,255,255,0.6)';
+                ctx.lineWidth=4;
+                ctx.beginPath();
+                ctx.arc(this.x,this.y,this.radius+6,0,Math.PI*2);
+                ctx.stroke();
+            }
+        }
+    }
+
+    class Projectile {
+        constructor(x,y,radius,color,velocity) { this.x=x; this.y=y; this.radius=radius; this.color=color; this.velocity=velocity; }
+        draw() {
+            const grad = ctx.createLinearGradient(this.x,this.y,this.x-this.velocity.x*10,this.y-this.velocity.y*10);
+            grad.addColorStop(0,this.color);
+            grad.addColorStop(1,'transparent');
+            ctx.strokeStyle=grad;
+            ctx.lineWidth=this.radius*2;
+            ctx.beginPath();
+            ctx.moveTo(this.x,this.y);
+            ctx.lineTo(this.x-this.velocity.x*10,this.y-this.velocity.y*10);
+            ctx.stroke();
+        }
+        update(dt) { this.x+=this.velocity.x*dt; this.y+=this.velocity.y*dt; this.draw(); }
+    }
+
+    class Enemy {
+        constructor(x,y,radius,color,velocity,type='normal',hp=1) {
+            this.x=x; this.y=y; this.radius=radius; this.color=color; this.velocity=velocity; this.type=type; this.hp=hp;
+        }
+        draw() { ctx.beginPath(); ctx.arc(this.x,this.y,this.radius,0,Math.PI*2); ctx.fillStyle=this.color; ctx.fill(); }
+        update(dt) { this.x+=this.velocity.x*dt; this.y+=this.velocity.y*dt; this.draw(); }
+    }
+
+    class Particle {
+        constructor(x,y,radius,color,velocity) {
+            this.x=x; this.y=y; this.radius=radius; this.color=color; this.velocity=velocity; this.alpha=1;
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha=this.alpha;
+            ctx.beginPath();
+            ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+            ctx.fillStyle=this.color;
+            ctx.fill();
+            ctx.restore();
+        }
+        update(dt) {
+            this.x+=this.velocity.x*dt;
+            this.y+=this.velocity.y*dt;
+            this.velocity.x*=0.99;
+            this.velocity.y*=0.99;
+            this.alpha-=0.01;
+            this.draw();
+        }
+    }
+
+    //------------------INIT---------------------
+    function init() {
+        const x=canvas.width/2, y=canvas.height/2;
+        player=new Player(x,y,15,'white');
+        projectiles=[]; enemies=[]; particles=[];
+        score=0; combo=1;
+        scoreEl.textContent=score; comboEl.textContent='x1';
+        hasShield=false;
+        clearInterval(enemySpawnInterval);
+    }
+
+    function spawnEnemies() {
+        enemySpawnInterval = setInterval(()=>{
+            const radius = Math.random()*(30-6)+6;
+            let x,y;
+            if (Math.random()<0.5){x=Math.random()<0.5?-radius:canvas.width+radius; y=Math.random()*canvas.height;}
+            else {x=Math.random()*canvas.width; y=Math.random()<0.5?-radius:canvas.height+radius;}
+            const angle=Math.atan2(canvas.height/2-y,canvas.width/2-x);
+            let speed=1+score/1000, type='normal', hp=1, color=`hsl(${Math.random()*360},50%,50%)`;
+            if (Math.random()<0.2){type='fast'; speed*=1.8; color='orange';}
+            if (Math.random()<0.1){type='tank'; hp=3; radius*=1.5; color='purple';}
+            if (Math.random()<0.05){type='splitter'; hp=2; color='lime';}
+            enemies.push(new Enemy(x,y,radius,color,{x:Math.cos(angle)*speed,y:Math.sin(angle)*speed},type,hp));
+        },1000);
+    }
+
+    //------------------ANIMATE---------------------
+    function animate(timestamp=0){
+        if (!lastTime) lastTime=timestamp;
+        const delta=((timestamp-lastTime)/16.67)/slowMotionFactor; // ✅ fixed delta
+        lastTime=timestamp;
+        animationId=requestAnimationFrame(animate);
+        if (paused) return;
+
+        ctx.fillStyle='rgba(0,0,0,0.2)';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        player.draw();
+
+        particles.forEach((p,i)=>{p.update(delta); if(p.alpha<=0)particles.splice(i,1);});
+        projectiles.forEach((p,i)=>{
+            p.update(delta);
+            if(p.x<0||p.x>canvas.width||p.y<0||p.y>canvas.height)projectiles.splice(i,1);
+        });
+
+        enemies.forEach((enemy,eIndex)=>{
+            enemy.update(delta);
+            const dist=Math.hypot(player.x-enemy.x,player.y-enemy.y);
+            if(dist<enemy.radius+player.radius){
+                if(hasShield){hasShield=false; enemies.splice(eIndex,1); flashScreen(); playSound(150);}
+                else{ cancelAnimationFrame(animationId); endScore.textContent=score;
+                    startGameOverlay.style.display='flex'; if(score>highScore){highScore=score; localStorage.setItem('coreDefender_highScore',highScore);}
+                    highScoreEl.textContent=highScore; return; }
+            }
+            projectiles.forEach((proj,pIndex)=>{
+                const d=Math.hypot(proj.x-enemy.x,proj.y-enemy.y);
+                if(d<enemy.radius+proj.radius){
+                    playSound(300);
+                    for(let i=0;i<enemy.radius*2;i++){
+                        particles.push(new Particle(enemy.x,enemy.y,Math.random()*2,enemy.color,{x:(Math.random()-0.5)*4,y:(Math.random()-0.5)*4}));
+                    }
+                    projectiles.splice(pIndex,1);
+                    enemy.hp--;
+                    if(enemy.hp<=0){
+                        addScore(100,enemy.x,enemy.y);
+                        if(enemy.type==='splitter'){
+                            for(let s=0;s<2;s++){
+                                const vel={x:(Math.random()-0.5)*3,y:(Math.random()-0.5)*3};
+                                enemies.push(new Enemy(enemy.x,enemy.y,enemy.radius/1.5,enemy.color,vel));
+                            }
+                        }
+                        if(enemy.type==='tank') slowMotion(300);
+                        enemies.splice(eIndex,1);
+                    } else {
+                        addScore(50,enemy.x,enemy.y);
+                        gsap.to(enemy,{radius:enemy.radius-5,duration:0.2});
+                    }
+                }
+            });
+        });
+    }
+
+    //------------------EVENTS---------------------
+    function shoot(x,y){
+        const angle=Math.atan2(y-canvas.height/2,x-canvas.width/2);
+        const velocity={x:Math.cos(angle)*5,y:Math.sin(angle)*5};
+        projectiles.push(new Projectile(canvas.width/2,canvas.height/2,5,'white',velocity));
+        playSound(500);
+    }
+
+    window.addEventListener('click',e=>{ if(startGameOverlay.style.display==='none') shoot(e.clientX,e.clientY); });
+    window.addEventListener('keydown',e=>{
+        if(e.key==='p' || e.key === ' '){paused=!paused;}
+        if(e.key==='m'){soundOn=!soundOn; muteBtn.textContent=soundOn?'🔊':'🔇'; if(soundOn)bgMusic.play(); else bgMusic.pause();}
+    });
+
+    muteBtn.onclick=()=>{soundOn=!soundOn; muteBtn.textContent=soundOn?'🔊':'🔇'; if(soundOn)bgMusic.play(); else bgMusic.pause();};
+
+    startGameBtn.addEventListener('click',()=>{
+        init();
+        animate();
+        spawnEnemies();
+        startGameOverlay.style.display='none';
+        bgMusic.volume=0.2;
+        if(soundOn) bgMusic.play();
+    });
+</script>
+</body>
+</html>
