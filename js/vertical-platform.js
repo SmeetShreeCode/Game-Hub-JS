@@ -432,17 +432,32 @@ const player = new Player({
             frameBuffer: 3,
         },
         Attack1: {
-            imageSrc: './images/vertical-platform/warrior/Attack1.png',
+            imageSrc: './images/vertical-platform/warrior/Attack_1.png',
+            frameRate: 4,
+            frameBuffer: 3,
+        },
+        Attack1_Left: {
+            imageSrc: './images/vertical-platform/warrior/Attack_1_Left.png',
             frameRate: 4,
             frameBuffer: 3,
         },
         Attack2: {
-            imageSrc: './images/vertical-platform/warrior/Attack2.png',
+            imageSrc: './images/vertical-platform/warrior/Attack_2.png',
+            frameRate: 4,
+            frameBuffer: 3,
+        },
+        Attack2_Left: {
+            imageSrc: './images/vertical-platform/warrior/Attack_2_Left.png',
             frameRate: 4,
             frameBuffer: 3,
         },
         Attack3: {
-            imageSrc: './images/vertical-platform/warrior/Attack3.png',
+            imageSrc: './images/vertical-platform/warrior/Attack_3.png',
+            frameRate: 4,
+            frameBuffer: 3,
+        },
+        Attack3_Left: {
+            imageSrc: './images/vertical-platform/warrior/Attack_3_Left.png',
             frameRate: 4,
             frameBuffer: 3,
         },
@@ -477,7 +492,7 @@ const background = new Sprite({
         x: 0,
         y: 0,
     },
-    imageSrc: './images/vertical-platform/background.png',
+    imageSrc: './images/vertical-platform/Background/background.png',
 });
 
 const backgroundImageHeight = 432;
@@ -519,11 +534,11 @@ function animate() {
         player.lastDirection = 'left';
         player.shouldPanCameraToTheRight({canvas, camera});
     } else if (keys.attack1.pressed) {
-        player.switchSprite('Attack1');
+        player.switchSprite(player.lastDirection === 'right' ? 'Attack1' : 'Attack1_Left');
     } else if (keys.attack2.pressed) {
-        player.switchSprite('Attack2');
+        player.switchSprite(player.lastDirection === 'right' ? 'Attack2' : 'Attack2_Left');
     } else if (keys.attack3.pressed) {
-        player.switchSprite('Attack3');
+        player.switchSprite(player.lastDirection === 'right' ? 'Attack3' : 'Attack3_Left');
     } else if (player.velocity.y === 0) {
         player.switchSprite(player.lastDirection === 'right' ? 'Idle' : 'IdleLeft');
     }
