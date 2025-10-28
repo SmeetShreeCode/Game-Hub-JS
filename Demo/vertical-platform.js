@@ -847,12 +847,7 @@ function animate() {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // draw health bars of player & enemies (example uses object positions)
-    drawPlayerHealth();
-    enemyCollisionBlock.forEach((enemy, idx) => {
-        // draw enemy health bar above enemy
-        drawHealthBar(ctx, enemy.position.x, enemy.position.y - 10, 40, 4, enemy.health, enemy.maxHealth, "yellow");
-    });
+
 
     // camera transform & scale
     ctx.save();
@@ -861,6 +856,13 @@ function animate() {
 
     // background
     background.update();
+    // draw health bars of player & enemies (example uses object positions)
+    drawPlayerHealth();
+    enemyCollisionBlock.forEach((enemy, idx) => {
+        // draw enemy health bar above enemy
+        drawHealthBar(ctx, enemy.position.x, enemy.position.y, 40, 4, enemy.health, enemy.maxHealth, "yellow");
+    });
+    drawHealthBar(ctx, player.position.x, player.position.y, 40, 4, player.health, player.maxHealth);
 
     // update collision blocks for debug if needed
     // collisionBlocks.forEach(b => b.update());
