@@ -1,12 +1,10 @@
-// clean vertical-platform game script (single-file)
-// Assumes presence of: <canvas> element, arrays floorCollisions and platformCollisions (1D arrays), and image assets paths used below.
-
-const canvas = document.querySelector("canvas");
-const ctx = canvas.getContext("2d");
-
+/* -------------------- Config & Globals -------------------- */
+let level = 1;
 let gameOver = false;
 let animationId = null;
 
+const canvas = document.querySelector("canvas");
+const ctx = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
@@ -17,46 +15,67 @@ const scaledCanvas = {
 
 const gravity = 0.2;
 
-// ---------------------- Collision block ----------------------
+/* -------------------- Placeholder Tilemaps (safe defaults) -------------------- */
+/* Replace these arrays with your real level arrays (1D arrays of numbers) */
+const rowWidth = 36;
+const rows = 27; // arbitrary so map isn't empty
+const floorCollisions = new Array(rowWidth * rows).fill(0);
+const platformCollisions = new Array(rowWidth * rows).fill(0);
+const enemyTilemap = new Array(rowWidth * rows).fill(0);
+
+// Put some ground at bottom row (symbol 202 denotes solid block)
+for (let x = 0; x < rowWidth; x++) {
+    floorCollisions[(rows - 2) * rowWidth + x] = 202;
+}
+// small platforms
+platformCollisions[(rows - 6) * rowWidth + 5] = 202;
+platformCollisions[(rows - 8) * rowWidth + 14] = 202;
+platformCollisions[(rows - 10) * rowWidth + 22] = 202;
+
+// put a couple of enemies in enemy tilemap (222)
+enemyTilemap[(rows - 7) * rowWidth + 7] = 222;
+enemyTilemap[(rows - 9) * rowWidth + 23] = 222;
+
+/* -------------------- Utility classes -------------------- */
 class CollisionBlock {
-    constructor({ position, height = 16, width = 16 }) {
+    constructor({ position, height = 16 }) {
         this.position = position;
-        this.width = width;
+        this.width = 16;
         this.height = height;
     }
 
     draw() {
-        // debug draw; comment out if you don't want visible blocks
+        // debug draw -- comment out if you don't want visible blocks
         ctx.fillStyle = "rgba(255, 0, 0, 0.25)";
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
-
-    update() {
-        this.draw();
-    }
 }
 
-// ---------------------- Sprite base ----------------------
+/* -------------------- Sprite base -------------------- */
 class Sprite {
     constructor({ position = { x: 0, y: 0 }, imageSrc = null, frameRate = 1, frameBuffer = 3, scale = 1 }) {
         this.position = position;
         this.scale = scale;
-        this.frameRate = frameRate || 1;
-        this.frameBuffer = frameBuffer || 3;
-        this.currentFrame = 0;
-        this.elapsedFrame = 0;
         this.loaded = false;
         this.image = null;
+        this.frameRate = frameRate;
+        this.currentFrame = 0;
+        this.frameBuffer = frameBuffer;
+        this.elapsedFrame = 0;
         this.width = 0;
         this.height = 0;
 
         if (imageSrc) {
             this.image = new Image();
             this.image.onload = () => {
-                // account for spritesheet frameRate
                 this.width = (this.image.width / this.frameRate) * this.scale;
                 this.height = this.image.height * this.scale;
                 this.loaded = true;
+            };
+            // In case src invalid, we still want the game to continue; onerror we keep loaded=false
+            this.image.onerror = () => {
+                this.image = null;
+                this.loaded = false;
             };
             this.image.src = imageSrc;
         }
@@ -64,7 +83,9 @@ class Sprite {
 
     draw() {
         if (!this.image || !this.loaded) {
-            // optionally draw placeholder rectangle
+            // fallback rectangle so game remains runnable without assets
+            ctx.fillStyle = "gray";
+            ctx.fillRect(this.position.x, this.position.y, 16 * this.scale, 16 * this.scale);
             return;
         }
 
@@ -84,11 +105,6 @@ class Sprite {
         );
     }
 
-    update() {
-        this.draw();
-        this.updateFrames();
-    }
-
     updateFrames() {
         this.elapsedFrame++;
         if (this.elapsedFrame % this.frameBuffer === 0) {
@@ -96,114 +112,115 @@ class Sprite {
             else this.currentFrame = 0;
         }
     }
+
+    update() {
+        this.draw();
+        this.updateFrames();
+    }
 }
 
-// ---------------------- Player ----------------------
+/* -------------------- Player -------------------- */
 class Player extends Sprite {
-    constructor({ position, collisionBlocks = [], platformCollisionBlocks = [], imageSrc, frameRate = 1, scale = 0.5, animations = {} }) {
+    constructor({
+                    position,
+                    collisionBlocks = [],
+                    platformCollisionBlocks = [],
+                    imageSrc,
+                    frameRate = 1,
+                    scale = 0.5,
+                    character = "player",
+                    animations = {}
+                }) {
         super({ position, imageSrc, frameRate, scale });
-        this.velocity = { x: 0, y: 1 };
+        this.velocity = { x: 0, y: 0 };
         this.collisionBlocks = collisionBlocks;
         this.platformCollisionBlocks = platformCollisionBlocks;
 
+        this.position = position;
+        // set sensible default width/height for fallback rects
+        this.width = 16 * scale;
+        this.height = 32 * scale;
+
+        // hitbox relative to sprite position
+        this.hitbox = {
+            position: { x: this.position.x + 6, y: this.position.y + 8 },
+            width: 12,
+            height: 20,
+        };
+
+        this.character = character;
         this.animations = animations;
+        this.lastDirection = "right";
+
         // preload animation images
         for (let key in this.animations) {
             const img = new Image();
             img.src = this.animations[key].imageSrc;
             this.animations[key].image = img;
+            this.animations[key].image.onerror = () => {
+                // ignore load error — fallback will draw rects
+            };
         }
 
-        this.lastDirection = "right";
-
-        // hitbox relative to position
-        this.hitbox = {
-            position: { x: this.position.x, y: this.position.y },
-            width: 14,
-            height: 27,
-        };
-
-        // camera box for panning
         this.camerabox = {
-            position: { x: this.position.x, y: this.position.y },
+            position: { x: this.position.x - 50, y: this.position.y },
             width: 200,
             height: 80,
         };
 
-        // attacking
+        this.jumpsRemaining = 2;
+
         this.attackBox = {
             position: { x: this.position.x, y: this.position.y },
-            width: 30,
-            height: 20,
-            offset: {
-                right: 25,
-                left: -35,
-                y: 20,
-            },
-            active: false,
+            width: 26,
+            height: 18,
+            offset: { right: 20, left: -20, y: 6 },
+            active: false
         };
-        this.attackCooldown = false;
 
-        // health
+        this.attackCooldown = false;
         this.maxHealth = 5;
         this.health = this.maxHealth;
         this.isInvincible = false;
+    }
 
-        // jumps
-        this.jumpsRemaining = 2;
+    updateHitbox() {
+        this.hitbox.position.x = this.position.x + 6;
+        this.hitbox.position.y = this.position.y + 8;
+    }
+
+    updateAttackBox() {
+        this.attackBox.position.x = (this.lastDirection === "right")
+            ? this.hitbox.position.x + this.attackBox.offset.right
+            : this.hitbox.position.x + this.attackBox.offset.left;
+        this.attackBox.position.y = this.hitbox.position.y + this.attackBox.offset.y;
     }
 
     performAttack() {
         if (this.attackCooldown) return;
         this.attackBox.active = true;
         this.attackCooldown = true;
-
-        setTimeout(() => {
-            this.attackBox.active = false;
-        }, 150);
-
-        setTimeout(() => {
-            this.attackCooldown = false;
-        }, 400);
+        setTimeout(() => (this.attackBox.active = false), 140);
+        setTimeout(() => (this.attackCooldown = false), 420);
     }
 
     switchSprite(key) {
         if (!this.animations[key]) return;
         const anim = this.animations[key];
-        // if image already set to that sprite, or images not loaded, skip
-        if (this.image === anim.image) return;
-        this.image = anim.image;
-        this.frameBuffer = anim.frameBuffer;
-        this.frameRate = anim.frameRate;
+        if (this.image === anim.image && this.loaded) return;
         this.currentFrame = 0;
-        this.loaded = !!this.image.complete; // may be true/false
-        if (this.image.complete) {
-            this.width = (this.image.width / this.frameRate) * this.scale;
-            this.height = this.image.height * this.scale;
-        } else {
-            this.image.onload = () => {
-                this.width = (this.image.width / this.frameRate) * this.scale;
-                this.height = this.image.height * this.scale;
-                this.loaded = true;
-            };
+        this.image = anim.image || this.image;
+        this.frameBuffer = anim.frameBuffer ?? this.frameBuffer;
+        this.frameRate = anim.frameRate ?? this.frameRate;
+        this.loaded = this.image ? this.image.complete : false;
+        if (this.image && !this.image.complete) {
+            this.image.onload = () => (this.loaded = true);
         }
     }
 
-    updateCamerabox() {
-        this.camerabox = {
-            position: {
-                x: this.position.x - 50,
-                y: this.position.y,
-            },
-            width: 200,
-            height: 80,
-        };
-    }
-
     checkForHorizontalCanvasCollision() {
-        const leftLimit = 0;
-        const rightLimit = 576; // game world width in scaled units originally used
-        if (this.hitbox.position.x + this.hitbox.width + this.velocity.x >= rightLimit || this.hitbox.position.x + this.velocity.x <= leftLimit) {
+        const hb = this.hitbox;
+        if (hb.position.x + hb.width + this.velocity.x >= 576 || hb.position.x + this.velocity.x <= 0) {
             this.velocity.x = 0;
         }
     }
@@ -239,45 +256,24 @@ class Player extends Sprite {
         }
     }
 
-    updateHitbox() {
-        this.hitbox = {
-            position: {
-                x: this.position.x + 35,
-                y: this.position.y + 26,
-            },
-            width: 14,
-            height: 27,
-        };
-    }
-
-    updateAttackBox() {
-        if (this.lastDirection === "right") {
-            this.attackBox.position.x = this.hitbox.position.x + this.attackBox.offset.right;
-        } else {
-            this.attackBox.position.x = this.hitbox.position.x + this.attackBox.offset.left;
-        }
-        this.attackBox.position.y = this.hitbox.position.y + this.attackBox.offset.y;
-    }
-
     applyGravity() {
         this.velocity.y += gravity;
         this.position.y += this.velocity.y;
     }
 
     checkForHorizontalCollisions() {
-        for (let i = 0; i < this.collisionBlocks.length; i++) {
-            const collisionBlock = this.collisionBlocks[i];
-            if (collision({ obj1: this.hitbox, obj2: collisionBlock })) {
+        for (let block of this.collisionBlocks) {
+            if (collision({ obj1: this.hitbox, obj2: block })) {
                 if (this.velocity.x > 0) {
                     this.velocity.x = 0;
                     const offset = this.hitbox.position.x - this.position.x + this.hitbox.width;
-                    this.position.x = collisionBlock.position.x - offset - 0.01;
+                    this.position.x = block.position.x - offset - 0.01;
                     break;
                 }
                 if (this.velocity.x < 0) {
                     this.velocity.x = 0;
                     const offset = this.hitbox.position.x - this.position.x;
-                    this.position.x = collisionBlock.position.x + collisionBlock.width - offset + 0.01;
+                    this.position.x = block.position.x + block.width - offset + 0.01;
                     break;
                 }
             }
@@ -285,36 +281,31 @@ class Player extends Sprite {
     }
 
     checkForVerticalCollisions() {
-        for (let i = 0; i < this.collisionBlocks.length; i++) {
-            const collisionBlock = this.collisionBlocks[i];
-            if (collision({ obj1: this.hitbox, obj2: collisionBlock })) {
+        // solid blocks
+        for (let block of this.collisionBlocks) {
+            if (collision({ obj1: this.hitbox, obj2: block })) {
                 if (this.velocity.y > 0) {
                     this.velocity.y = 0;
                     const offset = this.hitbox.position.y - this.position.y + this.hitbox.height;
-                    this.position.y = collisionBlock.position.y - offset - 0.01;
+                    this.position.y = block.position.y - offset - 0.01;
                     this.jumpsRemaining = 2;
                     break;
                 }
                 if (this.velocity.y < 0) {
                     this.velocity.y = 0;
                     const offset = this.hitbox.position.y - this.position.y;
-                    this.position.y = collisionBlock.position.y + collisionBlock.height - offset + 0.01;
+                    this.position.y = block.position.y + block.height - offset + 0.01;
                     break;
                 }
             }
         }
-
-        // platform collision blocks (one-sided)
-        for (let i = 0; i < this.platformCollisionBlocks.length; i++) {
-            const platformCollisionBlock = this.platformCollisionBlocks[i];
-            if (platformCollision({
-                obj1: this.hitbox,
-                obj2: platformCollisionBlock,
-            })) {
+        // platforms (one-way)
+        for (let platform of this.platformCollisionBlocks) {
+            if (platformCollision({ obj1: this.hitbox, obj2: platform })) {
                 if (this.velocity.y > 0) {
                     this.velocity.y = 0;
                     const offset = this.hitbox.position.y - this.position.y + this.hitbox.height;
-                    this.position.y = platformCollisionBlock.position.y - offset - 0.01;
+                    this.position.y = platform.position.y - offset - 0.01;
                     this.jumpsRemaining = 2;
                     break;
                 }
@@ -326,20 +317,21 @@ class Player extends Sprite {
         if (this.isInvincible || gameOver) return;
         this.health--;
         this.isInvincible = true;
-
         this.velocity.x = direction === "left" ? -knockback : knockback;
         this.velocity.y = -knockback;
+        setTimeout(() => (this.isInvincible = false), 600);
+        if (this.health <= 0) this.die();
+    }
 
-        setTimeout(() => {
-            this.isInvincible = false;
-        }, 500);
+    die() {
+        console.log("GAME OVER");
+        gameOver = true;
+        if (animationId) cancelAnimationFrame(animationId);
+    }
 
-        if (this.health <= 0) {
-            this.switchSprite("Death");
-            this.velocity.x = 0;
-            this.velocity.y = 0;
-            gameOver = true;
-        }
+    updateCamerabox() {
+        this.camerabox.position.x = this.position.x - 50;
+        this.camerabox.position.y = this.position.y;
     }
 
     update() {
@@ -348,16 +340,16 @@ class Player extends Sprite {
         this.updateAttackBox();
         this.updateCamerabox();
 
-        // draw attack box if active (debug)
+        // debug draw attack box
         if (this.attackBox.active) {
-            ctx.fillStyle = "rgba(255,255,0,0.3)";
+            ctx.fillStyle = "rgba(255,255,0,0.4)";
             ctx.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
         }
 
-        // draw player sprite
+        // draw player (sprite or fallback)
         this.draw();
 
-        // movement and collisions
+        // movement: we already apply velocity externally (in loop) but keep collisions local
         this.position.x += this.velocity.x;
         this.updateHitbox();
         this.checkForHorizontalCollisions();
@@ -368,14 +360,31 @@ class Player extends Sprite {
     }
 }
 
-// ---------------------- Enemy ----------------------
+/* -------------------- Enemy -------------------- */
 class Enemy extends Sprite {
-    constructor({ position, collisionBlocks = [], platformCollisionBlocks = [], imageSrc, frameRate = 1, scale = 0.5, animations = {} }) {
+    constructor({
+                    position,
+                    collisionBlocks = [],
+                    platformCollisionBlocks = [],
+                    imageSrc,
+                    frameRate = 1,
+                    scale = 0.5,
+                    animations = {}
+                }) {
         super({ position, imageSrc, frameRate, scale });
-        this.position = position;
-        this.velocity = { x: 1, y: 1 };
+        this.velocity = { x: 0.8, y: 0 };
         this.collisionBlocks = collisionBlocks;
         this.platformCollisionBlocks = platformCollisionBlocks;
+
+        this.position = position;
+        this.width = 16 * scale;
+        this.height = 28 * scale;
+
+        this.hitbox = {
+            position: { x: this.position.x + 6, y: this.position.y + 8 },
+            width: 12,
+            height: 20
+        };
 
         this.animations = animations;
         for (let key in this.animations) {
@@ -384,39 +393,38 @@ class Enemy extends Sprite {
             this.animations[key].image = img;
         }
 
-        this.hitbox = {
-            position: { x: this.position.x, y: this.position.y },
-            width: 14,
-            height: 27,
-        };
-
         this.movingRight = true;
-        this.health = 3;
+        this.lastDirection = "right";
+
         this.maxHealth = 3;
+        this.health = this.maxHealth;
         this.dead = false;
         this.markedForDeletion = false;
 
         this.attackBox = {
             position: { x: this.position.x, y: this.position.y },
-            width: 40,
-            height: 40,
-            active: false,
+            width: 18,
+            height: 18,
+            active: false
         };
 
         this.attackCooldown = 2000;
         this.lastAttack = 0;
         this.attackDamage = 1;
+        this.telegraphing = false;
+        this.isAttacking = false;
+        this.detectionRange = 100;
+        this.chaseSpeed = 1.2;
+
+        // behavior flags
+        this.flying = false;
+        this.heavy = false;
+        this.colorEffect = null;
     }
 
     updateHitbox() {
-        this.hitbox = {
-            position: {
-                x: this.position.x + 35,
-                y: this.position.y + 26,
-            },
-            width: 14,
-            height: 27,
-        };
+        this.hitbox.position.x = this.position.x + 6;
+        this.hitbox.position.y = this.position.y + 8;
     }
 
     applyGravity() {
@@ -425,25 +433,18 @@ class Enemy extends Sprite {
     }
 
     checkForHorizontalCollisions() {
-        for (let i = 0; i < this.collisionBlocks.length; i++) {
-            const block = this.collisionBlocks[i];
+        for (let block of this.collisionBlocks) {
             if (collision({ obj1: this.hitbox, obj2: block })) {
-                if (this.velocity.x > 0) {
-                    this.velocity.x = -1;
-                    this.movingRight = false;
-                    return;
-                } else if (this.velocity.x < 0) {
-                    this.velocity.x = 1;
-                    this.movingRight = true;
-                    return;
-                }
+                this.velocity.x *= -1;
+                this.movingRight = this.velocity.x > 0;
+                this.lastDirection = this.movingRight ? "right" : "left";
+                return;
             }
         }
     }
 
     checkForVerticalCollisions() {
-        for (let i = 0; i < this.collisionBlocks.length; i++) {
-            const block = this.collisionBlocks[i];
+        for (let block of this.collisionBlocks) {
             if (collision({ obj1: this.hitbox, obj2: block })) {
                 if (this.velocity.y > 0) {
                     this.velocity.y = 0;
@@ -456,10 +457,10 @@ class Enemy extends Sprite {
     }
 
     patrol() {
-        // simple patrol: move horizontally and avoid falling by checking platform blocks under front point
         this.position.x += this.velocity.x;
-
-        const frontX = this.movingRight ? this.hitbox.position.x + this.hitbox.width + 1 : this.hitbox.position.x - 1;
+        const frontX = this.movingRight
+            ? this.hitbox.position.x + this.hitbox.width + 1
+            : this.hitbox.position.x - 1;
         const frontY = this.hitbox.position.y + this.hitbox.height + 1;
 
         let onGroundAhead = false;
@@ -478,69 +479,64 @@ class Enemy extends Sprite {
         if (!onGroundAhead) {
             this.velocity.x *= -1;
             this.movingRight = !this.movingRight;
+            this.lastDirection = this.movingRight ? "right" : "left";
         }
+    }
 
-        // switch sprite if animations exist
-        if (this.animations) {
-            if (this.movingRight && this.animations.Walk) this.switchSprite("Walk");
-            else if (!this.movingRight && this.animations.WalkLeft) this.switchSprite("WalkLeft");
-        }
+    telegraphAttack() {
+        if (this.telegraphing || this.isAttacking) return;
+        this.telegraphing = true;
+        setTimeout(() => {
+            this.telegraphing = false;
+            this.attack();
+        }, 350);
     }
 
     attack() {
         const now = Date.now();
-        if (now - this.lastAttack < this.attackCooldown) return;
-        this.attackBox.active = true;
+        if (now - this.lastAttack < this.attackCooldown || this.dead) return;
         this.lastAttack = now;
-
-        // place attack box roughly in front
-        this.attackBox.position.x = this.position.x + (this.movingRight ? this.width || 0 : -this.attackBox.width);
+        this.isAttacking = true;
+        this.attackBox.active = true;
+        this.attackBox.position.x = this.position.x + (this.movingRight ? this.hitbox.width : -this.attackBox.width);
         this.attackBox.position.y = this.position.y;
-
         setTimeout(() => {
             this.attackBox.active = false;
-        }, 300);
+            this.isAttacking = false;
+        }, 420);
     }
 
-    takeDamage(direction = "left", knockback = 3) {
+    takeDamage(direction = "right", knockback = 3) {
         if (this.dead) return;
         this.health--;
         this.velocity.x = direction === "left" ? -knockback : knockback;
         this.velocity.y = -knockback / 2;
-
         if (this.health <= 0) this.die();
     }
 
     die() {
         this.dead = true;
-        if (this.animations && this.animations.Death) this.switchSprite("Death");
-        setTimeout(() => {
-            this.markedForDeletion = true;
-        }, 800);
+        this.markedForDeletion = true;
     }
 
-    switchSprite(key) {
-        if (!this.animations[key]) return;
-        const anim = this.animations[key];
-        if (this.image === anim.image) return;
-        this.image = anim.image;
-        this.frameBuffer = anim.frameBuffer;
-        this.frameRate = anim.frameRate;
-        this.currentFrame = 0;
-        this.loaded = !!this.image.complete;
-        if (this.image.complete) {
-            this.width = (this.image.width / this.frameRate) * this.scale;
-            this.height = this.image.height * this.scale;
-        } else {
-            this.image.onload = () => {
-                this.width = (this.image.width / this.frameRate) * this.scale;
-                this.height = this.image.height * this.scale;
-                this.loaded = true;
-            };
+    chasePlayer(player) {
+        const distanceX = player.position.x - this.position.x;
+        const absDistance = Math.abs(distanceX);
+
+        if (absDistance < this.detectionRange && !this.isAttacking && !this.telegraphing) {
+            this.velocity.x = distanceX > 0 ? this.chaseSpeed : -this.chaseSpeed;
+            this.movingRight = distanceX > 0;
+            this.lastDirection = this.movingRight ? "right" : "left";
+            // if very close, telegraph
+            if (absDistance < 26 && Date.now() - this.lastAttack > this.attackCooldown) {
+                this.telegraphAttack();
+            }
+        } else if (!this.isAttacking && !this.telegraphing) {
+            this.patrol();
         }
     }
 
-    update() {
+    update(player) {
         if (this.markedForDeletion) return;
         this.updateFrames();
         this.updateHitbox();
@@ -549,18 +545,33 @@ class Enemy extends Sprite {
         this.updateHitbox();
         this.checkForHorizontalCollisions();
         this.checkForVerticalCollisions();
+        this.chasePlayer(player);
+
+        // debug draw attack box
+        if (this.attackBox.active) {
+            ctx.fillStyle = "rgba(255, 0, 0, 0.25)";
+            ctx.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
+        }
+
+        // simple color overlay effect for special enemies
+        if (this.colorEffect) {
+            ctx.save();
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = this.colorEffect;
+            ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+            ctx.restore();
+        }
+
+        // slight flying bob
+        if (this.flying) {
+            this.position.y += Math.sin(Date.now() / 200 + this.position.x / 60) * 0.6;
+        }
 
         this.draw();
-        this.patrol();
-
-        // optionally attack randomly or when player in range (left as simple timer)
-        if (Date.now() - this.lastAttack > this.attackCooldown + 5000) {
-            this.attack();
-        }
     }
 }
 
-// ---------------------- Collision helpers ----------------------
+/* -------------------- Collision helpers -------------------- */
 function collision({ obj1, obj2 }) {
     return (
         obj1.position.y + obj1.height >= obj2.position.y &&
@@ -571,7 +582,7 @@ function collision({ obj1, obj2 }) {
 }
 
 function platformCollision({ obj1, obj2 }) {
-    // only collide if obj1's bottom is within platform vertical tolerance -> one-sided platform
+    // one-way platform collision (only when falling onto platform)
     return (
         obj1.position.y + obj1.height >= obj2.position.y &&
         obj1.position.y + obj1.height <= obj2.position.y + obj2.height &&
@@ -580,167 +591,310 @@ function platformCollision({ obj1, obj2 }) {
     );
 }
 
-// ---------------------- Build collision arrays from tile arrays ----------------------
-// NOTE: floorCollisions and platformCollisions must be present as 1D arrays (tile indices).
-// Also original script used width = 36 tiles, so we will use 36 here.
-const TILE_COLUMNS = 36; // keep consistent with your map layout
+/* -------------------- Build collision blocks from tile maps -------------------- */
 const floorCollisions2D = [];
-if (typeof floorCollisions !== "undefined" && Array.isArray(floorCollisions)) {
-    for (let i = 0; i < floorCollisions.length; i += TILE_COLUMNS) {
-        floorCollisions2D.push(floorCollisions.slice(i, i + TILE_COLUMNS));
-    }
+for (let i = 0; i < floorCollisions.length; i += rowWidth) {
+    floorCollisions2D.push(floorCollisions.slice(i, i + rowWidth));
 }
 const collisionBlocks = [];
 floorCollisions2D.forEach((row, y) => {
     row.forEach((symbol, x) => {
         if (symbol === 202) {
-            collisionBlocks.push(
-                new CollisionBlock({
-                    position: { x: x * 16, y: y * 16 },
-                    width: 16,
-                    height: 16,
-                })
-            );
+            collisionBlocks.push(new CollisionBlock({
+                position: { x: x * 16, y: y * 16 }
+            }));
         }
     });
 });
 
 const platformCollisions2D = [];
-if (typeof platformCollisions !== "undefined" && Array.isArray(platformCollisions)) {
-    for (let i = 0; i < platformCollisions.length; i += TILE_COLUMNS) {
-        platformCollisions2D.push(platformCollisions.slice(i, i + TILE_COLUMNS));
-    }
+for (let i = 0; i < platformCollisions.length; i += rowWidth) {
+    platformCollisions2D.push(platformCollisions.slice(i, i + rowWidth));
 }
 const platformCollisionBlocks = [];
 platformCollisions2D.forEach((row, y) => {
     row.forEach((symbol, x) => {
         if (symbol === 202) {
-            platformCollisionBlocks.push(
-                new CollisionBlock({
-                    position: { x: x * 16, y: y * 16 },
-                    width: 16,
-                    height: 4,
-                })
-            );
+            platformCollisionBlocks.push(new CollisionBlock({
+                position: { x: x * 16, y: y * 16 },
+                height: 4
+            }));
         }
     });
 });
 
-// create enemies from platform map (tile value 222 = enemy spawn)
-const enemyCollision2D = platformCollisions2D.length ? platformCollisions2D : [];
-const enemies = [];
+/* -------------------- Particles -------------------- */
+const particles = [];
+function spawnParticles(x, y, count = 10, color = "white") {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 3,
+            vy: Math.random() * -3,
+            alpha: 1,
+            color,
+            size: 1 + Math.random() * 3
+        });
+    }
+}
+
+function updateParticles() {
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.04; // small gravity for particles
+        p.alpha -= 0.02;
+        if (p.alpha <= 0) particles.splice(i, 1);
+    }
+}
+
+function drawParticles() {
+    particles.forEach((p) => {
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    });
+}
+
+/* -------------------- Create enemies from tilemap -------------------- */
+const enemyCollision2D = [];
+for (let i = 0; i < enemyTilemap.length; i += rowWidth) {
+    enemyCollision2D.push(enemyTilemap.slice(i, i + rowWidth));
+}
+
+let enemyCollisionBlock = [];
 enemyCollision2D.forEach((row, y) => {
     row.forEach((symbol, x) => {
         if (symbol === 222) {
-            enemies.push(
-                new Enemy({
-                    position: { x: x * 16, y: y * 16 },
-                    imageSrc: "./images/vertical-platform/Kunoichi/Idle.png",
-                    frameRate: 9,
-                    scale: 0.5,
-                    collisionBlocks,
-                    platformCollisionBlocks,
-                    animations: {
-                        Idle: { imageSrc: "./images/vertical-platform/Kunoichi/Idle.png", frameRate: 9, frameBuffer: 4 },
-                        Walk: { imageSrc: "./images/vertical-platform/Kunoichi/Run.png", frameRate: 8, frameBuffer: 5 },
-                        WalkLeft: { imageSrc: "./images/vertical-platform/Kunoichi/RunLeft.png", frameRate: 8, frameBuffer: 5 },
-                        Death: { imageSrc: "./images/vertical-platform/Kunoichi/Death.png", frameRate: 6, frameBuffer: 6 },
-                    },
-                })
-            );
+            enemyCollisionBlock.push(new Enemy({
+                position: { x: x * 16, y: y * 16 },
+                imageSrc: null, // fill with asset path if available
+                frameRate: 6,
+                scale: 0.6,
+                collisionBlocks,
+                platformCollisionBlocks,
+                animations: {
+                    Idle: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+                    Walk: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+                    WalkLeft: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+                    Attack: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+                    AttackLeft: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+                    Death: { imageSrc: "", frameRate: 6, frameBuffer: 5 }
+                }
+            }));
         }
     });
 });
 
-// ---------------------- Player instance ----------------------
-const player = new Player({
-    position: { x: 100, y: 300 },
-    collisionBlocks,
-    platformCollisionBlocks,
-    imageSrc: "./images/vertical-platform/warrior/Idle.png",
-    frameRate: 8,
-    scale: 0.5,
-    animations: {
-        Idle: { imageSrc: "./images/vertical-platform/warrior/Idle.png", frameRate: 8, frameBuffer: 3 },
-        IdleLeft: { imageSrc: "./images/vertical-platform/warrior/IdleLeft.png", frameRate: 8, frameBuffer: 3 },
-        Run: { imageSrc: "./images/vertical-platform/warrior/Run.png", frameRate: 8, frameBuffer: 5 },
-        RunLeft: { imageSrc: "./images/vertical-platform/warrior/RunLeft.png", frameRate: 8, frameBuffer: 5 },
-        Jump: { imageSrc: "./images/vertical-platform/warrior/Jump.png", frameRate: 2, frameBuffer: 3 },
-        JumpLeft: { imageSrc: "./images/vertical-platform/warrior/JumpLeft.png", frameRate: 2, frameBuffer: 3 },
-        Fall: { imageSrc: "./images/vertical-platform/warrior/Fall.png", frameRate: 2, frameBuffer: 3 },
-        FallLeft: { imageSrc: "./images/vertical-platform/warrior/FallLeft.png", frameRate: 2, frameBuffer: 3 },
-        Attack1: { imageSrc: "./images/vertical-platform/warrior/Attack_1.png", frameRate: 4, frameBuffer: 3 },
-        Attack1_Left: { imageSrc: "./images/vertical-platform/warrior/Attack_1_Left.png", frameRate: 4, frameBuffer: 3 },
-        Attack2: { imageSrc: "./images/vertical-platform/warrior/Attack_2.png", frameRate: 4, frameBuffer: 3 },
-        Attack2_Left: { imageSrc: "./images/vertical-platform/warrior/Attack_2_Left.png", frameRate: 4, frameBuffer: 3 },
-        Attack3: { imageSrc: "./images/vertical-platform/warrior/Attack_3.png", frameRate: 4, frameBuffer: 3 },
-        Attack3_Left: { imageSrc: "./images/vertical-platform/warrior/Attack_3_Left.png", frameRate: 4, frameBuffer: 3 },
-        Death: { imageSrc: "./images/vertical-platform/warrior/Death.png", frameRate: 6, frameBuffer: 8 },
-    },
-});
+/* -------------------- Enemy factory (type-based) -------------------- */
+function createEnemyByType(type, level, x, y) {
+    const base = {
+        imageSrc: null,
+        animations: {},
+        scale: 0.5,
+        health: 5,
+        speed: 1,
+        damage: 1,
+        detection: 120,
+        flying: false,
+        heavy: false,
+        colorEffect: null
+    };
 
-// ---------------------- Background sprite ----------------------
+    if (type === "Goblin") {
+        base.scale = 0.45;
+        base.animations = {
+            Idle: { imageSrc: "", frameRate: 8, frameBuffer: 4 },
+            Walk: { imageSrc: "", frameRate: 8, frameBuffer: 4 },
+            WalkLeft: { imageSrc: "", frameRate: 8, frameBuffer: 4 },
+            Attack: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+            Death: { imageSrc: "", frameRate: 6, frameBuffer: 5 }
+        };
+        base.health = 5 + level;
+        base.speed = 1.5 + level * 0.05;
+        base.damage = 1 + Math.floor(level / 3);
+        base.colorEffect = "rgba(0,255,0,0.25)";
+    } else if (type === "Bat") {
+        base.scale = 0.6;
+        base.animations = {
+            Idle: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+            Fly: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+            FlyLeft: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+            Death: { imageSrc: "", frameRate: 6, frameBuffer: 5 }
+        };
+        base.health = 8 + level;
+        base.speed = 2.0 + level * 0.05;
+        base.damage = 2 + Math.floor(level / 4);
+        base.detection = 180;
+        base.flying = true;
+        base.colorEffect = "rgba(120,50,255,0.18)";
+    } else if (type === "Ogre") {
+        base.scale = 1.0;
+        base.animations = {
+            Idle: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+            Walk: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+            WalkLeft: { imageSrc: "", frameRate: 6, frameBuffer: 4 },
+            Attack: { imageSrc: "", frameRate: 6, frameBuffer: 3 },
+            Death: { imageSrc: "", frameRate: 6, frameBuffer: 5 }
+        };
+        base.health = 30 + level * 3;
+        base.speed = 1.2 + level * 0.03;
+        base.damage = 5 + Math.floor(level / 2);
+        base.detection = 200;
+        base.heavy = true;
+        base.colorEffect = "rgba(255,0,0,0.2)";
+    }
+
+    const enemy = new Enemy({
+        position: { x, y },
+        imageSrc: base.imageSrc,
+        frameRate: base.animations?.Idle?.frameRate || 8,
+        scale: base.scale,
+        collisionBlocks,
+        platformCollisionBlocks,
+        animations: base.animations
+    });
+
+    enemy.maxHealth = base.health;
+    enemy.health = base.health;
+    enemy.chaseSpeed = base.speed;
+    enemy.attackDamage = base.damage;
+    enemy.detectionRange = base.detection;
+    enemy.type = type;
+    enemy.colorEffect = base.colorEffect;
+    enemy.flying = base.flying;
+    enemy.heavy = base.heavy;
+
+    return enemy;
+}
+
+function spawnEnemiesForLevel(levelNum) {
+    enemyCollisionBlock = []; // reset
+    const monsterLevel = levelNum % 10 === 0;
+    const enemyCount = monsterLevel ? 1 : Math.min(3 + levelNum, 8);
+
+    let typePool;
+    if (levelNum <= 5) typePool = ["Goblin"];
+    else if (levelNum < 10) typePool = ["Goblin", "Bat"];
+    else if (monsterLevel) typePool = ["Ogre"];
+    else typePool = ["Goblin", "Bat"];
+
+    for (let i = 0; i < enemyCount; i++) {
+        const type = monsterLevel ? "Ogre" : typePool[Math.floor(Math.random() * typePool.length)];
+        const x = 80 + i * 96;
+        const y = 100;
+        const e = createEnemyByType(type, levelNum, x, y);
+        enemyCollisionBlock.push(e);
+    }
+
+    if (monsterLevel) {
+        screenShake(900, 8);
+        showLevelText(`⚔️ LEVEL ${levelNum} — OGRE BOSS ⚔️`);
+        spawnParticles(200, 120, 40, "red");
+    } else {
+        showLevelText(`Level ${levelNum}`);
+    }
+}
+
+/* -------------------- UI Helpers -------------------- */
+function drawHealthBar(ctxRef, x, y, width, height, currentHealth, maxHealth, color = "green") {
+    ctxRef.fillStyle = "red";
+    ctxRef.fillRect(x, y - 6, width, height);
+    const healthWidth = Math.max(0, (currentHealth / maxHealth) * width);
+    ctxRef.fillStyle = color;
+    ctxRef.fillRect(x, y - 6, healthWidth, height);
+    ctxRef.strokeStyle = "black";
+    ctxRef.strokeRect(x, y - 6, width, height);
+}
+
+let levelTextTimeout = null;
+function showLevelText(text) {
+    const x = canvas.width / 2;
+    const y = 60;
+    // draw overlay briefly by setting state and letting animate render it
+    levelOverlay.text = text;
+    if (levelTextTimeout) clearTimeout(levelTextTimeout);
+    levelTextTimeout = setTimeout(() => (levelOverlay.text = ""), 2000);
+}
+
+const levelOverlay = { text: "" };
+
+/* -------------------- Screen shake (basic) -------------------- */
+let screenShakeOffset = { x: 0, y: 0 };
+function screenShake(duration = 400, magnitude = 6) {
+    const start = Date.now();
+    function tick() {
+        const elapsed = Date.now() - start;
+        if (elapsed < duration) {
+            const progress = elapsed / duration;
+            const damper = 1 - progress;
+            screenShakeOffset.x = (Math.random() * 2 - 1) * magnitude * damper;
+            screenShakeOffset.y = (Math.random() * 2 - 1) * magnitude * damper;
+            requestAnimationFrame(tick);
+        } else {
+            screenShakeOffset.x = 0;
+            screenShakeOffset.y = 0;
+        }
+    }
+    tick();
+}
+
+/* -------------------- Background & Camera -------------------- */
 const background = new Sprite({
     position: { x: 0, y: 0 },
-    imageSrc: "./images/vertical-platform/Background/background.png",
+    imageSrc: null, // set path if you have a background image
+    frameRate: 1,
+    frameBuffer: 1,
+    scale: 1
 });
-
-// handy constant for background height the original code used
 const backgroundImageHeight = 432;
-
 const camera = {
-    position: { x: 0, y: -backgroundImageHeight + scaledCanvas.height },
+    position: { x: 0, y: -backgroundImageHeight + scaledCanvas.height }
 };
 
-// keys
+/* -------------------- Player instance -------------------- */
+const player = new Player({
+    position: { x: 10, y: 300 },
+    collisionBlocks,
+    platformCollisionBlocks,
+    imageSrc: null, // set to "./images/vertical-platform/warrior/Idle.png" if you have it
+    frameRate: 8,
+    scale: 0.6,
+    character: "warrior",
+    animations: {
+        Idle: { imageSrc: "", frameRate: 8, frameBuffer: 3 },
+        IdleLeft: { imageSrc: "", frameRate: 8, frameBuffer: 3 },
+        Run: { imageSrc: "", frameRate: 8, frameBuffer: 5 },
+        RunLeft: { imageSrc: "", frameRate: 8, frameBuffer: 5 },
+        Jump: { imageSrc: "", frameRate: 2, frameBuffer: 3 },
+        JumpLeft: { imageSrc: "", frameRate: 2, frameBuffer: 3 },
+        Fall: { imageSrc: "", frameRate: 2, frameBuffer: 3 },
+        FallLeft: { imageSrc: "", frameRate: 2, frameBuffer: 3 },
+        Attack1: { imageSrc: "", frameRate: 4, frameBuffer: 3 },
+        Attack1_Left: { imageSrc: "", frameRate: 4, frameBuffer: 3 },
+        Attack2: { imageSrc: "", frameRate: 4, frameBuffer: 3 },
+        Attack2_Left: { imageSrc: "", frameRate: 4, frameBuffer: 3 },
+        Attack3: { imageSrc: "", frameRate: 4, frameBuffer: 3 },
+        Attack3_Left: { imageSrc: "", frameRate: 4, frameBuffer: 3 },
+        Death: { imageSrc: "", frameRate: 6, frameBuffer: 8 }
+    }
+});
+
+/* -------------------- Input handling -------------------- */
 const keys = {
     moveRight: { pressed: false },
     moveLeft: { pressed: false },
     attack1: { pressed: false },
     attack2: { pressed: false },
-    attack3: { pressed: false },
+    attack3: { pressed: false }
 };
 
-// ---------------------- Drawing helpers ----------------------
-function drawPlayerHealth() {
-    // simple squares for now
-    for (let i = 0; i < player.health; i++) {
-        ctx.fillStyle = "red";
-        ctx.fillRect(20 + i * 30, 20, 25, 25);
-    }
-}
-
-function drawHealthBar(ctxLocal, x, y, width, height, currentHealth, maxHealth, color = "green") {
-    ctxLocal.fillStyle = "red";
-    ctxLocal.fillRect(x, y, width, height);
-    const healthWidth = Math.max(0, (currentHealth / maxHealth) * width);
-    ctxLocal.fillStyle = color;
-    ctxLocal.fillRect(x, y, healthWidth, height);
-    ctxLocal.strokeStyle = "black";
-    ctxLocal.strokeRect(x, y, width, height);
-}
-
-// ---------------------- Reset game ----------------------
-function resetGame() {
-    player.health = player.maxHealth;
-    player.position.x = 100;
-    player.position.y = 300;
-    player.velocity.x = 0;
-    player.velocity.y = 0;
-    player.switchSprite("Idle");
-    // reset enemies that are present (placeholder repositioning)
-    enemies.forEach((enemy) => {
-        enemy.health = enemy.maxHealth;
-        enemy.markedForDeletion = false;
-        enemy.dead = false;
-        // optional reposition: keep original tile-based spawn; for simplicity we do not change position here
-        enemy.velocity.x = enemy.movingRight ? 1 : -1;
-        enemy.velocity.y = 0;
-    });
-    gameOver = false;
-}
-
-// ---------------------- Input ----------------------
 window.addEventListener("keydown", (e) => {
     switch (e.key) {
         case "d":
@@ -757,7 +911,7 @@ window.addEventListener("keydown", (e) => {
         case "W":
         case "ArrowUp":
             if (player.jumpsRemaining > 0) {
-                player.velocity.y = -5;
+                player.velocity.y = -5.5;
                 player.jumpsRemaining--;
             }
             break;
@@ -808,41 +962,72 @@ window.addEventListener("keyup", (e) => {
     }
 });
 
-// ---------------------- Main animate loop ----------------------
-function animate() {
-    animationId = window.requestAnimationFrame(animate);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+/* -------------------- Reset game -------------------- */
+function resetGame() {
+    player.health = player.maxHealth;
+    player.position.x = 10;
+    player.position.y = 300;
+    player.velocity.x = 0;
+    player.velocity.y = 0;
+    player.switchSprite("Idle");
+    gameOver = false;
+    spawnEnemiesForLevel(level);
+    animate();
+}
 
-    // draw HUD healthbars for player and enemies (simple)
-    drawPlayerHealth();
-    enemies.forEach((en) => {
-        // draw enemy health bar near its position (world coordinates transformed by camera)
-        const screenX = (en.position.x + camera.position.x) * 4; // because we scale by 4 later
-        const screenY = (en.position.y + camera.position.y) * 4;
-        // small bar — keep it lightweight
-        drawHealthBar(ctx, screenX / 4, screenY / 4 - 10, 40, 4, en.health, en.maxHealth, "yellow");
-    });
+/* -------------------- Draw helpers -------------------- */
+function drawEnemyAura(enemy) {
+    let color = "rgba(0,0,0,0)";
+    if (enemy.type === "Goblin") color = "rgba(0,255,0,0.22)";
+    if (enemy.type === "Bat") color = "rgba(120,0,255,0.18)";
+    if (enemy.type === "Ogre") color = "rgba(255,0,0,0.28)";
+
+    const cx = enemy.position.x + (enemy.width || 16) / 2;
+    const cy = enemy.position.y + (enemy.height || 16) / 2;
+    const gradient = ctx.createRadialGradient(cx, cy, 8, cx, cy, 40);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
 
     ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = gradient;
+    ctx.fillRect(enemy.position.x - 30, enemy.position.y - 30, (enemy.width || 16) + 60, (enemy.height || 16) + 60);
+    ctx.restore();
+}
+
+/* -------------------- Main animate loop -------------------- */
+function animate() {
+    animationId = window.requestAnimationFrame(animate);
+
+    // clear
+    ctx.fillStyle = "#e8f5ff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // camera transform and screen shake
+    ctx.save();
+    ctx.translate(screenShakeOffset.x, screenShakeOffset.y);
     ctx.scale(4, 4);
     ctx.translate(camera.position.x, camera.position.y);
 
-    // background
-    if (background.loaded) background.update();
+    // background (simple fill or image if provided)
+    if (background && background.loaded) background.update();
+    else {
+        ctx.fillStyle = "#b3e5fc";
+        ctx.fillRect(0, 0, scaledCanvas.width, scaledCanvas.height);
+    }
 
-    // For debugging you can draw collision blocks/platforms
-    // collisionBlocks.forEach(cb => cb.update());
-    // platformCollisionBlocks.forEach(pb => pb.update());
+    // draw collision blocks (debug)
+    collisionBlocks.forEach((b) => b.draw());
+    platformCollisionBlocks.forEach((b) => b.draw());
 
-    // Update enemies
-    enemies.forEach((enemy) => enemy.update());
+    // draw player health bar
+    drawHealthBar(ctx, player.position.x, player.position.y - 4, 36, 4, player.health, player.maxHealth);
 
-    // player collision and update
+    // player checks & update
     player.checkForHorizontalCanvasCollision();
     player.update();
 
-    // player movement & animation switching
+    // reset horizontal velocity then movement input
     player.velocity.x = 0;
     if (keys.moveRight.pressed) {
         player.switchSprite("Run");
@@ -872,51 +1057,77 @@ function animate() {
         player.switchSprite(player.lastDirection === "right" ? "Fall" : "FallLeft");
     }
 
-    // Interactions (player attacks enemies, enemies attack player)
-    enemies.forEach((enemy) => {
-        // player attack vs enemy
+    // update & draw enemies
+    enemyCollisionBlock.forEach((enemy) => {
+        drawHealthBar(ctx, enemy.position.x, enemy.position.y - 6, 36, 4, enemy.health, enemy.maxHealth, "yellow");
+        if (enemy.colorEffect) drawEnemyAura(enemy);
+        enemy.update(player);
+
+        // small bob for flying bats handled in update()
+
+        // enemy auto-attack (attempts)
+        enemy.attack();
+
+        // enemy attack hits player
+        if (enemy.attackBox.active && collision({ obj1: enemy.attackBox, obj2: player.hitbox })) {
+            const direction = enemy.position.x < player.position.x ? "right" : "left";
+            player.takeDamage(direction, enemy.attackDamage || 3);
+        }
+
+        // player attack hits enemy
         if (player.attackBox.active && collision({ obj1: player.attackBox, obj2: enemy.hitbox })) {
             const direction = player.position.x < enemy.position.x ? "right" : "left";
             enemy.takeDamage(direction, 3);
+            spawnParticles(enemy.position.x + enemy.width / 2, enemy.position.y + enemy.height / 2, 6, "orange");
         }
 
-        // enemy attack vs player
-        if (enemy.attackBox.active && collision({ obj1: enemy.attackBox, obj2: player.hitbox })) {
-            const direction = enemy.position.x < player.position.x ? "right" : "left";
-            player.takeDamage(direction, 5);
-        }
-
-        // collision touch
+        // contact damage
         if (collision({ obj1: player.hitbox, obj2: enemy.hitbox })) {
-            // give player damage with brief invulnerability handled inside player.takeDamage
-            player.takeDamage();
+            player.takeDamage(enemy.position.x < player.position.x ? "left" : "right", 3);
         }
     });
 
     // remove dead enemies
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        if (enemies[i].markedForDeletion) enemies.splice(i, 1);
+    enemyCollisionBlock = enemyCollisionBlock.filter((e) => !e.markedForDeletion);
+
+    // particles
+    updateParticles();
+    drawParticles();
+
+    // camera restore
+    ctx.restore();
+
+    // overlay: level text
+    if (levelOverlay.text) {
+        ctx.fillStyle = "rgba(0,0,0,0.6)";
+        ctx.font = "22px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(levelOverlay.text, canvas.width / 2, 60);
     }
 
-    // draw game over overlay if needed
+    // draw game over
     if (gameOver) {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "#fff";
         ctx.font = "48px Arial";
         ctx.textAlign = "center";
-        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2);
+        ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 40);
         ctx.font = "24px Arial";
-        ctx.fillText("Press R to Restart", canvas.width / 2, canvas.height / 2 + 50);
-
-        // don't continue normal updates while game over; you can still allow restart key
-        ctx.restore();
-        return;
+        ctx.fillText("Press R to Restart", canvas.width / 2, canvas.height / 2 + 20);
+        cancelAnimationFrame(animationId);
     }
-
-    ctx.restore();
 }
 
-// start animation
+/* -------------------- Start game -------------------- */
+spawnEnemiesForLevel(level);
 animate();
+
+/* -------------------- Expose some functions to console for debug -------------------- */
+window.spawnParticles = spawnParticles;
+window.spawnEnemiesForLevel = spawnEnemiesForLevel;
+window.resetGame = resetGame;
+window.setLevel = (n) => {
+    level = n;
+    spawnEnemiesForLevel(level);
+};

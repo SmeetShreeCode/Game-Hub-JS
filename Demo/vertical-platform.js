@@ -2,6 +2,7 @@ const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 let animationId = null;
 let gameOver = false;
+let levelCompleted = false;
 
 canvas.width = innerWidth;
 canvas.height = innerHeight;
@@ -144,7 +145,7 @@ const player = new Player({
         Death: {imageSrc: "./images/vertical-platform/warrior/Death.png", frameRate: 6, frameBuffer: 8},
     },
 });
-console.log(player);
+
 /* -------------------- Background & Camera -------------------- */
 const background = new Sprite({
     position: {x: 0, y: 0},
@@ -159,15 +160,6 @@ const backgroundImageHeight = 432;
 const camera = {
     position: {x: 0, y: -backgroundImageHeight + scaledCanvas.height},
 };
-
-/* -------------------- Helpers: Health & UI -------------------- */
-function drawPlayerHealth() {
-    // small squares at top-left
-    ctx.fillStyle = "red";
-    for (let i = 0; i < player.health; i++) {
-        ctx.fillRect(20 + i * 30, 20, 25, 25);
-    }
-}
 
 function drawHealthBar(ctxRef, x, y, width, height, currentHealth, maxHealth, color = "green") {
     ctxRef.fillStyle = "red";
@@ -291,12 +283,6 @@ function animate() {
 
     // background
     background.update();
-    // draw health bars of player & enemies (example uses object positions)
-    drawPlayerHealth();
-    enemyCollisionBlock.forEach((enemy, idx) => {
-        // draw enemy health bar above enemy
-        drawHealthBar(ctx, enemy.position.x, enemy.position.y, 40, 4, enemy.health, enemy.maxHealth, "yellow");
-    });
     drawHealthBar(ctx, player.position.x, player.position.y, 40, 4, player.health, player.maxHealth);
 
     // player utility checks
@@ -335,8 +321,18 @@ function animate() {
 
     // Update enemies & handle interactions
     enemyCollisionBlock.forEach((enemy) => {
+        drawHealthBar(ctx, enemy.position.x, enemy.position.y, 40, 4, enemy.health, enemy.maxHealth, "yellow");
+        drawEnemyAura(enemy);
         enemy.update(player);
+        if (enemy.type === "Bat") {
+            // Make bat hover up and down slightly
+            enemy.position.y += Math.sin(Date.now() / 300 + enemy.position.x) * 0.5;
 
+            // Slightly chase player in Y direction
+            if (Math.abs(player.position.x - enemy.position.x) < enemy.detectionRange) {
+                enemy.position.y += (player.position.y - enemy.position.y) * 0.01;
+            }
+        }
 
         // enemy tries to attack periodically
         enemy.attack();
@@ -380,6 +376,33 @@ function animate() {
 
         cancelAnimationFrame(animationId);
     }
+}
+console.log(player);
+console.log(enemyCollisionBlock);
+
+function drawEnemyAura(enemy) {
+    let color = "rgba(0,0,0,0)";
+    if (enemy.type === "Goblin") color = "rgba(0,255,0,0.3)";
+    if (enemy.type === "Bat") color = "rgba(0,0,255,0.3)";
+    if (enemy.type === "Ogre") color = "rgba(255,0,0,0.5)";
+
+    const gradient = ctx.createRadialGradient(
+        enemy.position.x + enemy.width / 2,
+        enemy.position.y + enemy.height / 2,
+        10,
+        enemy.position.x + enemy.width / 2,
+        enemy.position.y + enemy.height / 2,
+        40
+    );
+
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(1, "rgba(0,0,0,0)");
+
+    ctx.save();
+    ctx.globalAlpha = 0.7;
+    ctx.fillStyle = gradient;
+    ctx.fillRect(enemy.position.x - 30, enemy.position.y - 30, enemy.width + 60, enemy.height + 60);
+    ctx.restore();
 }
 
 /* -------------------- Start game -------------------- */
