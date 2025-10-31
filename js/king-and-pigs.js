@@ -4,213 +4,12 @@ const ctx = canvas.getContext('2d');
 canvas.width = 64 * 16;
 canvas.height = 64 * 9;
 
-class CollisionBlock {
-    constructor({position}) {
-        this.position = position;
-        this.width = 64;
-        this.height = 64;
-    }
-
-    draw() {
-        ctx.fillStyle = 'rgba(255,0,0,0.5)';
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
-    }
-}
-
-class Sprite {
-    constructor({position, imageSrc, frameRate = 1, animations, frameBuffer = 2, loop = true, autoplay = true}) {
-        this.position = position;
-        this.image = new Image();
-        this.image.onload = () => {
-            this.loaded = true;
-            this.width = this.image.width / this.frameRate;
-            this.height = this.image.height;
-        }
-        this.image.src = imageSrc;
-        this.loaded = false;
-        this.frameRate = frameRate;
-        this.currentFrame = 0;
-        this.elapsedFrames = 0;
-        this.frameBuffer = frameBuffer;
-        this.animations = animations;
-        this.loop = loop;
-        this.autoplay = autoplay;
-
-        if (this.animations) {
-            for (let key in this.animations) {
-                const image = new Image();
-                image.src = this.animations[key].imageSrc;
-                this.animations[key].image = image;
-            }
-        }
-    }
-
-    draw() {
-        if (!this.loaded) return;
-        const cropbox = {
-            position: {
-                x: this.width * this.currentFrame,
-                y: 0,
-            },
-            width: this.width,
-            height: this.height,
-        }
-        ctx.drawImage(
-            this.image,
-            cropbox.position.x,
-            cropbox.position.y,
-            cropbox.width,
-            cropbox.height,
-            this.position.x,
-            this.position.y,
-            this.width,
-            this.height
-        );
-        this.updateFrames();
-    }
-
-    play() {
-        this.autoplay = true;
-    }
-
-    updateFrames() {
-        if (!this.autoplay) return;
-        this.elapsedFrames++;
-        if (this.elapsedFrames % this.frameBuffer === 0) {
-            if (this.currentFrame < this.frameRate - 1) this.currentFrame++;
-            else if (this.loop) this.currentFrame = 0;
-        }
-    }
-}
-
-class Player extends Sprite {
-    constructor({collisionBlocks = [], imageSrc, frameRate, animations}) {
-        super({imageSrc, frameRate, animations});
-        this.position = {x: 200, y: 200};
-        this.velocity = {x: 0, y: 0};
-        this.sides = {
-            bottom: this.position.y + this.height,
-        }
-        this.gravity = 1;
-        this.collisionBlocks = collisionBlocks;
-    }
-
-    update() {
-        // ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'
-        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
-
-        this.position.x += this.velocity.x;
-        this.updateHitbox();
-        this.checkForHorizontalCollisions();
-        this.applyGravity();
-        this.updateHitbox();
-        // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
-        this.checkForVerticalCollisions();
-    }
-
-    switchSprite(name) {
-        if (this.image === this.animations[name].image) return;
-        this.currentFrame = 0;
-        this.image = this.animations[name].image;
-        this.frameRate = this.animations[name].frameRate;
-        this.frameBuffer = this.animations[name].frameBuffer;
-    }
-
-    updateHitbox() {
-        this.hitbox = {
-            position: {
-                x: this.position.x + 58,
-                y: this.position.y + 34,
-            },
-            width: 50,
-            height: 53,
-        }
-    }
-
-    checkForHorizontalCollisions() {
-        for (let i = 0; i < this.collisionBlocks.length; i++) {
-            const collisionBlock = this.collisionBlocks[i];
-
-            if (this.hitbox.position.x <= collisionBlock.position.x + collisionBlock.width &&
-                this.hitbox.position.x + this.hitbox.width >= collisionBlock.position.x &&
-                this.hitbox.position.y + this.hitbox.height >= collisionBlock.position.y &&
-                this.hitbox.position.y <= collisionBlock.position.y + collisionBlock.height) {
-                if (this.velocity.x < 0) {
-                    const offset = this.hitbox.position.x - this.position.x;
-                    this.position.x = collisionBlock.position.x + collisionBlock.width - offset + 0.01;
-                    break;
-                }
-                if (this.velocity.x > 0) {
-                    const offset = this.hitbox.position.x - this.position.x + this.hitbox.width;
-                    this.position.x = collisionBlock.position.x - offset - 0.01;
-                    break;
-                }
-            }
-        }
-    }
-
-    applyGravity() {
-        this.velocity.y += this.gravity;
-        this.position.y += this.velocity.y;
-    }
-
-    checkForVerticalCollisions() {
-        for (let i = 0; i < this.collisionBlocks.length; i++) {
-            const collisionBlock = this.collisionBlocks[i];
-
-            if (this.hitbox.position.x <= collisionBlock.position.x + collisionBlock.width &&
-                this.hitbox.position.x + this.hitbox.width >= collisionBlock.position.x &&
-                this.hitbox.position.y + this.hitbox.height >= collisionBlock.position.y &&
-                this.hitbox.position.y <= collisionBlock.position.y + collisionBlock.height) {
-                if (this.velocity.y < 0) {
-                    this.velocity.y = 0;
-                    const offset = this.hitbox.position.y - this.position.y;
-                    this.position.y = collisionBlock.position.y + collisionBlock.height - offset + 0.01;
-                    break;
-                }
-                if (this.velocity.y > 0) {
-                    this.velocity.y = 0;
-                    const offset = this.hitbox.position.y - this.position.y + this.hitbox.height;
-                    this.position.y = collisionBlock.position.y - offset - 0.01;
-                    break;
-                }
-            }
-        }
-    }
-}
-
-Array.prototype.parse2D = function () {
-    const rows = [];
-    for (let i = 0; i < this.length; i += 16) {
-        rows.push(this.slice(i, i + 16));
-    }
-    return rows;
-}
-
-Array.prototype.createObjectFrom2D = function () {
-    const objects = [];
-    this.forEach((row, y) => {
-        row.forEach((symbol, x) => {
-            if (symbol === 292) {
-                objects.push(new CollisionBlock({
-                    position: {x: x * 64, y: y * 64},
-                }));
-            }
-        });
-    });
-    return objects;
-}
-
-const parsedCollisions = collisionsLevel1.parse2D();
-const collisionBlocks = parsedCollisions.createObjectFrom2D();
-
-const backgroundLevel1 = new Sprite({
-    position: {x: 0, y: 0},
-    imageSrc: './images/king-and-pigs/img/backgroundLevel1.png',
-});
+let parsedCollisions;
+let collisionBlocks;
+let background;
+let doors;
 
 const player = new Player({
-    collisionBlocks,
     imageSrc: './images/king-and-pigs/img/king/idle.png',
     frameRate: 11,
     animations: {
@@ -237,20 +36,111 @@ const player = new Player({
             frameRate: 8,
             frameBuffer: 4,
             loop: true,
-        }
+        },
+        enterDoor: {
+            imageSrc: './images/king-and-pigs/img/king/enterDoor.png',
+            frameRate: 8,
+            frameBuffer: 4,
+            loop: false,
+            onComplete: () => {
+                console.log("done");
+                gsap.to(overlay, {
+                    opacity: 1,
+                    onComplete: () => {
+                        level++;
+                        if (level === 4) level = 1;
+                        levels[level].init();
+                        player.switchSprite('idleRight');
+                        player.preventInput = false;
+                        gsap.to(overlay, {
+                            opacity: 0,
+                        });
+                    },
+                });
+            },
+        },
     },
 });
 
-const doors = [
-    new Sprite({
-        position: {x: 767, y: 278},
-        imageSrc: './images/king-and-pigs/img/doorOpen.png',
-        frameRate: 5,
-        frameBuffer: 5,
-        loop: false,
-        autoplay: false,
-    })
-];
+let level = 1;
+let levels = {
+    1: {
+        init: () => {
+            parsedCollisions = collisionsLevel1.parse2D();
+            collisionBlocks = parsedCollisions.createObjectFrom2D();
+            player.collisionBlocks = collisionBlocks;
+
+            if (player.currentAnimation) player.currentAnimation.isActive = false;
+            background = new Sprite({
+                position: {x: 0, y: 0},
+                imageSrc: './images/king-and-pigs/img/backgroundLevel1.png',
+            });
+
+            doors = [
+                new Sprite({
+                    position: {x: 767, y: 278},
+                    imageSrc: './images/king-and-pigs/img/doorOpen.png',
+                    frameRate: 5,
+                    frameBuffer: 5,
+                    loop: false,
+                    autoplay: false,
+                })
+            ];
+        },
+    },
+    2: {
+        init: () => {
+            parsedCollisions = collisionsLevel2.parse2D();
+            collisionBlocks = parsedCollisions.createObjectFrom2D();
+            player.collisionBlocks = collisionBlocks;
+            player.position.x = 96;
+            player.position.y = 140;
+
+            if (player.currentAnimation) player.currentAnimation.isActive = false;
+            background = new Sprite({
+                position: {x: 0, y: 0},
+                imageSrc: './images/king-and-pigs/img/backgroundLevel2.png',
+            });
+
+            doors = [
+                new Sprite({
+                    position: {x: 772, y: 336},
+                    imageSrc: './images/king-and-pigs/img/doorOpen.png',
+                    frameRate: 5,
+                    frameBuffer: 5,
+                    loop: false,
+                    autoplay: false,
+                })
+            ];
+        },
+    },
+    3: {
+        init: () => {
+            parsedCollisions = collisionsLevel3.parse2D();
+            collisionBlocks = parsedCollisions.createObjectFrom2D();
+            player.collisionBlocks = collisionBlocks;
+            player.position.x = 750;
+            player.position.y = 230;
+
+            if (player.currentAnimation) player.currentAnimation.isActive = false;
+            background = new Sprite({
+                position: {x: 0, y: 0},
+                imageSrc: './images/king-and-pigs/img/backgroundLevel3.png',
+            });
+
+            doors = [
+                new Sprite({
+                    position: {x: 176, y: 335},
+                    imageSrc: './images/king-and-pigs/img/doorOpen.png',
+                    frameRate: 5,
+                    frameBuffer: 5,
+                    loop: false,
+                    autoplay: false,
+                })
+            ];
+        },
+    },
+};
 
 const keys = {
     jump: {
@@ -262,41 +152,39 @@ const keys = {
     moveLeft: {
         pressed: false,
     }
-}
+};
+
+const overlay = {
+    opacity: 0,
+};
 
 function animate() {
     window.requestAnimationFrame(animate);
 
-    backgroundLevel1.draw();
-    collisionBlocks.forEach(collisionBlock => {
-        collisionBlock.draw();
-    });
+    background.draw();
+    // collisionBlocks.forEach(collisionBlock => {
+    //     collisionBlock.draw();
+    // });
     doors.forEach(door => {
         door.draw();
     });
-    player.velocity.x = 0;
-    if (keys.moveLeft.pressed) {
-        player.switchSprite('runRight')
-        player.velocity.x = 5;
-        player.lastDirection = 'right';
-    } else if (keys.moveRight.pressed) {
-        player.switchSprite('runLeft')
-        player.velocity.x = -5;
-        player.lastDirection = 'left';
-    } else {
-        if (player.lastDirection === 'left')
-            player.switchSprite('idleLeft');
-        else
-            player.switchSprite('idleRight');
-    }
+
+    player.handleInput(keys);
     player.draw();
     player.update();
 
+    ctx.save();
+    ctx.globalAlpha = overlay.opacity;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
 }
 
+levels[level].init();
 animate();
 
 window.addEventListener('keydown', (e) => {
+    if (player.preventInput) return;
     switch (e.key) {
         case 'w':
         case 'W':
@@ -308,6 +196,11 @@ window.addEventListener('keydown', (e) => {
                     player.hitbox.position.x >= door.position.x &&
                     player.hitbox.position.y + player.hitbox.height >= door.position.y &&
                     player.hitbox.position.y <= door.position.y + door.height) {
+                    player.velocity.x = 0;
+                    player.velocity.y = 0;
+                    player.preventInput = true;
+                    player.switchSprite('enterDoor')
+                    door.play();
                     return;
                 }
             }
