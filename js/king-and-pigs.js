@@ -37,6 +37,12 @@ const player = new Player({
             frameBuffer: 4,
             loop: true,
         },
+        attack: {
+            imageSrc: './images/king-and-pigs/img/king/attack.png',
+            frameRate: 3,
+            frameBuffer: 4,
+            loop: true,
+        },
         enterDoor: {
             imageSrc: './images/king-and-pigs/img/king/enterDoor.png',
             frameRate: 8,
@@ -48,7 +54,7 @@ const player = new Player({
                     opacity: 1,
                     onComplete: () => {
                         level++;
-                        if (level === 4) level = 1;
+                        if (level === 11) level = 1;
                         levels[level].init();
                         player.switchSprite('idleRight');
                         player.preventInput = false;
@@ -62,86 +68,6 @@ const player = new Player({
     },
 });
 
-let level = 1;
-let levels = {
-    1: {
-        init: () => {
-            parsedCollisions = collisionsLevel1.parse2D();
-            collisionBlocks = parsedCollisions.createObjectFrom2D();
-            player.collisionBlocks = collisionBlocks;
-
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel1.png',
-            });
-
-            doors = [
-                new Sprite({
-                    position: {x: 767, y: 278},
-                    imageSrc: './images/king-and-pigs/img/doorOpen.png',
-                    frameRate: 5,
-                    frameBuffer: 5,
-                    loop: false,
-                    autoplay: false,
-                })
-            ];
-        },
-    },
-    2: {
-        init: () => {
-            parsedCollisions = collisionsLevel2.parse2D();
-            collisionBlocks = parsedCollisions.createObjectFrom2D();
-            player.collisionBlocks = collisionBlocks;
-            player.position.x = 96;
-            player.position.y = 140;
-
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel2.png',
-            });
-
-            doors = [
-                new Sprite({
-                    position: {x: 772, y: 336},
-                    imageSrc: './images/king-and-pigs/img/doorOpen.png',
-                    frameRate: 5,
-                    frameBuffer: 5,
-                    loop: false,
-                    autoplay: false,
-                })
-            ];
-        },
-    },
-    3: {
-        init: () => {
-            parsedCollisions = collisionsLevel3.parse2D();
-            collisionBlocks = parsedCollisions.createObjectFrom2D();
-            player.collisionBlocks = collisionBlocks;
-            player.position.x = 750;
-            player.position.y = 230;
-
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel3.png',
-            });
-
-            doors = [
-                new Sprite({
-                    position: {x: 176, y: 335},
-                    imageSrc: './images/king-and-pigs/img/doorOpen.png',
-                    frameRate: 5,
-                    frameBuffer: 5,
-                    loop: false,
-                    autoplay: false,
-                })
-            ];
-        },
-    },
-};
-
 const keys = {
     jump: {
         pressed: false,
@@ -151,7 +77,10 @@ const keys = {
     },
     moveLeft: {
         pressed: false,
-    }
+    },
+    attack: {
+        pressed: false,
+    },
 };
 
 const overlay = {
@@ -193,13 +122,14 @@ window.addEventListener('keydown', (e) => {
             for (let i = 0; i < doors.length; i++) {
                 const door = doors[i];
                 if (player.hitbox.position.x + player.hitbox.width <= door.position.x + door.width &&
-                    player.hitbox.position.x >= door.position.x &&
+                    player.hitbox.position.x + player.hitbox.width >= door.position.x &&
                     player.hitbox.position.y + player.hitbox.height >= door.position.y &&
                     player.hitbox.position.y <= door.position.y + door.height) {
                     player.velocity.x = 0;
+                    player.position.x = door.position.x - door.width / 2;
                     player.velocity.y = 0;
                     player.preventInput = true;
-                    player.switchSprite('enterDoor')
+                    player.switchSprite('enterDoor');
                     door.play();
                     return;
                 }
@@ -216,6 +146,9 @@ window.addEventListener('keydown', (e) => {
         case 'ArrowRight':
             keys.moveLeft.pressed = true;
             break;
+        case ' ':
+            keys.attack.pressed = true;
+            break;
     }
 });
 
@@ -230,6 +163,9 @@ window.addEventListener('keyup', (e) => {
         case 'D':
         case 'ArrowRight':
             keys.moveLeft.pressed = false;
+            break;
+        case ' ':
+            keys.attack.pressed = false;
             break;
     }
 });
