@@ -3,11 +3,14 @@ let level = 1;
 let levels = {
     1: {
         init: () => {
-            parsedCollisions = collisionsLevel1.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 200;
             player.position.y = 200;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -17,7 +20,7 @@ let levels = {
 
             doors = [
                 new Sprite({
-                    position: {x: 767, y: 278},
+                    position: {x: 767, y: 272},
                     imageSrc: './images/king-and-pigs/img/doorOpen.png',
                     frameRate: 5,
                     frameBuffer: 5,
@@ -29,11 +32,14 @@ let levels = {
     },
     2: {
         init: () => {
-            parsedCollisions = collisionsLevel2.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 96;
             player.position.y = 140;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -55,11 +61,14 @@ let levels = {
     },
     3: {
         init: () => {
-            parsedCollisions = collisionsLevel3.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 750;
             player.position.y = 230;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -81,11 +90,14 @@ let levels = {
     },
     4: {
         init: () => {
-            parsedCollisions = collisionsLevel4.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 764;
             player.position.y = 250;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -107,11 +119,14 @@ let levels = {
     },
     5: {
         init: () => {
-            parsedCollisions = collisionsLevel5.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 214;
-            player.position.y = 318;
+            player.position.y = 316;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -133,11 +148,14 @@ let levels = {
     },
     6: {
         init: () => {
-            parsedCollisions = collisionsLevel6.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 214;
             player.position.y = 318;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -159,11 +177,14 @@ let levels = {
     },
     7: {
         init: () => {
-            parsedCollisions = collisionsLevel7.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 200;
             player.position.y = 318;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -185,11 +206,14 @@ let levels = {
     },
     8: {
         init: () => {
-            parsedCollisions = collisionsLevel8.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 750;
             player.position.y = 318;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -211,11 +235,14 @@ let levels = {
     },
     9: {
         init: () => {
-            parsedCollisions = collisionsLevel9.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
-            player.position.x = 200;
+            player.position.x = 195;
             player.position.y = 318;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -237,11 +264,14 @@ let levels = {
     },
     10: {
         init: () => {
-            parsedCollisions = collisionsLevel10.parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 750;
-            player.position.y = 318;
+            player.position.y = 320;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -251,7 +281,36 @@ let levels = {
 
             doors = [
                 new Sprite({
-                    position: {x: 189, y: 340},
+                    position: {x: 189, y: 338},
+                    imageSrc: './images/king-and-pigs/img/doorOpen.png',
+                    frameRate: 5,
+                    frameBuffer: 5,
+                    loop: false,
+                    autoplay: false,
+                })
+            ];
+        },
+    },
+    11: {
+        init: () => {
+            parsedCollisions = collisionsLevel[level].parse2D();
+            collisionBlocks = parsedCollisions.createObjectFrom2D();
+            player.collisionBlocks = collisionBlocks;
+            player.position.x = 120;
+            player.position.y = 392;
+            enemies.collisionBlocks = collisionBlocks;
+            enemies.position.x = 600;
+            enemies.position.y = 355;
+
+            if (player.currentAnimation) player.currentAnimation.isActive = false;
+            background = new Sprite({
+                position: {x: 0, y: 0},
+                imageSrc: './images/king-and-pigs/img/backgroundLevel11.png',
+            });
+
+            doors = [
+                new Sprite({
+                    position: {x: 861, y: 147},
                     imageSrc: './images/king-and-pigs/img/doorOpen.png',
                     frameRate: 5,
                     frameBuffer: 5,
