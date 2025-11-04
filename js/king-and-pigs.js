@@ -1,13 +1,14 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = 64 * 16;
-canvas.height = 64 * 9;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
 let parsedCollisions;
 let collisionBlocks;
 let background;
 let doors;
+let gameState = 'playing'; // 'paused', 'gameOver', 'menu', 'setting'
 
 const player = new Player({
     imageSrc: './images/king-and-pigs/img/king/idle.png',
@@ -37,8 +38,14 @@ const player = new Player({
             frameBuffer: 4,
             loop: true,
         },
-        attack: {
-            imageSrc: './images/king-and-pigs/img/king/attack.png',
+        attackRight: {
+            imageSrc: './images/king-and-pigs/img/king/attackRight.png',
+            frameRate: 3,
+            frameBuffer: 4,
+            loop: true,
+        },
+        attackLeft: {
+            imageSrc: './images/king-and-pigs/img/king/attackLeft.png',
             frameRate: 3,
             frameBuffer: 4,
             loop: true,
@@ -69,11 +76,11 @@ const player = new Player({
 });
 
 const enemies = new Enemy({
-    imageSrc: './images/king-and-pigs/Sprites/03-Pig/Idle (34x28).png',
+    imageSrc: './images/king-and-pigs/Sprites/03-Pig/idleLeft.png',
     frameRate: 11,
     animations: {
         idleRight: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/Idle (34x28).png',
+            imageSrc: './images/king-and-pigs/Sprites/03-Pig/idleRight.png',
             frameRate: 11,
             frameBuffer: 2,
             loop: true,
@@ -86,31 +93,49 @@ const enemies = new Enemy({
         },
         runRight: {
             imageSrc: './images/king-and-pigs/Sprites/03-Pig/runRight.png',
-            frameRate: 8,
+            frameRate: 6,
             frameBuffer: 4,
             loop: true,
         },
         runLeft: {
             imageSrc: './images/king-and-pigs/Sprites/03-Pig/runLeft.png',
-            frameRate: 8,
+            frameRate: 6,
             frameBuffer: 4,
             loop: true,
         },
-        attack: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/attack.png',
+        attackLeft: {
+            imageSrc: './images/king-and-pigs/Sprites/03-Pig/attackLeft.png',
             frameRate: 3,
             frameBuffer: 4,
             loop: true,
         },
-        hit: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/hit.png',
+        attackRight: {
+            imageSrc: './images/king-and-pigs/Sprites/03-Pig/attackRight.png',
             frameRate: 3,
             frameBuffer: 4,
             loop: true,
         },
-        dead: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/dead.png',
-            frameRate: 3,
+        hitRight: {
+            imageSrc: './images/king-and-pigs/Sprites/03-Pig/hitRight.png',
+            frameRate: 2,
+            frameBuffer: 4,
+            loop: false,
+        },
+        hitLeft: {
+            imageSrc: './images/king-and-pigs/Sprites/03-Pig/hitLeft.png',
+            frameRate: 2,
+            frameBuffer: 4,
+            loop: false,
+        },
+        deadRight: {
+            imageSrc: './images/king-and-pigs/Sprites/03-Pig/deadRight.png',
+            frameRate: 4,
+            frameBuffer: 4,
+            loop: true,
+        },
+        deadLeft: {
+            imageSrc: './images/king-and-pigs/Sprites/03-Pig/deadLeft.png',
+            frameRate: 4,
             frameBuffer: 4,
             loop: true,
         },
@@ -138,8 +163,25 @@ const overlay = {
     opacity: 0,
 };
 
+function checkPlayerEnemyCollision() {
+    const p = player.hitbox;
+    const e = enemies.hitbox;
+
+    if (p.position.x < e.position.x + e.width && p.position.x + p.width > e.position.x &&
+        p.position.y < e.position.y + e.height && p.position.y + p.height > e.position.y) {
+
+        if (keys.attack.pressed) {
+            enemies.switchSprite('dead');
+            enemies.velocity.x = 0;
+        } else {
+            console.log('Player takes damage!');
+        }
+    }
+}
+
 function animate() {
     window.requestAnimationFrame(animate);
+    if (gameState !== 'playing') return;
 
     background.draw();
     // collisionBlocks.forEach(collisionBlock => {
@@ -160,10 +202,31 @@ function animate() {
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
+    checkPlayerEnemyCollision();
 }
 
 levels[level].init();
 animate();
+
+function checkPlayerAndDoor() {
+    for (let i = 0; i < doors.length; i++) {
+        const door = doors[i];
+        if (player.hitbox.position.x + player.hitbox.width <= door.position.x + door.width &&
+            player.hitbox.position.x + player.hitbox.width >= door.position.x &&
+            player.hitbox.position.y + player.hitbox.height >= door.position.y &&
+            player.hitbox.position.y <= door.position.y + door.height) {
+            player.velocity.x = 0;
+            player.velocity.y = 0;
+            player.position.x = door.position.x - door.width / 2;
+            player.position.y = door.position.y - door.width / 2;
+            player.preventInput = true;
+            player.switchSprite('enterDoor');
+            door.play();
+            return;
+        }
+    }
+    if (player.velocity.y === 0) player.velocity.y = -20;
+}
 
 window.addEventListener('keydown', (e) => {
     // console.log(e);
@@ -172,34 +235,17 @@ window.addEventListener('keydown', (e) => {
         case 'w':
         case 'W':
         case 'ArrowUp':
-
-            for (let i = 0; i < doors.length; i++) {
-                const door = doors[i];
-                if (player.hitbox.position.x + player.hitbox.width <= door.position.x + door.width &&
-                    player.hitbox.position.x + player.hitbox.width >= door.position.x &&
-                    player.hitbox.position.y + player.hitbox.height >= door.position.y &&
-                    player.hitbox.position.y <= door.position.y + door.height) {
-                    player.velocity.x = 0;
-                    player.velocity.y = 0;
-                    player.position.x = door.position.x - door.width / 2;
-                    player.position.y = door.position.y - door.width / 2;
-                    player.preventInput = true;
-                    player.switchSprite('enterDoor');
-                    door.play();
-                    return;
-                }
-            }
-            if (player.velocity.y === 0) player.velocity.y = -20;
+            checkPlayerAndDoor();
             break;
         case 'a':
         case 'A':
         case 'ArrowLeft':
-            keys.moveRight.pressed = true;
+            keys.moveLeft.pressed = true;
             break;
         case 'd':
         case 'D':
         case 'ArrowRight':
-            keys.moveLeft.pressed = true;
+            keys.moveRight.pressed = true;
             break;
         case ' ':
             keys.attack.pressed = true;
@@ -212,12 +258,12 @@ window.addEventListener('keyup', (e) => {
         case 'a':
         case 'A':
         case 'ArrowLeft':
-            keys.moveRight.pressed = false;
+            keys.moveLeft.pressed = false;
             break;
         case 'd':
         case 'D':
         case 'ArrowRight':
-            keys.moveLeft.pressed = false;
+            keys.moveRight.pressed = false;
             break;
         case ' ':
             keys.attack.pressed = false;
@@ -236,17 +282,15 @@ const jumpBtn = document.getElementById('jump-btn');
 const attackBtn = document.getElementById('attack-btn');
 
 // RIGHT
-leftBtn.addEventListener('touchstart', () => keys.moveRight.pressed = true);
-leftBtn.addEventListener('touchend', () => keys.moveRight.pressed = false);
+leftBtn.addEventListener('touchstart', () => keys.moveLeft.pressed = true);
+leftBtn.addEventListener('touchend', () => keys.moveLeft.pressed = false);
 
 // LEFT
-rightBtn.addEventListener('touchstart', () => keys.moveLeft.pressed = true);
-rightBtn.addEventListener('touchend', () => keys.moveLeft.pressed = false);
+rightBtn.addEventListener('touchstart', () => keys.moveRight.pressed = true);
+rightBtn.addEventListener('touchend', () => keys.moveRight.pressed = false);
 
 // JUMP
-jumpBtn.addEventListener('touchstart', () => {
-    if (player.velocity.y === 0) player.velocity.y = -20;
-});
+jumpBtn.addEventListener('touchstart', () => checkPlayerAndDoor());
 
 // ATTACK
 attackBtn.addEventListener('touchstart', () => keys.attack.pressed = true);

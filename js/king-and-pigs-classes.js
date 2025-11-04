@@ -103,10 +103,13 @@ class Player extends Sprite {
 
         this.position.x += this.velocity.x;
         this.updateHitbox();
+        this.updateAttackbox();
         this.checkForHorizontalCollisions();
         this.applyGravity();
         this.updateHitbox();
+        this.updateAttackbox();
         // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
+        // ctx.fillRect(this.attackbox.position.x, this.attackbox.position.y, this.attackbox.width, this.attackbox.height);
         this.checkForVerticalCollisions();
     }
 
@@ -114,22 +117,17 @@ class Player extends Sprite {
         if (this.preventInput) return;
         this.velocity.x = 0;
         if (keys.moveLeft.pressed) {
-            this.switchSprite('runRight')
-            this.velocity.x = 5;
-            this.lastDirection = 'right';
-        } else if (keys.moveRight.pressed) {
             this.switchSprite('runLeft')
             this.velocity.x = -5;
             this.lastDirection = 'left';
+        } else if (keys.moveRight.pressed) {
+            this.switchSprite('runRight')
+            this.velocity.x = 5;
+            this.lastDirection = 'right';
         } else if (keys.attack.pressed) {
-            this.switchSprite('attack')
-            // this.velocity.x = -5;
-            // this.lastDirection = 'left';
+            this.switchSprite(this.lastDirection === 'left' ? 'attackLeft' : 'attackRight');
         } else {
-            if (this.lastDirection === 'left')
-                this.switchSprite('idleLeft');
-            else
-                this.switchSprite('idleRight');
+            this.switchSprite(this.lastDirection === 'left' ? 'idleLeft' : 'idleRight');
         }
     }
 
@@ -150,6 +148,17 @@ class Player extends Sprite {
                 y: this.position.y + 34,
             },
             width: 50,
+            height: 53,
+        }
+    }
+
+    updateAttackbox() {
+        this.attackbox = {
+            position: {
+                x: this.lastDirection === 'right' ? this.position.x + 50 : this.position.x + 8,
+                y: this.position.y + 34,
+            },
+            width: 100,
             height: 53,
         }
     }
@@ -216,6 +225,24 @@ class Enemy extends Sprite {
         }
         this.gravity = 1;
         this.collisionBlocks = collisionBlocks;
+        this.direction = 'left';
+        this.patrolDistance = 100;
+        this.startX = this.position.x;
+        this.speed = 2;
+    }
+
+    patrol() {
+        if (this.direction === 'left') {
+            this.velocity.x = -this.speed;
+            this.switchSprite('runLeft');
+            if (this.position.x < this.startX - this.patrolDistance)
+                this.direction = 'right';
+        } else {
+            this.velocity.x = this.speed;
+            this.switchSprite('runRight');
+            if (this.position.x > this.startX + this.patrolDistance)
+                this.direction = 'left';
+        }
     }
 
     update() {
@@ -227,7 +254,8 @@ class Enemy extends Sprite {
         this.checkForHorizontalCollisions();
         this.applyGravity();
         this.updateHitbox();
-        ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
+        // this.patrol();
+        // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
         this.checkForVerticalCollisions();
     }
 
@@ -244,11 +272,11 @@ class Enemy extends Sprite {
     updateHitbox() {
         this.hitbox = {
             position: {
-                x: this.position.x,
-                y: this.position.y,
+                x: this.position.x + 20,
+                y: this.position.y + 18,
             },
-            width: 34,
-            height: 28,
+            width: 38,
+            height: 38,
         }
     }
 

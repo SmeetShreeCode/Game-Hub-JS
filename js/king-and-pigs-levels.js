@@ -38,8 +38,8 @@ let levels = {
             player.position.x = 96;
             player.position.y = 140;
             enemies.collisionBlocks = collisionBlocks;
-            enemies.position.x = 600;
-            enemies.position.y = 355;
+            enemies.position.x = 200;
+            enemies.position.y = 455;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
