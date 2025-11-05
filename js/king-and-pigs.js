@@ -184,9 +184,9 @@ function animate() {
     if (gameState !== 'playing') return;
 
     background.draw();
-    // collisionBlocks.forEach(collisionBlock => {
-    //     collisionBlock.draw();
-    // });
+    collisionBlocks.forEach(collisionBlock => {
+        collisionBlock.draw();
+    });
     doors.forEach(door => {
         door.draw();
     });

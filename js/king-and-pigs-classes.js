@@ -229,9 +229,11 @@ class Enemy extends Sprite {
         this.patrolDistance = 100;
         this.startX = this.position.x;
         this.speed = 2;
+        this.isPatrol = false;
     }
 
     patrol() {
+        if (!this.isPatrol) return;
         if (this.direction === 'left') {
             this.velocity.x = -this.speed;
             this.switchSprite('runLeft');
@@ -254,7 +256,7 @@ class Enemy extends Sprite {
         this.checkForHorizontalCollisions();
         this.applyGravity();
         this.updateHitbox();
-        // this.patrol();
+        this.patrol();
         // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
         this.checkForVerticalCollisions();
     }

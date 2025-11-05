@@ -1,4 +1,4 @@
-let level = 1;
+let level = 11;
 
 let levels = {
     1: {
@@ -11,6 +11,7 @@ let levels = {
             enemies.collisionBlocks = collisionBlocks;
             enemies.position.x = 600;
             enemies.position.y = 355;
+            enemies.isPatrol = true;
 
             if (player.currentAnimation) player.currentAnimation.isActive = false;
             background = new Sprite({
@@ -293,7 +294,7 @@ let levels = {
     },
     11: {
         init: () => {
-            parsedCollisions = collisionsLevel[level].parse2D();
+            parsedCollisions = collisionsLevel[26].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 120;
