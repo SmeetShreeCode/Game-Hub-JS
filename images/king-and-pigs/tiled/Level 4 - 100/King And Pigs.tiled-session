@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "Level 47.tmx",
+    "activeFile": "Level 11.tmx",
     "expandedProjectPaths": [
         "."
     ],
@@ -90,12 +90,31 @@
                 "y": 287.7791635486821
             }
         },
+        "Level 1001.tmx": {
+            "expandedObjectLayers": [
+                4
+            ],
+            "scale": 1.0440104166666666,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 576.6225991519083,
+                "y": 363.98104265402844
+            }
+        },
+        "Level 11 18.tmx": {
+            "scale": 1.17451171875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 511.7020038247276,
+                "y": 287.7791635486821
+            }
+        },
         "Level 11.tmx": {
             "expandedObjectLayers": [
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 2,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 499.78215681383546,
                 "y": 302.25326349047975
@@ -107,6 +126,14 @@
             ],
             "scale": 1.17451171875,
             "selectedLayer": 1,
+            "viewCenter": {
+                "x": 511.7020038247276,
+                "y": 287.7791635486821
+            }
+        },
+        "Level 13 11.tmx": {
+            "scale": 1.17451171875,
+            "selectedLayer": 0,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -425,7 +452,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 2,
+            "selectedLayer": 4,
             "viewCenter": {
                 "x": 470.8339569302402,
                 "y": 273.30506360688446
@@ -438,8 +465,8 @@
             "scale": 1.17451171875,
             "selectedLayer": 4,
             "viewCenter": {
-                "x": 512.1277126465452,
-                "y": 287.3534547268645
+                "x": 511.7020038247276,
+                "y": 286.92774590504695
             }
         },
         "Level 41.tmx": {
@@ -450,7 +477,7 @@
             "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
-                "y": 288.2048723704997
+                "y": 287.7791635486821
             }
         },
         "Level 42.tmx": {
@@ -461,7 +488,7 @@
             "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
-                "y": 288.2048723704997
+                "y": 287.7791635486821
             }
         },
         "Level 43.tmx": {
@@ -469,7 +496,7 @@
             "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
-                "y": 288.2048723704997
+                "y": 287.7791635486821
             }
         },
         "Level 44.tmx": {
@@ -480,7 +507,7 @@
             "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
-                "y": 288.2048723704997
+                "y": 287.7791635486821
             }
         },
         "Level 45.tmx": {
@@ -491,7 +518,7 @@
             "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
-                "y": 288.2048723704997
+                "y": 287.7791635486821
             }
         },
         "Level 46.tmx": {
@@ -502,7 +529,7 @@
             "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
-                "y": 288.2048723704997
+                "y": 287.7791635486821
             }
         },
         "Level 47.tmx": {
@@ -1121,37 +1148,29 @@
     },
     "last.exportedFilePath": "C:/Users/ShreeCode07/Desktop/New folder (2)",
     "last.imagePath": "C:/Users/ShreeCode07/Desktop/New folder (2)",
-    "map.height": 9,
+    "map.height": 11,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 64,
     "map.tileWidth": 64,
-    "map.width": 16,
+    "map.width": 18,
     "openFiles": [
-        "Level 40.tmx",
-        "Level 41.tmx",
-        "Level 42.tmx",
-        "Level 43.tmx",
-        "Level 44.tmx",
-        "Level 45.tmx",
-        "Level 46.tmx",
-        "helper.tmx",
-        "Level 47.tmx"
+        "Level 11.tmx"
     ],
     "project": "King And Pigs.tiled-project",
     "recentFiles": [
-        "Level 100.tmx",
-        "Level 99.tmx",
-        "Level 98.tmx",
-        "Level 97.tmx",
-        "Level 96.tmx",
-        "Level 95.tmx",
-        "Level 94.tmx",
-        "Level 93.tmx",
-        "Level 92.tmx",
-        "Level 91.tmx",
-        "Level 90.tmx",
-        "Level 89.tmx"
+        "Level 13 11.tmx",
+        "Level 11.tmx",
+        "Level 18.tmx",
+        "Level 11 18.tmx",
+        "Level 20.tmx",
+        "Level 19.tmx",
+        "Level 17.tmx",
+        "Level 16.tmx",
+        "Level 15.tmx",
+        "Level 12.tmx",
+        "Level 14.tmx",
+        "Level 10.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

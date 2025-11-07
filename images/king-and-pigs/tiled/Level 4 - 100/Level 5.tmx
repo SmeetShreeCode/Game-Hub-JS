@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="6" nextobjectid="10">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="11">
  <tileset firstgid="1" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Main.tsx"/>
  <tileset firstgid="248" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Decorations.tsx"/>
  <tileset firstgid="290" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Misc.tsx"/>
@@ -42,6 +42,28 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="5" name="Boxes and Doors">
+  <object id="2" gid="290" x="734.75" y="446.801" width="92" height="112"/>
+  <object id="4" gid="291" x="857.514" y="449.372" width="44" height="32"/>
+  <object id="5" gid="291" x="831.12" y="449.372" width="44" height="32"/>
+  <object id="6" gid="291" x="854.96" y="421.275" width="44" height="32"/>
+  <object id="7" gid="291" x="126.147" y="319.105" width="44" height="32"/>
+  <object id="8" gid="291" x="150.838" y="319.956" width="44" height="32"/>
+  <object id="9" gid="291" x="139.769" y="290.156" width="44" height="32"/>
+ </objectgroup>
+ <layer id="6" name="Platform Collision" width="16" height="9" opacity="0.5">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,293,293,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
  <layer id="4" name="Collision" width="16" height="9" opacity="0.38">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -55,13 +77,4 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="5" name="Boxes and Doors">
-  <object id="2" gid="290" x="734.75" y="446.801" width="92" height="112"/>
-  <object id="4" gid="291" x="857.514" y="449.372" width="44" height="32"/>
-  <object id="5" gid="291" x="831.12" y="449.372" width="44" height="32"/>
-  <object id="6" gid="291" x="854.96" y="421.275" width="44" height="32"/>
-  <object id="7" gid="291" x="126.147" y="319.105" width="44" height="32"/>
-  <object id="8" gid="291" x="150.838" y="319.956" width="44" height="32"/>
-  <object id="9" gid="291" x="139.769" y="290.156" width="44" height="32"/>
- </objectgroup>
 </map>

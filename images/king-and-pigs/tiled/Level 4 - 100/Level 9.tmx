@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="6" nextobjectid="11">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="11">
+ <editorsettings>
+  <export target="Level 9.tmj" format="json"/>
+ </editorsettings>
  <tileset firstgid="1" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Main.tsx"/>
  <tileset firstgid="248" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Decorations.tsx"/>
  <tileset firstgid="290" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Misc.tsx"/>
@@ -42,6 +45,31 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="4" name="Boxes and Doors">
+  <object id="1" gid="290" x="753.481" y="321.642" width="92" height="112"/>
+  <object id="2" gid="291" x="856.663" y="319.956" width="44" height="32"/>
+  <object id="3" gid="291" x="660.837" y="322.51" width="44" height="32"/>
+  <object id="4" gid="291" x="633.592" y="321.659" width="44" height="32"/>
+  <object id="5" gid="291" x="652.323" y="294.414" width="44" height="32"/>
+  <object id="6" gid="291" x="662.54" y="449.372" width="44" height="32"/>
+  <object id="7" gid="291" x="617.415" y="448.52" width="44" height="32"/>
+  <object id="8" gid="291" x="663.391" y="417.018" width="44" height="32"/>
+  <object id="9" gid="291" x="377.315" y="445.966" width="44" height="32"/>
+  <object id="10" gid="291" x="126.998" y="447.669" width="44" height="32"/>
+ </objectgroup>
+ <layer id="6" name="Platform Collision" width="16" height="9" opacity="0.5">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,294,294,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,294,294,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
  <layer id="5" name="Collision" width="16" height="9" opacity="0.5">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -55,16 +83,4 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="4" name="Boxes and Doors">
-  <object id="1" gid="290" x="753.481" y="321.642" width="92" height="112"/>
-  <object id="2" gid="291" x="856.663" y="319.956" width="44" height="32"/>
-  <object id="3" gid="291" x="660.837" y="322.51" width="44" height="32"/>
-  <object id="4" gid="291" x="633.592" y="321.659" width="44" height="32"/>
-  <object id="5" gid="291" x="652.323" y="294.414" width="44" height="32"/>
-  <object id="6" gid="291" x="662.54" y="449.372" width="44" height="32"/>
-  <object id="7" gid="291" x="617.415" y="448.52" width="44" height="32"/>
-  <object id="8" gid="291" x="663.391" y="417.018" width="44" height="32"/>
-  <object id="9" gid="291" x="377.315" y="445.966" width="44" height="32"/>
-  <object id="10" gid="291" x="126.998" y="447.669" width="44" height="32"/>
- </objectgroup>
 </map>

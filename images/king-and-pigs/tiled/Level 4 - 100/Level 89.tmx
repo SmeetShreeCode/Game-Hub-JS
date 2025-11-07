@@ -55,7 +55,7 @@
   <object id="16" gid="291" x="426.697" y="256.1" width="44" height="32"/>
   <object id="17" gid="291" x="918.816" y="256.1" width="44" height="32"/>
  </objectgroup>
- <layer id="5" name="Collision" width="16" height="9" opacity="0.2">
+ <layer id="5" name="Collision" width="16" height="9" opacity="0.3">
   <data encoding="csv">
 0,292,292,0,292,292,292,292,292,0,292,292,292,292,292,0,
 292,0,0,292,0,0,0,0,0,292,0,0,0,0,0,292,

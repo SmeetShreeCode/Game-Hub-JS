@@ -1,8 +1,8 @@
 class CollisionBlock {
-    constructor({position}) {
+    constructor({position, width = 64, height = 64}) {
         this.position = position;
-        this.width = 64;
-        this.height = 64;
+        this.width = width;
+        this.height = height;
     }
 
     draw() {
@@ -216,7 +216,7 @@ class Player extends Sprite {
 }
 
 class Enemy extends Sprite {
-    constructor({collisionBlocks = [], imageSrc, frameRate, animations}) {
+    constructor({collisionBlocks = [], imageSrc, frameRate, animations, isPatrol}) {
         super({imageSrc, frameRate, animations});
         this.position = {x: 600, y: 355};
         this.velocity = {x: 0, y: 0};
@@ -229,7 +229,7 @@ class Enemy extends Sprite {
         this.patrolDistance = 100;
         this.startX = this.position.x;
         this.speed = 2;
-        this.isPatrol = false;
+        this.isPatrol = isPatrol;
     }
 
     patrol() {
@@ -293,13 +293,20 @@ class Enemy extends Sprite {
                 if (this.velocity.x < 0) {
                     const offset = this.hitbox.position.x - this.position.x;
                     this.position.x = collisionBlock.position.x + collisionBlock.width - offset + 0.01;
+                    // reverse direction when hitting wall
+                    this.direction = 'right';
+                    this.switchSprite('runRight');
                     break;
                 }
                 if (this.velocity.x > 0) {
                     const offset = this.hitbox.position.x - this.position.x + this.hitbox.width;
                     this.position.x = collisionBlock.position.x - offset - 0.01;
+                    // reverse direction when hitting wall
+                    this.direction = 'left';
+                    this.switchSprite('runLeft');
                     break;
                 }
+                this.velocity.x = 0;
             }
         }
     }
@@ -346,9 +353,10 @@ Array.prototype.createObjectFrom2D = function () {
     const objects = [];
     this.forEach((row, y) => {
         row.forEach((symbol, x) => {
-            if (symbol === 292 || symbol === 250) {
+            if (symbol === 292 || symbol === 250 || symbol === 293 || symbol === 294) {
                 objects.push(new CollisionBlock({
                     position: {x: x * 64, y: y * 64},
+                    height: symbol === 294 ? 12 : symbol === 293 ? 24 : 64,
                 }));
             }
         });
