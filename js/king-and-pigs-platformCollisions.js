@@ -1,0 +1,5 @@
+const platformCollisionsLevel = {
+    1: [
+
+    ],
+};

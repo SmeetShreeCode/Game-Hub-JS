@@ -11,6 +11,9 @@
   <image width="64" height="64" source="../assets/collision.png"/>
  </tile>
   <tile id="3">
-  <image width="64" height="64" source="../assets/floor_collision.png"/>
+  <image width="64" height="64" source="../assets/b-floorCollision.png"/>
+ </tile>
+<tile id="4">
+  <image width="64" height="64" source="../assets/s-floorCollision.png"/>
  </tile>
 </tileset>

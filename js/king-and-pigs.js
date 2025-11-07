@@ -154,6 +154,9 @@ const keys = {
     moveLeft: {
         pressed: false,
     },
+    moveDown: {
+        pressed: false,
+    },
     attack: {
         pressed: false,
     },
@@ -247,6 +250,12 @@ window.addEventListener('keydown', (e) => {
         case 'ArrowRight':
             keys.moveRight.pressed = true;
             break;
+        case 's':
+        case 'S':
+        case 'ArrowDown':
+            console.log("down.pressed");
+            keys.moveDown.pressed = true;
+            break;
         case ' ':
             keys.attack.pressed = true;
             break;
@@ -264,6 +273,12 @@ window.addEventListener('keyup', (e) => {
         case 'D':
         case 'ArrowRight':
             keys.moveRight.pressed = false;
+            break;
+        case 's':
+        case 'S':
+        case 'ArrowDown':
+            console.log("down.moved");
+            keys.moveDown.pressed = false;
             break;
         case ' ':
             keys.attack.pressed = false;

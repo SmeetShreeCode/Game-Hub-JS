@@ -1,3 +1,11 @@
+function loadImage() {
+    if (player.currentAnimation) player.currentAnimation.isActive = false;
+    background = new Sprite({
+        position: {x: 0, y: 0},
+        imageSrc: `./images/king-and-pigs/img/Levels/Level ${12}.png`,
+    });
+}
+
 let level = 11;
 
 let levels = {
@@ -13,12 +21,7 @@ let levels = {
             enemies.position.y = 355;
             enemies.isPatrol = true;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel1.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 767, y: 272},
@@ -42,12 +45,7 @@ let levels = {
             enemies.position.x = 200;
             enemies.position.y = 455;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel2.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 772, y: 336},
@@ -71,12 +69,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel3.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 176, y: 335},
@@ -100,12 +93,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel4.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 136, y: 329},
@@ -129,12 +117,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel5.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 735, y: 336},
@@ -158,12 +141,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel6.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 740, y: 210},
@@ -187,12 +165,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel7.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 805, y: 339},
@@ -216,12 +189,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel8.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 318, y: 335},
@@ -245,12 +213,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel9.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 753, y: 211},
@@ -274,12 +237,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel10.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 189, y: 338},
@@ -294,7 +252,7 @@ let levels = {
     },
     11: {
         init: () => {
-            parsedCollisions = collisionsLevel[37].parse2D();
+            parsedCollisions = collisionsLevel[level].parse2D();
             collisionBlocks = parsedCollisions.createObjectFrom2D();
             player.collisionBlocks = collisionBlocks;
             player.position.x = 120;
@@ -303,12 +261,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
 
-            if (player.currentAnimation) player.currentAnimation.isActive = false;
-            background = new Sprite({
-                position: {x: 0, y: 0},
-                imageSrc: './images/king-and-pigs/img/backgroundLevel11.png',
-            });
-
+            loadImage();
             doors = [
                 new Sprite({
                     position: {x: 861, y: 147},
