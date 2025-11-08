@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "Level 11.tmx",
+    "activeFile": "",
     "expandedProjectPaths": [
         "."
     ],
@@ -76,7 +76,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -84,7 +84,7 @@
         },
         "Level 100.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -110,11 +110,8 @@
             }
         },
         "Level 11.tmx": {
-            "expandedObjectLayers": [
-                4
-            ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 499.78215681383546,
                 "y": 302.25326349047975
@@ -125,7 +122,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -155,7 +152,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -166,7 +163,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -177,7 +174,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -188,7 +185,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -199,7 +196,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -210,7 +207,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -221,7 +218,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -243,7 +240,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -254,7 +251,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -265,7 +262,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -276,7 +273,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -287,7 +284,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -298,7 +295,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -309,7 +306,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -320,7 +317,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -342,7 +339,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -353,7 +350,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -364,7 +361,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -375,7 +372,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -386,7 +383,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -397,7 +394,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -408,7 +405,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -419,7 +416,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -430,7 +427,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -441,7 +438,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 514.2562567556332,
                 "y": 295.4419223413985
@@ -452,7 +449,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 470.8339569302402,
                 "y": 273.30506360688446
@@ -463,7 +460,7 @@
                 5
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 286.92774590504695
@@ -474,7 +471,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -485,7 +482,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -493,7 +490,7 @@
         },
         "Level 43.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -504,7 +501,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -515,7 +512,7 @@
                 5
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -526,7 +523,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -537,7 +534,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -545,7 +542,7 @@
         },
         "Level 48.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 509.9991685374573,
                 "y": 286.92774590504695
@@ -556,7 +553,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 499.78215681383546,
                 "y": 318.43019871954766
@@ -575,7 +572,7 @@
         },
         "Level 50.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -586,7 +583,7 @@
                 5
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -597,7 +594,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -608,7 +605,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -616,7 +613,7 @@
         },
         "Level 54.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -624,7 +621,7 @@
         },
         "Level 55.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -632,7 +629,7 @@
         },
         "Level 56.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -643,7 +640,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -651,7 +648,7 @@
         },
         "Level 58.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -662,16 +659,13 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
             }
         },
         "Level 6.tmx": {
-            "expandedObjectLayers": [
-                5
-            ],
             "scale": 1.17451171875,
             "selectedLayer": 4,
             "viewCenter": {
@@ -681,7 +675,7 @@
         },
         "Level 60.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -689,7 +683,7 @@
         },
         "Level 61.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -700,7 +694,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -711,7 +705,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 504.8906626756464,
                 "y": 325.2415398686289
@@ -719,7 +713,7 @@
         },
         "Level 64.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -730,7 +724,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -741,7 +735,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -752,7 +746,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -763,7 +757,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -774,7 +768,7 @@
                 5
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -785,7 +779,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 3,
+            "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -796,7 +790,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -807,7 +801,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -818,7 +812,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -829,7 +823,7 @@
                 2
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -840,7 +834,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 498.0793215265652,
                 "y": 288.63058119231727
@@ -851,7 +845,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 270.75081067597904
@@ -862,7 +856,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -873,7 +867,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -884,7 +878,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -892,7 +886,7 @@
         },
         "Level 79.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -903,7 +897,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 3,
+            "selectedLayer": 4,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -914,7 +908,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -925,7 +919,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -936,7 +930,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -947,7 +941,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -958,7 +952,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -969,7 +963,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -980,7 +974,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -991,7 +985,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1002,7 +996,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1013,7 +1007,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1023,11 +1017,11 @@
             "expandedObjectLayers": [
                 4
             ],
-            "scale": 0.75,
-            "selectedLayer": 3,
+            "scale": 1,
+            "selectedLayer": 4,
             "viewCenter": {
-                "x": 511.99999999999994,
-                "y": 286.66666666666663
+                "x": 489,
+                "y": 314
             }
         },
         "Level 90.tmx": {
@@ -1035,7 +1029,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1046,7 +1040,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1057,7 +1051,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1065,7 +1059,7 @@
         },
         "Level 93.tmx": {
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1076,7 +1070,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1087,7 +1081,7 @@
                 5
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1098,7 +1092,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1109,7 +1103,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1120,7 +1114,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 1,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1131,7 +1125,7 @@
                 4
             ],
             "scale": 1.17451171875,
-            "selectedLayer": 4,
+            "selectedLayer": 5,
             "viewCenter": {
                 "x": 511.7020038247276,
                 "y": 287.7791635486821
@@ -1146,7 +1140,7 @@
             }
         }
     },
-    "last.exportedFilePath": "C:/Users/ShreeCode07/Desktop/New folder (2)",
+    "last.exportedFilePath": "C:/Users/ShreeCode07/Desktop/New folder (3)",
     "last.imagePath": "C:/Users/ShreeCode07/Desktop/New folder (2)",
     "map.height": 11,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
@@ -1155,22 +1149,21 @@
     "map.tileWidth": 64,
     "map.width": 18,
     "openFiles": [
-        "Level 11.tmx"
     ],
     "project": "King And Pigs.tiled-project",
     "recentFiles": [
-        "Level 13 11.tmx",
+        "Level 4.tmx",
+        "Level 5.tmx",
+        "Level 6.tmx",
+        "Level 7.tmx",
+        "Level 8.tmx",
+        "Level 9.tmx",
+        "Level 10.tmx",
         "Level 11.tmx",
-        "Level 18.tmx",
-        "Level 11 18.tmx",
-        "Level 20.tmx",
-        "Level 19.tmx",
-        "Level 17.tmx",
+        "Level 29.tmx",
         "Level 16.tmx",
-        "Level 15.tmx",
-        "Level 12.tmx",
-        "Level 14.tmx",
-        "Level 10.tmx"
+        "Level 100.tmx",
+        "Level 99.tmx"
     ],
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="2" nextobjectid="1">
+ <tileset firstgid="1" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Main.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="16" height="9">
+  <data encoding="csv">
+27,60,60,60,60,60,60,60,60,60,60,60,60,60,60,28,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,40,
+46,22,22,22,22,22,22,22,22,22,22,22,22,22,22,47
+</data>
+ </layer>
+</map>

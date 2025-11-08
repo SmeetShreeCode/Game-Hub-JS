@@ -239,6 +239,7 @@ function checkPlayerAndDoor() {
 
     console.log(collisionBlocks)
     console.log(platformCollisions)
+    // player.checkForHorizontalPlatformCollision()
 }
 
 window.addEventListener('keydown', (e) => {

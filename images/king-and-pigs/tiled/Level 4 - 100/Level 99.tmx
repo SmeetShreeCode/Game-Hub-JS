@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="6" nextobjectid="22">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="16" height="9" tilewidth="64" tileheight="64" infinite="0" nextlayerid="7" nextobjectid="22">
  <tileset firstgid="1" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Main.tsx"/>
  <tileset firstgid="248" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Misc.tsx"/>
- <tileset firstgid="252" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Decorations.tsx"/>
+ <tileset firstgid="253" source="D:/Learning/Game-Hub/images/king-and-pigs/tiled/tilesets/Decorations.tsx"/>
  <layer id="1" name="BackGround" width="16" height="9">
   <data encoding="csv">
 41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,41,
@@ -32,13 +32,13 @@
  <layer id="3" name="Decoration" width="16" height="9">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,275,276,0,0,277,278,0,275,276,0,0,277,278,0,0,
-0,282,283,268,270,284,285,0,282,283,264,0,284,285,0,0,
-0,0,0,0,0,0,0,0,0,0,0,270,0,261,262,0,
-0,264,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,260,0,264,0,0,0,0,0,0,270,0,0,
-0,271,0,0,274,0,0,0,261,263,0,264,0,0,264,0,
-0,0,0,0,0,0,270,0,0,0,0,0,0,0,0,0,
+0,276,277,0,0,278,279,0,276,277,0,0,278,279,0,0,
+0,283,284,269,271,285,286,0,283,284,265,0,285,286,0,0,
+0,0,0,0,0,0,0,0,0,0,0,271,0,262,263,0,
+0,265,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,261,0,265,0,0,0,0,0,0,271,0,0,
+0,272,0,0,275,0,0,0,262,264,0,265,0,0,265,0,
+0,0,0,0,0,0,271,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
@@ -76,6 +76,19 @@
 250,0,0,0,0,250,0,0,0,0,0,0,250,0,0,250,
 250,0,0,0,0,250,0,0,0,0,0,0,250,0,0,250,
 0,250,250,250,250,0,250,250,250,250,250,250,0,250,250,0
+</data>
+ </layer>
+ <layer id="6" name="Platform Collision" width="16" height="9" opacity="0.4">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,251,251,0,0,0,0,0,252,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,251,0,252,252,0,
+0,252,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,252,0,0,0,0,0,0,251,0,0,
+0,251,0,0,0,0,0,0,252,252,0,252,0,0,252,0,
+0,0,0,0,0,0,251,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
 </map>

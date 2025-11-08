@@ -86,7 +86,7 @@ class Sprite {
 }
 
 class Player extends Sprite {
-    constructor({collisionBlocks = [], imageSrc, frameRate, animations, loop}) {
+    constructor({collisionBlocks = [], platformCollisionBlocks = [], imageSrc, frameRate, animations, loop}) {
         super({imageSrc, frameRate, animations, loop});
         this.position = {x: 200, y: 200};
         this.velocity = {x: 0, y: 0};
@@ -95,6 +95,7 @@ class Player extends Sprite {
         }
         this.gravity = 1;
         this.collisionBlocks = collisionBlocks;
+        this.platformCollisionBlocks = platformCollisionBlocks;
     }
 
     update() {
@@ -208,6 +209,21 @@ class Player extends Sprite {
                     this.velocity.y = 0;
                     const offset = this.hitbox.position.y - this.position.y + this.hitbox.height;
                     this.position.y = collisionBlock.position.y - offset - 0.01;
+                    break;
+                }
+            }
+        }
+
+        for (let i = 0; i < this.platformCollisionBlocks.length; i++) {
+            const platformCollisionBlock = this.platformCollisionBlocks[i];
+
+            if (this.hitbox.position.y + this.hitbox.height >= platformCollisionBlock.position.y &&
+                this.hitbox.position.y + this.hitbox.height <= platformCollisionBlock.position.y + platformCollisionBlock.height &&
+                this.hitbox.position.x <= platformCollisionBlock.position.x + platformCollisionBlock.width &&
+                this.hitbox.position.x + this.hitbox.width >= platformCollisionBlock.position.x) {
+                if (this.velocity.y > 0) {
+                    const offset = this.hitbox.position.y - this.position.y + this.hitbox.height;
+                    this.position.y = platformCollisionBlock.position.y - offset - 0.01;
                     break;
                 }
             }
@@ -349,11 +365,13 @@ Array.prototype.parse2D = function () {
     return rows;
 };
 
-Array.prototype.createObjectFrom2D = function () {
+Array.prototype.createObjectFrom2D = function (type) {
     const objects = [];
     this.forEach((row, y) => {
         row.forEach((symbol, x) => {
-            if (symbol === 292 || symbol === 250 || symbol === 293 || symbol === 294) {
+            let condition = type === 'collision' ? symbol === 292 || symbol === 250
+                : type === 'floor' ? symbol === 293 || symbol === 294 : false; //check type is collision or floor or other
+            if (condition) {
                 objects.push(new CollisionBlock({
                     position: {x: x * 64, y: y * 64},
                     height: symbol === 294 ? 12 : symbol === 293 ? 24 : 64,

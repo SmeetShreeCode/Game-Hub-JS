@@ -1,10 +1,9 @@
 function loadCollisionsAndPlatforms() {
     parsedCollisions = collisionsLevel[level].parse2D();
-    collisionBlocks = parsedCollisions.createObjectFrom2D();
+    collisionBlocks = parsedCollisions.createObjectFrom2D('collision');
     player.collisionBlocks = collisionBlocks;
 
-    parsedPlatformCollisions = platformCollisionsLevel[level].parse2D();
-    platformCollisions = parsedPlatformCollisions.createObjectFrom2D();
+    platformCollisions = parsedCollisions.createObjectFrom2D('floor');
     player.platformCollisionBlocks = platformCollisions;
 }
 
@@ -16,7 +15,12 @@ function loadLevelImage() {
     });
 }
 
-let level = 5;
+// mix the box collision and plat form collision in one collision file it's working properly with both mix
+// only you have to pass the type with the making collision or object
+// and for mobile control put https://yoannmoi.net/nipplejs/ or button controls
+
+
+let level = 4;
 
 let levels = {
     1: {
