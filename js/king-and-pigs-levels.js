@@ -1348,7 +1348,7 @@ let levels = {
             loadLevelImage();
             doors = [
                 new Sprite({
-                    position: {x: 867, y: 78},
+                    position: {x: 867, y: 400},
                     imageSrc: './images/king-and-pigs/img/doorOpen.png',
                     frameRate: 5,
                     frameBuffer: 5,
