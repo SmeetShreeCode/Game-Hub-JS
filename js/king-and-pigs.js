@@ -63,7 +63,7 @@ const player = new Player({
                     opacity: 1,
                     onComplete: () => {
                         level++;
-                        if (level === 12) level = 1;
+                        if (level === 100) level = 1;
                         levels[level].init();
                         player.switchSprite('idleRight');
                         player.preventInput = false;
@@ -180,7 +180,7 @@ function checkPlayerEnemyCollision() {
         p.position.y < e.position.y + e.height && p.position.y + p.height > e.position.y) {
 
         if (keys.attack.pressed) {
-            enemies.switchSprite('dead');
+            enemies.switchSprite(enemies.direction === 'left' ? 'deadLeft' : 'deadRight');
             enemies.velocity.x = 0;
         } else {
             console.log('Player takes damage!');
@@ -193,12 +193,12 @@ function animate() {
     if (gameState !== 'playing') return;
 
     background.draw();
-    collisionBlocks.forEach(collisionBlock => {
-        collisionBlock.draw();
-    });
-    platformCollisions.forEach(platformCollision => {
-        platformCollision.draw();
-    });
+    // collisionBlocks.forEach(collisionBlock => {
+    //     collisionBlock.draw();
+    // });
+    // platformCollisions.forEach(platformCollision => {
+    //     platformCollision.draw();
+    // });
     doors.forEach(door => {
         door.draw();
     });

@@ -370,11 +370,11 @@ Array.prototype.createObjectFrom2D = function (type) {
     this.forEach((row, y) => {
         row.forEach((symbol, x) => {
             let condition = type === 'collision' ? symbol === 292 || symbol === 250
-                : type === 'floor' ? symbol === 293 || symbol === 294 : false; //check type is collision or floor or other
+                : type === 'floor' ? symbol === 293 || symbol === 294 || symbol === 251 || symbol === 252 : false; //check type is collision or floor or other
             if (condition) {
                 objects.push(new CollisionBlock({
                     position: {x: x * 64, y: y * 64},
-                    height: symbol === 294 ? 12 : symbol === 293 ? 24 : 64,
+                    height: symbol === 294 || symbol === 252 ? 12 : symbol === 293 || symbol === 251 ? 24 : symbol === 292 || symbol === 250 ? 64 : 0,
                 }));
             }
         });
