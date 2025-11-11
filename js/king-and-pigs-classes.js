@@ -232,20 +232,89 @@ class Player extends Sprite {
 }
 
 class Enemy extends Sprite {
-    constructor({collisionBlocks = [], imageSrc, frameRate, animations, isPatrol}) {
-        super({imageSrc, frameRate, animations});
-        this.position = {x: 600, y: 355};
-        this.velocity = {x: 0, y: 0};
-        this.sides = {
-            bottom: this.position.y + this.height,
+    constructor({collisionBlocks = [], imageSrc, frameRate, animations = null, isPatrol = false, patrolDistance = 100, isKing = false, type = 'Pig'}) {
+        // build default animations only if none are passed
+        if (!animations) {
+            const characterFolder =
+                type === 'Pig' ? (isKing ? 'King Pig' : 'Pig') : type;
+
+            animations = {
+                idleRight: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/idleRight.png`,
+                    frameRate: 11,
+                    frameBuffer: 2,
+                    loop: true,
+                },
+                idleLeft: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/idleLeft.png`,
+                    frameRate: 11,
+                    frameBuffer: 2,
+                    loop: true,
+                },
+                runRight: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/runRight.png`,
+                    frameRate: 6,
+                    frameBuffer: 4,
+                    loop: true,
+                },
+                runLeft: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/runLeft.png`,
+                    frameRate: 6,
+                    frameBuffer: 4,
+                    loop: true,
+                },
+                attackLeft: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/attackLeft.png`,
+                    frameRate: 3,
+                    frameBuffer: 4,
+                    loop: true,
+                },
+                attackRight: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/attackRight.png`,
+                    frameRate: 3,
+                    frameBuffer: 4,
+                    loop: true,
+                },
+                hitRight: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/hitRight.png`,
+                    frameRate: 2,
+                    frameBuffer: 4,
+                    loop: false,
+                },
+                hitLeft: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/hitLeft.png`,
+                    frameRate: 2,
+                    frameBuffer: 4,
+                    loop: false,
+                },
+                deadRight: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/deadRight.png`,
+                    frameRate: 4,
+                    frameBuffer: 4,
+                    loop: true,
+                },
+                deadLeft: {
+                    imageSrc: `./images/king-and-pigs/Sprites/${characterFolder}/deadLeft.png`,
+                    frameRate: 4,
+                    frameBuffer: 4,
+                    loop: true,
+                },
+            };
         }
+
+        super({imageSrc, frameRate, animations});
+        this.position = { x: 600, y: 355 };
+        this.velocity = { x: 0, y: 0 };
+        this.sides = { bottom: this.position.y + this.height, };
         this.gravity = 1;
         this.collisionBlocks = collisionBlocks;
         this.direction = 'left';
-        this.patrolDistance = 100;
+        this.patrolDistance = patrolDistance;
         this.startX = this.position.x;
         this.speed = 2;
         this.isPatrol = isPatrol;
+        this.isKing = isKing;
+        this.type = type;
     }
 
     patrol() {

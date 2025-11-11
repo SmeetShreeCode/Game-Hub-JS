@@ -1,0 +1,41 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: #000000;
+    overflow: hidden;
+}
+
+.screw {
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle at 30% 30%, #ddd, #999);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: inset 3px 3px 5px rgba(255, 255, 255, 0.4),
+    inset -3px -3px 5px rgba(0, 0, 0, 0.3),
+    0 15px 10px rgba(0, 0, 0, 0.4);
+}
+
+.screw::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    height: 10%;
+    background: linear-gradient(to bottom, #444, #111);
+    transform: translate(-50%, -50%) rotate(0deg);
+    border-radius: 3px;
+}
+
+.screw::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10%;
+    height: 60%;
+    background: linear-gradient(to bottom, #444, #111);
+    transform: translate(-50%, -50%) rotate(90deg);
+    border-radius: 3px;
+}

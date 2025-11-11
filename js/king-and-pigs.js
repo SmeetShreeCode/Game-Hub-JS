@@ -1,4 +1,4 @@
-const canvas = document.querySelector('canvas');
+const canvas = document.getElementById('canvas1');
 const ctx = canvas.getContext('2d');
 
 canvas.width = innerWidth;
@@ -6,11 +6,10 @@ canvas.height = innerHeight;
 
 let parsedCollisions;
 let collisionBlocks;
-let parsedPlatformCollisions;
 let platformCollisions;
 let background;
 let doors;
-let gameState = 'playing'; // 'paused', 'gameOver', 'menu', 'setting'
+gameState = 'playing'; // 'paused', 'gameOver', 'menu', 'setting'
 
 const player = new Player({
     imageSrc: './images/king-and-pigs/img/king/idle.png',
@@ -78,75 +77,11 @@ const player = new Player({
 });
 
 const enemies = new Enemy({
-    imageSrc: './images/king-and-pigs/Sprites/03-Pig/idleLeft.png',
+    imageSrc: './images/king-and-pigs/Sprites/Pig/idleLeft.png',
     frameRate: 11,
     isPatrol: true,
-    animations: {
-        idleRight: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/idleRight.png',
-            frameRate: 11,
-            frameBuffer: 2,
-            loop: true,
-        },
-        idleLeft: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/idleLeft.png',
-            frameRate: 11,
-            frameBuffer: 2,
-            loop: true,
-        },
-        runRight: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/runRight.png',
-            frameRate: 6,
-            frameBuffer: 4,
-            loop: true,
-        },
-        runLeft: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/runLeft.png',
-            frameRate: 6,
-            frameBuffer: 4,
-            loop: true,
-        },
-        attackLeft: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/attackLeft.png',
-            frameRate: 3,
-            frameBuffer: 4,
-            loop: true,
-        },
-        attackRight: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/attackRight.png',
-            frameRate: 3,
-            frameBuffer: 4,
-            loop: true,
-        },
-        hitRight: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/hitRight.png',
-            frameRate: 2,
-            frameBuffer: 4,
-            loop: false,
-        },
-        hitLeft: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/hitLeft.png',
-            frameRate: 2,
-            frameBuffer: 4,
-            loop: false,
-        },
-        deadRight: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/deadRight.png',
-            frameRate: 4,
-            frameBuffer: 4,
-            loop: true,
-        },
-        deadLeft: {
-            imageSrc: './images/king-and-pigs/Sprites/03-Pig/deadLeft.png',
-            frameRate: 4,
-            frameBuffer: 4,
-            loop: true,
-        },
-    },
 });
 
-console.log(player);
-console.log(enemies);
 const keys = {
     jump: {
         pressed: false,
@@ -239,7 +174,6 @@ function checkPlayerAndDoor() {
 
     console.log(collisionBlocks)
     console.log(platformCollisions)
-    // player.checkForHorizontalPlatformCollision()
 }
 
 window.addEventListener('keydown', (e) => {

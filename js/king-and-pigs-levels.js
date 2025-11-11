@@ -31,6 +31,7 @@ let levels = {
             enemies.position.x = 600;
             enemies.position.y = 355;
             enemies.isPatrol = true;
+            enemies.patrolDistance = 50;
 
             loadLevelImage();
             doors = [

@@ -5,6 +5,23 @@ body {
     overflow: hidden;
 }
 
+.level-screen {
+    display: none;
+    position: absolute;
+}
+
+#game-header {
+    background: #2b1f1f;
+    height: 100px;
+    width: 100%;
+}
+
+#canvas1 {
+    padding: 0 250px;
+    height: 100%;
+    width: 100%;
+}
+
 #mobile-controls {
     position: fixed;
     bottom: 20px;

@@ -7,17 +7,28 @@
     <link rel="stylesheet" href="css/king-and-pigs.css">
 </head>
 <body>
+
+<div class="level-screen">
+    <div class="level-screen-content">
+        <div class="levels">
+            1
+        </div>
+    </div>
+</div>
+
 <div id="mobile-controls">
     <button id="left-btn" class="control-btn">←</button>
     <button id="jump-btn" class="control-btn">⤴</button>
     <button id="right-btn" class="control-btn">→</button>
     <button id="attack-btn" class="control-btn">⚔</button>
 </div>
-<canvas></canvas>
+
+<canvas id="game-header"></canvas>
+<canvas id="canvas1"></canvas>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" integrity="sha512-NcZdtrT77bJr4STcmsGAESr06BYGE8woZdSdEgqnpyqac7sugNO+Tr4bGwGF3MsnEkGKhU2KL2xh6Ec+BqsaHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="js/king-and-pigs-level-screen.js"></script>
 <script src="js/king-and-pigs-collisions.js"></script>
-<script src="js/king-and-pigs-platformCollisions.js"></script>
 <script src="js/king-and-pigs-classes.js"></script>
 <script src="js/king-and-pigs-levels.js"></script>
 <script src="js/king-and-pigs.js"></script>
