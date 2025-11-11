@@ -2,35 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000">
+    <meta name="screen-orientation" content="landscape">
     <title>King And Pigs</title>
     <link rel="stylesheet" href="css/king-and-pigs.css">
 </head>
 <body>
-
-<div class="level-screen">
-    <div class="level-screen-content">
-        <div class="levels">
-            1
-        </div>
+<div class="orientation-warning" id="orientationWarning">
+    <div class="warning-content">
+        <p>Please rotate your device to landscape mode</p>
+        <div class="rotate-icon">↻</div>
     </div>
 </div>
 
-<div id="mobile-controls">
-    <button id="left-btn" class="control-btn">←</button>
-    <button id="jump-btn" class="control-btn">⤴</button>
-    <button id="right-btn" class="control-btn">→</button>
-    <button id="attack-btn" class="control-btn">⚔</button>
-</div>
+<div class="game-container">
+    <div class="level-selection-screen" id="levelSelectionScreen">
+        <div class="level-selection-content">
+            <div class="selection-header">
+                <h1>King and Pigs</h1>
+                <p>Select a Level</p>
+            </div>
+            <div class="level-grid" id="levelGrid">
+                <!-- Levels will be generated here -->
+            </div>
+            <div class="selection-stats">
+                <span id="levelCount">Total Levels: 100</span>
+            </div>
+        </div>
+    </div>
 
-<canvas id="game-header"></canvas>
-<canvas id="canvas1"></canvas>
+    <div class="level-screen">
+        <div class="level-screen-content">
+            <div class="levels">
+                1
+            </div>
+        </div>
+    </div>
+
+    <div id="mobile-controls" class="mobile-controls-container">
+        <div class="mobile-dpad">
+            <button id="left-btn" class="control-btn dpad-btn" aria-label="Move Left">←</button>
+            <button id="jump-btn" class="control-btn jump-btn" aria-label="Jump">⤴</button>
+            <button id="right-btn" class="control-btn dpad-btn" aria-label="Move Right">→</button>
+        </div>
+        <div class="mobile-action-btns">
+            <button id="attack-btn" class="control-btn action-btn" aria-label="Attack">⚔</button>
+            <button id="menu-btn" class="control-btn action-btn menu-btn" aria-label="Menu" title="Press ESC or tap to return to level selection">☰</button>
+        </div>
+    </div>
+
+    <div class="game-viewport">
+        <canvas id="game-header"></canvas>
+        <canvas id="canvas1"></canvas>
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js" integrity="sha512-NcZdtrT77bJr4STcmsGAESr06BYGE8woZdSdEgqnpyqac7sugNO+Tr4bGwGF3MsnEkGKhU2KL2xh6Ec+BqsaHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="js/king-and-pigs-level-screen.js"></script>
 <script src="js/king-and-pigs-collisions.js"></script>
 <script src="js/king-and-pigs-classes.js"></script>
 <script src="js/king-and-pigs-levels.js"></script>
+<script src="js/king-and-pigs-level-selector.js"></script>
 <script src="js/king-and-pigs.js"></script>
 </body>
 </html>

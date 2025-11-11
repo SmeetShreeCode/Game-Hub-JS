@@ -57,18 +57,23 @@ const player = new Player({
             frameBuffer: 4,
             loop: false,
             onComplete: () => {
-                console.log("done");
+                console.log("Level completed!");
+                
+                // Mark current level as completed
+                if (typeof markLevelCompleted === 'function') {
+                    markLevelCompleted(selectedLevel);
+                }
+                
                 gsap.to(overlay, {
                     opacity: 1,
                     onComplete: () => {
-                        level++;
-                        if (level === 100) level = 1;
-                        levels[level].init();
-                        player.switchSprite('idleRight');
-                        player.preventInput = false;
-                        gsap.to(overlay, {
-                            opacity: 0,
-                        });
+                        // Go back to level selection instead of auto-playing next level
+                        if (typeof goBackToLevelSelection === 'function') {
+                            goBackToLevelSelection();
+                            if (typeof initializeLevelGrid === 'function') {
+                                initializeLevelGrid();
+                            }
+                        }
                     },
                 });
             },
@@ -125,7 +130,7 @@ function checkPlayerEnemyCollision() {
 
 function animate() {
     window.requestAnimationFrame(animate);
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || !gameStarted) return;
 
     background.draw();
     // collisionBlocks.forEach(collisionBlock => {
@@ -152,8 +157,14 @@ function animate() {
     checkPlayerEnemyCollision();
 }
 
-levels[level].init();
-animate();
+// Start game function - called when level is selected
+function startGame() {
+    levels[level].init();
+    animate();
+}
+
+// Don't start automatically - wait for level selection
+// startGame() will be called when a level is selected
 
 function checkPlayerAndDoor() {
     for (let i = 0; i < doors.length; i++) {
@@ -239,31 +250,270 @@ window.addEventListener('keyup', (e) => {
     }
 });
 
-if (!/Mobi|Android/i.test(navigator.userAgent)) {
-    document.getElementById('mobile-controls').style.display = 'none';
+// Mobile Detection and Setup
+const isMobile = /Mobi|Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
+const orientationWarning = document.getElementById('orientationWarning');
+const gameContainer = document.querySelector('.game-container');
+const mobileControls = document.getElementById('mobile-controls');
+
+// Handle orientation changes
+function handleOrientationChange() {
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+    
+    if (isMobile && isPortrait) {
+        if (orientationWarning) orientationWarning.style.display = 'flex';
+        if (gameContainer) gameContainer.style.display = 'none';
+    } else {
+        if (orientationWarning) orientationWarning.style.display = 'none';
+        if (gameContainer) gameContainer.style.display = 'flex';
+    }
 }
 
-// Handle mobile touch controls
+// Call on load and on orientation change
+handleOrientationChange();
+window.addEventListener('orientationchange', handleOrientationChange);
+window.addEventListener('resize', handleOrientationChange);
+
+// Hide mobile controls on desktop
+if (!isMobile) {
+    if (mobileControls) mobileControls.style.display = 'none';
+}
+
+// Get mobile control buttons
 const leftBtn = document.getElementById('left-btn');
 const rightBtn = document.getElementById('right-btn');
 const jumpBtn = document.getElementById('jump-btn');
 const attackBtn = document.getElementById('attack-btn');
-const x = document.getElementById('jump-btn');
 
-// RIGHT
-leftBtn.addEventListener('touchstart', () => keys.moveLeft.pressed = true);
-leftBtn.addEventListener('touchend', () => keys.moveLeft.pressed = false);
+// Prevent default touch behaviors
+document.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+}, { passive: false });
 
-// LEFT
-rightBtn.addEventListener('touchstart', () => keys.moveRight.pressed = true);
-rightBtn.addEventListener('touchend', () => keys.moveRight.pressed = false);
+// Prevent pinch zoom
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
 
-// JUMP
-jumpBtn.addEventListener('touchstart', () => {
-    if (player.velocity.y === 0) player.velocity.y = -18
-});
-x.addEventListener('touchstart', () => checkPlayerAndDoor());
+document.addEventListener('wheel', (e) => {
+    e.preventDefault();
+}, { passive: false });
 
-// ATTACK
-attackBtn.addEventListener('touchstart', () => keys.attack.pressed = true);
-attackBtn.addEventListener('touchend', () => keys.attack.pressed = false);
+// Helper function to safely set key state
+function setKeyState(keyObj, state) {
+    if (player && !player.preventInput) {
+        keyObj.pressed = state;
+    }
+}
+
+// Track which buttons are currently pressed
+const pressedButtons = new Set();
+
+// LEFT Button
+if (leftBtn) {
+    leftBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        leftBtn.classList.add('active');
+        pressedButtons.add('left');
+        setKeyState(keys.moveLeft, true);
+    });
+
+    leftBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        leftBtn.classList.remove('active');
+        pressedButtons.delete('left');
+        setKeyState(keys.moveLeft, false);
+    });
+
+    leftBtn.addEventListener('touchcancel', (e) => {
+        leftBtn.classList.remove('active');
+        pressedButtons.delete('left');
+        setKeyState(keys.moveLeft, false);
+    });
+
+    leftBtn.addEventListener('mousedown', () => {
+        leftBtn.classList.add('active');
+        pressedButtons.add('left');
+        setKeyState(keys.moveLeft, true);
+    });
+
+    leftBtn.addEventListener('mouseup', () => {
+        leftBtn.classList.remove('active');
+        pressedButtons.delete('left');
+        setKeyState(keys.moveLeft, false);
+    });
+
+    leftBtn.addEventListener('mouseleave', () => {
+        leftBtn.classList.remove('active');
+        pressedButtons.delete('left');
+        setKeyState(keys.moveLeft, false);
+    });
+}
+
+// RIGHT Button
+if (rightBtn) {
+    rightBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        rightBtn.classList.add('active');
+        pressedButtons.add('right');
+        setKeyState(keys.moveRight, true);
+    });
+
+    rightBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        rightBtn.classList.remove('active');
+        pressedButtons.delete('right');
+        setKeyState(keys.moveRight, false);
+    });
+
+    rightBtn.addEventListener('touchcancel', (e) => {
+        rightBtn.classList.remove('active');
+        pressedButtons.delete('right');
+        setKeyState(keys.moveRight, false);
+    });
+
+    rightBtn.addEventListener('mousedown', () => {
+        rightBtn.classList.add('active');
+        pressedButtons.add('right');
+        setKeyState(keys.moveRight, true);
+    });
+
+    rightBtn.addEventListener('mouseup', () => {
+        rightBtn.classList.remove('active');
+        pressedButtons.delete('right');
+        setKeyState(keys.moveRight, false);
+    });
+
+    rightBtn.addEventListener('mouseleave', () => {
+        rightBtn.classList.remove('active');
+        pressedButtons.delete('right');
+        setKeyState(keys.moveRight, false);
+    });
+}
+
+// JUMP Button
+if (jumpBtn) {
+    jumpBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        jumpBtn.classList.add('active');
+        pressedButtons.add('jump');
+        if (player && player.velocity.y === 0 && !player.preventInput) {
+            player.velocity.y = -18;
+        }
+    });
+
+    jumpBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        jumpBtn.classList.remove('active');
+        pressedButtons.delete('jump');
+    });
+
+    jumpBtn.addEventListener('touchcancel', (e) => {
+        jumpBtn.classList.remove('active');
+        pressedButtons.delete('jump');
+    });
+
+    jumpBtn.addEventListener('mousedown', () => {
+        jumpBtn.classList.add('active');
+        pressedButtons.add('jump');
+        if (player && player.velocity.y === 0 && !player.preventInput) {
+            player.velocity.y = -18;
+        }
+    });
+
+    jumpBtn.addEventListener('mouseup', () => {
+        jumpBtn.classList.remove('active');
+        pressedButtons.delete('jump');
+    });
+
+    jumpBtn.addEventListener('mouseleave', () => {
+        jumpBtn.classList.remove('active');
+        pressedButtons.delete('jump');
+    });
+}
+
+// ATTACK Button
+if (attackBtn) {
+    attackBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        attackBtn.classList.add('active');
+        pressedButtons.add('attack');
+        setKeyState(keys.attack, true);
+    });
+
+    attackBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        attackBtn.classList.remove('active');
+        pressedButtons.delete('attack');
+        setKeyState(keys.attack, false);
+    });
+
+    attackBtn.addEventListener('touchcancel', (e) => {
+        attackBtn.classList.remove('active');
+        pressedButtons.delete('attack');
+        setKeyState(keys.attack, false);
+    });
+
+    attackBtn.addEventListener('mousedown', () => {
+        attackBtn.classList.add('active');
+        pressedButtons.add('attack');
+        setKeyState(keys.attack, true);
+    });
+
+    attackBtn.addEventListener('mouseup', () => {
+        attackBtn.classList.remove('active');
+        pressedButtons.delete('attack');
+        setKeyState(keys.attack, false);
+    });
+
+    attackBtn.addEventListener('mouseleave', () => {
+        attackBtn.classList.remove('active');
+        pressedButtons.delete('attack');
+        setKeyState(keys.attack, false);
+    });
+}
+
+// MENU Button
+const menuBtn = document.getElementById('menu-btn');
+if (menuBtn) {
+    menuBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        menuBtn.classList.add('active');
+        if (gameStarted && typeof goBackToLevelSelection === 'function') {
+            goBackToLevelSelection();
+            if (typeof initializeLevelGrid === 'function') {
+                initializeLevelGrid();
+            }
+        }
+    });
+
+    menuBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        menuBtn.classList.remove('active');
+    });
+
+    menuBtn.addEventListener('touchcancel', (e) => {
+        menuBtn.classList.remove('active');
+    });
+
+    menuBtn.addEventListener('mousedown', () => {
+        menuBtn.classList.add('active');
+        if (gameStarted && typeof goBackToLevelSelection === 'function') {
+            goBackToLevelSelection();
+            if (typeof initializeLevelGrid === 'function') {
+                initializeLevelGrid();
+            }
+        }
+    });
+
+    menuBtn.addEventListener('mouseup', () => {
+        menuBtn.classList.remove('active');
+    });
+
+    menuBtn.addEventListener('mouseleave', () => {
+        menuBtn.classList.remove('active');
+    });
+}
