@@ -426,6 +426,114 @@ class Enemy extends Sprite {
     }
 }
 
+class Box extends Sprite {
+    constructor({imageSrc, frameRate, animations, loop}) {
+        super({imageSrc, frameRate, animations, loop});
+        this.position = {x: 200, y: 200};
+        this.sides = {
+            bottom: this.position.y + this.height,
+        }
+    }
+
+    update() {
+        // ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'
+        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+        this.updateHitbox();
+        // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
+    }
+
+    updateHitbox() {
+        this.hitbox = {
+            position: {
+                x: this.position.x,
+                y: this.position.y,
+            },
+            width: 50,
+            height: 53,
+        }
+    }
+}
+
+class Bomb extends Sprite {
+    constructor({imageSrc, frameRate, animations, loop}) {
+        super({imageSrc, frameRate, animations, loop});
+        this.position = {x: 200, y: 200};
+    }
+
+    update() {
+        // ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'
+        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+        this.updateHitbox();
+        // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
+    }
+
+    updateHitbox() {
+        this.hitbox = {
+            position: {
+                x: this.position.x,
+                y: this.position.y,
+            },
+            width: 20,
+            height: 25,
+        }
+    }
+}
+
+class Cannon extends Sprite {
+    constructor({imageSrc, frameRate, animations, loop}) {
+        super({imageSrc, frameRate, animations, loop});
+        this.position = {x: 200, y: 200};
+    }
+
+    update() {
+        // ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'
+        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+        this.updateHitbox();
+        // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
+    }
+
+    updateHitbox() {
+        this.hitbox = {
+            position: {
+                x: this.position.x,
+                y: this.position.y,
+            },
+            width: 40,
+            height: 45,
+        }
+    }
+}
+
+class LivesAndCoins extends Sprite {
+    constructor({imageSrc, frameRate, animations, loop, type = 'coin'}) {
+        super({imageSrc, frameRate, animations, loop});
+        this.position = {x: 200, y: 200};
+        this.type = type;
+    }
+
+    update() {
+        // ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'
+        // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+        this.updateHitbox();
+        // ctx.fillRect(this.hitbox.position.x, this.hitbox.position.y, this.hitbox.width, this.hitbox.height);
+    }
+
+    updateHitbox() {
+        this.hitbox = {
+            position: {
+                x: this.position.x,
+                y: this.position.y,
+            },
+            width: 10,
+            height: 15,
+        }
+    }
+}
+
 Array.prototype.parse2D = function () {
     const rows = [];
     for (let i = 0; i < this.length; i += 16) {

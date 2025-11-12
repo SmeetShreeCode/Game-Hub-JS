@@ -59,7 +59,45 @@ const levels = [
       { id: 's7', x: 66, y: 32, plates: ['p2'] },
       { id: 's8', x: 88, y: 32, plates: ['p2'] }
     ]
-  }
+  },
+
+    {
+    plates: [
+      { id: 'p1', x: 10, y: 6, w: 36, h: 28, label: 'A', screws: ['s1','s2','s3','s4'] },
+      { id: 'p2', x: 54, y: 6, w: 36, h: 28, label: 'B', screws: ['s5','s6','s7','s8'] },
+      { id: 'p3', x: 10, y: 44, w: 80, h: 34, label: 'C', screws: ['s3','s4','s5','s6'] }
+    ],
+    screws: [
+      { id: 's1', x: 12, y: 12, plates: ['p1'] },
+      { id: 's2', x: 34, y: 12, plates: ['p1'] },
+      { id: 's3', x: 12, y: 32, plates: ['p1','p3'] },
+      { id: 's4', x: 34, y: 32, plates: ['p1','p3'] },
+      { id: 's5', x: 66, y: 12, plates: ['p2','p3'] },
+      { id: 's6', x: 88, y: 12, plates: ['p2','p3'] },
+      { id: 's7', x: 66, y: 32, plates: ['p2'] },
+      { id: 's8', x: 88, y: 32, plates: ['p2'] },
+      { id: 's9', x: 90, y: 32, plates: ['p2', 'p3'] }
+    ]
+  },
+    {
+    plates: [
+      { id: 'p1', x: 10, y: 6, w: 36, h: 28, label: 'A', screws: ['s1','s2','s3','s4'] },
+      { id: 'p2', x: 54, y: 6, w: 36, h: 28, label: 'B', screws: ['s5','s6','s7','s8'] },
+      { id: 'p3', x: 10, y: 44, w: 80, h: 34, label: 'C', screws: ['s3','s4','s5','s6'] }
+    ],
+    screws: [
+      { id: 's1', x: 12, y: 12, plates: ['p1'] },
+      { id: 's2', x: 34, y: 12, plates: ['p1'] },
+      { id: 's3', x: 12, y: 32, plates: ['p1','p3'] },
+      { id: 's4', x: 34, y: 32, plates: ['p1','p3'] },
+      { id: 's5', x: 66, y: 12, plates: ['p2','p3'] },
+      { id: 's6', x: 88, y: 12, plates: ['p2','p3'] },
+      { id: 's7', x: 66, y: 32, plates: ['p2'] },
+      { id: 's8', x: 88, y: 32, plates: ['p2'] },
+      { id: 's9', x: 90, y: 32, plates: ['p2', 'p3'] },
+      { id: 's10', x: 15, y: 32, plates: ['p2', 'p3'] },
+    ]
+  },
 ];
 
 // Runtime maps

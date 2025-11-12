@@ -2,11 +2,21 @@
   <dictionary name="project">
     <words>
       <w>attackbox</w>
+      <w>bombanimations</w>
       <w>bottompipe</w>
+      <w>boxanimations</w>
+      <w>cannonanimations</w>
       <w>cherrys</w>
+      <w>coinanimations</w>
       <w>cropbox</w>
+      <w>enemyanimations</w>
       <w>flappybird</w>
+      <w>hexanaut</w>
       <w>incress</w>
+      <w>liveanimations</w>
+      <w>pigbox</w>
+      <w>playeranimations</w>
+      <w>tileman</w>
       <w>toppipe</w>
     </words>
   </dictionary>

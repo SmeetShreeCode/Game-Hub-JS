@@ -1,5 +1,5 @@
-const levelCanvas = document.getElementsByClassName('level-screen')[0];
+const levelCanvas = document.getElementById('game-header');
 
 console.log(levelCanvas);
-let gameState = 'menu'; // 'paused', 'gameOver', 'menu', 'setting'
+
 

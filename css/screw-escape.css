@@ -1,5 +1,5 @@
 :root{
-  --bg-1: #0b0f12;
+  --bg-1: #5e96c0;
   --bg-2: #1c2125;
   --plate-grad-a: #d6d7d8;
   --plate-grad-b: #9fa1a3;
@@ -13,7 +13,7 @@ html,body{height:100%;margin:0;font-family:Inter,Segoe UI,system-ui,Arial;backgr
 .controls{display:flex;align-items:center;gap:10px}
 .btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06);color:#fff;padding:8px 10px;border-radius:8px;cursor:pointer}
 .btn:active{transform:translateY(1px)}
-.board{position:relative;margin:18px auto;max-width:980px;width:94%;height:64vh;border-radius:10px;overflow:hidden;background:radial-gradient(1200px 400px at 10% 0%, rgba(255,255,255,0.02), transparent), linear-gradient(180deg,#0f1416,#15191c);box-shadow:0 8px 24px rgba(0,0,0,0.6);padding:20px}
+.board{position:relative;margin:18px auto;max-width:980px;width:94%;height:64vh;border-radius:10px;overflow:hidden;background:radial-gradient(1200px 400px at 10% 0%, rgba(255,255,255,0.02), transparent), linear-gradient(180deg,#0f1416,#06263e);box-shadow:0 8px 24px rgba(0,0,0,0.6);padding:20px}
 .hint{padding:10px 16px;color:#cbd5e1;text-align:center}
 .message{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:rgba(0,0,0,0.5);padding:8px 12px;border-radius:8px;color:#fff;display:none}
 
