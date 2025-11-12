@@ -2,19 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Screw Game</title>
     <link rel="stylesheet" href="css/screw-game.css">
 </head>
 <body>
-<div class="screw"></div>
-<div class="screw"></div>
-<div class="screw"></div>
-<div class="screw"></div>
-<div class="screw"></div>
-<div class="screw"></div>
+<!-- Orientation Warning -->
+<div class="orientation-warning">
+    <div class="warning-content">
+        <div class="warning-icon">↻</div>
+        <h1>Please Rotate Your Device</h1>
+        <p>This game is best played in landscape mode</p>
+    </div>
+</div>
 
-<canvas></canvas>
+<!-- Game Container -->
+<div class="game-container">
+    <!-- Level Selection Screen -->
+    <div class="level-selection-screen" id="levelSelectionScreen">
+        <div class="level-selection-content">
+            <h1 class="game-title">Screw Game</h1>
+            <p class="level-subtitle">Select a Level</p>
+            <div class="level-grid" id="levelGrid"></div>
+        </div>
+    </div>
+
+    <!-- Screws Container -->
+    <div class="screws-container" id="screwsContainer">
+        <div class="screw" data-index="0"></div>
+        <div class="screw" data-index="1"></div>
+        <div class="screw" data-index="2"></div>
+        <div class="screw" data-index="3"></div>
+        <div class="screw" data-index="4"></div>
+        <div class="screw" data-index="5"></div>
+        <!-- Shape badges (visual indicators for locked shapes) -->
+        <div id="shapesContainer" class="shapes-container" aria-hidden="true"></div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Mobile Controls -->
+    <div class="mobile-controls">
+        <button id="rotateLeftBtn" class="control-btn" title="Rotate Left">↺</button>
+        <button id="rotateRightBtn" class="control-btn" title="Rotate Right">↻</button>
+        <button id="undoBtn" class="control-btn" title="Undo">↶</button>
+        <button id="menuBtn" class="menu-btn" title="Menu">☰</button>
+    </div>
+</div>
 
 <script src="js/screw-game.js"></script>
+<script src="js/screw-game-levels.js"></script>
+<script src="js/screw-game-selector.js"></script>
 </body>
 </html>

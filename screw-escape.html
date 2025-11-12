@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover">
+  <title>Screw Escape</title>
+  <link rel="stylesheet" href="css/screw-escape.css">
+ </head>
+<body>
+  <header class="ui-bar">
+    <h1>Screw Escape</h1>
+    <div class="controls">
+      <div class="level-info">Level <span id="levelNumber">1</span></div>
+      <div class="score">Score: <span id="scoreDisplay">0</span></div>
+      <button id="resetBtn" class="btn">Reset Level</button>
+      <button id="nextBtn" class="btn">Next Level</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="gameBoard" class="board">
+      <!-- Plates and screws will be injected here -->
+    </div>
+    <div id="message" class="message" aria-live="polite"></div>
+  </main>
+
+  <footer class="hint">Click screws to unscrew them. Plates with no screws will fall. Mobile friendly.</footer>
+
+  <!-- Level complete modal -->
+  <div id="levelCompleteModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content">
+      <h2 id="modalTitle">Level Cleared!</h2>
+      <p id="modalText">Great job — the plates fell away.</p>
+      <div class="modal-stats">Score: <span id="modalScore">0</span> &middot; Best: <span id="bestScore">0</span></div>
+      <div class="modal-actions">
+        <button id="modalNext" class="btn">Next Level</button>
+        <button id="modalReplay" class="btn">Replay</button>
+        <button id="modalClose" class="btn">Close</button>
+      </div>
+    </div>
+    <div class="confetti-layer" aria-hidden="true"></div>
+  </div>
+
+  <script src="js/screw-escape.js"></script>
+</body>
+</html>
