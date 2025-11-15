@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1,viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>Screw Escape</title>
     <link rel="stylesheet" href="css/screw-escape.css">
 </head>
@@ -12,23 +12,22 @@
     <div class="controls">
         <div id="levelText" class="level-info">Level <span id="levelNumber">1</span></div>
         <div class="score">Score: <span id="scoreDisplay">0</span></div>
-        <button id="restartBtn" class="btn">Reset Level</button>
-        <button id="nextBtn" class="btn">Next Level</button>
+        <button id="restartBtn" class="btn">Reset</button>
+        <button id="nextBtn" class="btn">Next</button>
     </div>
 </header>
 
 <main>
-    <div id="progressContainer" style="width:200px; height:20px; background:#444; border-radius:10px; overflow:hidden;">
-        <div id="progressBar" style="width:0%; height:100%; background:#ffcc00;"></div>
+    <div class="game-container">
+        <div id="progressContainer" class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <canvas id="world"></canvas>
+        <div id="message" class="message" aria-live="polite"></div>
     </div>
-    <button id="editorBtn">Enter Editor</button>
-    <button id="exportBtn">Export Level</button>
-
-    <canvas id="world"></canvas>
-    <div id="message" class="message" aria-live="polite"></div>
 </main>
 
-<footer class="hint">Click screws to unscrew them. Plates with no screws will fall. Mobile friendly.</footer>
+<footer class="hint">Click screws to unscrew them. Plates with no screws will fall.</footer>
 
 <!-- Level complete modal -->
 <div id="levelCompleteModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">

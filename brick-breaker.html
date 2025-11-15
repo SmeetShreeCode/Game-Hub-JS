@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Brick Breaker</title>
+    <link rel="stylesheet" href="css/brick-breaker.css">
+</head>
+<body>
+    <div class="game-container">
+        <header>
+            <h1>Brick Breaker</h1>
+        </header>
+
+        <div class="game-wrapper">
+            <div class="game-info">
+                <div class="info-panel">
+                    <div class="score-display">
+                        <div class="info-item">
+                            <label>Score</label>
+                            <span id="score">0</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Level</label>
+                            <span id="level">1</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Lives</label>
+                            <span id="lives">3</span>
+                        </div>
+                    </div>
+                    
+                    <div class="controls-info">
+                        <h3>Controls</h3>
+                        <div class="control-item">
+                            <kbd>←</kbd> <kbd>→</kbd> Move Paddle
+                        </div>
+                        <div class="control-item">
+                            <kbd>Space</kbd> Launch Ball
+                        </div>
+                        <div class="control-item">
+                            <kbd>P</kbd> Pause
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-board-container">
+                <canvas id="gameCanvas"></canvas>
+                <div id="startScreen" class="overlay">
+                    <div class="overlay-content">
+                        <h2>Brick Breaker</h2>
+                        <p>Break all the bricks to advance!</p>
+                        <button id="startBtn" class="btn btn-primary">Start Game</button>
+                    </div>
+                </div>
+                <div id="pausedOverlay" class="overlay hidden">
+                    <div class="overlay-content">
+                        <h2>Paused</h2>
+                        <p>Press P to resume</p>
+                        <button id="resumeBtn" class="btn">Resume</button>
+                    </div>
+                </div>
+                <div id="gameOverOverlay" class="overlay hidden">
+                    <div class="overlay-content">
+                        <h2 id="gameOverTitle">Game Over</h2>
+                        <p>Final Score: <span id="finalScore">0</span></p>
+                        <p>Level Reached: <span id="finalLevel">1</span></p>
+                        <button id="restartBtn" class="btn btn-primary">Play Again</button>
+                    </div>
+                </div>
+                <div id="levelCompleteOverlay" class="overlay hidden">
+                    <div class="overlay-content">
+                        <h2>Level Complete!</h2>
+                        <p>Score: <span id="levelScore">0</span></p>
+                        <button id="nextLevelBtn" class="btn btn-primary">Next Level</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-controls">
+                <button id="pauseBtn" class="btn">Pause</button>
+                <button id="resetBtn" class="btn">Reset</button>
+            </div>
+        </div>
+
+        <div class="mobile-controls hidden">
+            <div class="mobile-paddle-controls">
+                <button class="mobile-btn" id="btnLeft">←</button>
+                <button class="mobile-btn" id="btnLaunch">Launch</button>
+                <button class="mobile-btn" id="btnRight">→</button>
+            </div>
+        </div>
+
+        <footer>
+            <p><a href="index.html">⬅ Back to Games</a></p>
+        </footer>
+    </div>
+
+    <script src="js/brick-breaker.js"></script>
+</body>
+</html>

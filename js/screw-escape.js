@@ -5,15 +5,38 @@ const world = engine.world;
 world.gravity.y = 1;
 
 const canvas = document.getElementById("world");
-canvas.width = 800;
-canvas.height = 600;
+const gameContainer = canvas.parentElement;
+
+// Base dimensions for physics world
+const BASE_WIDTH = 800;
+const BASE_HEIGHT = 600;
+
+// Set initial canvas size
+function resizeCanvas() {
+    const containerWidth = gameContainer.clientWidth;
+    const maxWidth = Math.min(containerWidth - 32, BASE_WIDTH); // Account for padding
+    const scale = Math.min(maxWidth / BASE_WIDTH, window.innerHeight * 0.6 / BASE_HEIGHT);
+    
+    const displayWidth = Math.floor(BASE_WIDTH * scale);
+    const displayHeight = Math.floor(BASE_HEIGHT * scale);
+    
+    canvas.style.width = displayWidth + 'px';
+    canvas.style.height = displayHeight + 'px';
+    canvas.width = BASE_WIDTH;
+    canvas.height = BASE_HEIGHT;
+    
+    render.options.width = BASE_WIDTH;
+    render.options.height = BASE_HEIGHT;
+    render.canvas.width = BASE_WIDTH;
+    render.canvas.height = BASE_HEIGHT;
+}
 
 const render = Render.create({
     canvas,
     engine,
     options: {
-        width: 800,
-        height: 600,
+        width: BASE_WIDTH,
+        height: BASE_HEIGHT,
         wireframes: false,
         background:
             "radial-gradient(1200px 400px at 10% 0%, rgba(255,255,255,0.02), transparent), linear-gradient(180deg, #0f1416, #06263e)"
@@ -21,6 +44,16 @@ const render = Render.create({
 });
 Render.run(render);
 Runner.run(Runner.create(), engine);
+
+// Initial resize
+resizeCanvas();
+
+// Handle window resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(resizeCanvas, 100);
+});
 
 let boards = [];
 let screws = [];
@@ -33,7 +66,7 @@ const levelText = document.getElementById("levelText");
 const restartBtn = document.getElementById("restartBtn");
 const progressBar = document.getElementById("progressBar");
 
-const ground = Bodies.rectangle(400, 580, 810, 40, {isStatic: true});
+const ground = Bodies.rectangle(BASE_WIDTH / 2, BASE_HEIGHT - 20, BASE_WIDTH + 10, 40, {isStatic: true});
 Composite.add(world, ground);
 
 const mouse = Mouse.create(render.canvas);
@@ -100,7 +133,7 @@ function loadLevel(levelIndex) {
         switch (b.shape) {
             case "roundRect":
                 board = Bodies.rectangle(b.x, b.y, b.w, b.h, {
-                    chamfer: {radius: b.radius || 20},
+                    chamfer: {radius: b.radius || 12},
                     render: {fillStyle: b.color}
                 });
                 break;
@@ -259,6 +292,16 @@ function transitionToNextLevel(nextLevelIndex) {
     requestAnimationFrame(fade);
 }
 
+function getCanvasCoordinates(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = BASE_WIDTH / rect.width;
+    const scaleY = BASE_HEIGHT / rect.height;
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
+}
+
 function handleInteraction(x, y) {
     if (isUnscrewing || isTransitioning) return;
 
@@ -272,15 +315,17 @@ function handleInteraction(x, y) {
     });
 }
 
-canvas.addEventListener("click", e =>
-    handleInteraction(e.offsetX, e.offsetY)
-);
+canvas.addEventListener("click", e => {
+    const coords = getCanvasCoordinates(e.clientX, e.clientY);
+    handleInteraction(coords.x, coords.y);
+});
 
 canvas.addEventListener("touchstart", e => {
-    const r = canvas.getBoundingClientRect();
+    e.preventDefault();
     const t = e.touches[0];
-    handleInteraction(t.clientX - r.left, t.clientY - r.top);
-});
+    const coords = getCanvasCoordinates(t.clientX, t.clientY);
+    handleInteraction(coords.x, coords.y);
+}, { passive: false });
 
 restartBtn.addEventListener("click", () => {
     if (!isTransitioning) loadLevel(currentLevel);
