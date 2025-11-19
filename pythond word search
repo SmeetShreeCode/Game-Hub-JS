@@ -327,3 +327,401 @@ I can add:
 
 Just tell me what you want!
 
+Here is the fixed and improved version of your code so it can search Gujarati text inside PDFs.
+
+✅ Why your old code didn’t work for Gujarati
+
+PyPDF2 has very weak support for non-English languages (Gujarati, Hindi, Tamil, etc.).
+Most Indian-language PDFs use embedded fonts, and PyPDF2 fails to extract that text correctly.
+
+✅ Best solution: Use pdfplumber (works MUCH better for Gujarati)
+
+pdfplumber extracts Unicode text properly.
+
+✔️ Updated Working Code (Gujarati + English + Numbers)
+Install required library
+
+Open terminal / CMD:
+
+pip install pdfplumber
+
+✨ Final Python Script
+import os
+import pdfplumber
+
+def search_pdf_folder(folder_path, keyword):
+    keyword = keyword.lower()
+    found_files = []
+
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".pdf"):
+            pdf_path = os.path.join(folder_path, filename)
+            try:
+                with pdfplumber.open(pdf_path) as pdf:
+                    for page in pdf.pages:
+                        text = page.extract_text()
+                        if text and keyword in text.lower():
+                            found_files.append(filename)
+                            break
+            except Exception as e:
+                print(f"Could not read {filename}: {e}")
+
+    return found_files
+
+
+if __name__ == "__main__":
+    folder = input("Enter the folder path: ")
+    word = input("Enter the word to search: ")
+
+    print("\nSearching... Please wait...\n")
+
+    results = search_pdf_folder(folder, word)
+
+    if results:
+        print("Word found in these PDF files:\n")
+        for file in results:
+            print(" -", file)
+    else:
+        print("No PDF contains this word.")
+
+✔️ This version supports:
+
+Gujarati text (ગુજરાતી)
+
+Hindi
+
+Marathi
+
+All other Unicode languages
+
+English and numbers
+
+🔍 If some PDFs still fail
+
+Some PDFs are scanned images (not text).
+If you want, I can also give you OCR version using Tesseract so it reads Gujarati text from scanned PDFs.
+
+If you want OCR support, just tell me:
+“Give me the OCR version for Gujarati PDFs.”
+
+Great — here is the OCR-enabled version that can read Gujarati text even from scanned PDFs.
+
+This uses:
+
+✔️ pdfplumber → extract normal text
+✔️ pytesseract + Tesseract OCR → read Gujarati from scanned pages
+✔️ pdf2image → convert PDF pages to images for OCR
+🔧 Step 1: Install required packages
+Python libraries
+pip install pdfplumber pytesseract pdf2image pillow
+
+Install Tesseract OCR
+Windows:
+
+Download installer:
+https://github.com/UB-Mannheim/tesseract/wiki
+
+Install and note the installation path — usually:
+
+C:\Program Files\Tesseract-OCR\tesseract.exe
+
+Linux:
+sudo apt install tesseract-ocr tesseract-ocr-guj
+
+macOS:
+brew install tesseract
+brew install tesseract-lang
+
+🔧 Step 2: Install Gujarati OCR language
+
+Windows installer includes Gujarati, but if not:
+
+Download guj.traineddata from:
+https://github.com/tesseract-ocr/tessdata
+
+Put in:
+
+.../Tesseract-OCR/tessdata/
+
+✨ Step 3: Full OCR Python Script (Gujarati Supported)
+import os
+import pdfplumber
+import pytesseract
+from pdf2image import convert_from_path
+from PIL import Image
+
+# Set Tesseract path manually (only needed for Windows)
+# Example: r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+def extract_text_with_ocr(pdf_path, keyword):
+    """Extract text using normal extraction + OCR."""
+    keyword = keyword.lower()
+
+    try:
+        # 1. Try normal text extraction first
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                text = page.extract_text()
+                if text and keyword in text.lower():
+                    return True
+
+        # 2. OCR: Convert PDF pages to images
+        images = convert_from_path(pdf_path, dpi=300)
+
+        for img in images:
+            # Apply OCR with Gujarati + English
+            text = pytesseract.image_to_string(img, lang="guj+eng")
+            if text and keyword in text.lower():
+                return True
+
+    except Exception as e:
+        print(f"Error reading {pdf_path}: {e}")
+
+    return False
+
+
+def search_pdf_folder(folder_path, keyword):
+    found_files = []
+
+    for filename in os.listdir(folder_path):
+        if filename.endswith(".pdf"):
+            pdf_path = os.path.join(folder_path, filename)
+            print(f"Checking: {filename}")
+
+            if extract_text_with_ocr(pdf_path, keyword):
+                found_files.append(filename)
+
+    return found_files
+
+
+if __name__ == "__main__":
+    folder = input("Enter the folder path: ")
+    word = input("Enter the word to search: ")
+
+    print("\nSearching... Please wait (OCR may take time)...\n")
+
+    results = search_pdf_folder(folder, word)
+
+    if results:
+        print("\nWord found in these PDF files:\n")
+        for file in results:
+            print(" -", file)
+    else:
+        print("No PDF contains this word.")
+
+✔️ This version can:
+✅ Search Gujarati text in normal PDFs
+✅ Search Gujarati text in scanned PDFs
+✅ Search English + Gujarati together
+✅ Read handwritten Gujarati (if clear enough)
+⚡ Optional Upgrades
+
+If you want, I can also add:
+
+✔ Progress bar
+✔ Faster OCR (skip pages that look blank)
+✔ Save index so future searches become instant
+✔ GUI version (Tkinter)
+✔ Search multiple keywords
+
+Just tell me what you want!
+
+Great — here is the enhanced OCR-powered Gujarati PDF search tool with:
+
+✔ Progress bar (tqdm)
+✔ Faster OCR (skip blank pages using pixel-density check)
+✔ Saves an index file → future searches are instant
+✔ Supports multiple keywords (comma-separated or space-separated)
+🔧 Step 1 — Install required packages
+pip install pdfplumber pytesseract pdf2image pillow tqdm
+
+
+Also install Tesseract and Gujarati OCR (instructions same as earlier).
+
+🚀 FULL ADVANCED SCRIPT
+
+💡 This script builds an index of all extracted text (including OCR). Next time you run it, it won’t re-OCR the PDFs unless missing.
+
+✅ Smart Gujarati PDF Searcher with OCR + Index + Multi-Keyword Support
+import os
+import json
+import pdfplumber
+import pytesseract
+from pdf2image import convert_from_path
+from PIL import Image
+from tqdm import tqdm
+
+# --------------------------
+# CONFIGURE TESSERACT PATH
+# --------------------------
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+# Index file
+INDEX_FILE = "pdf_index.json"
+
+
+# -------------------------------------------------------
+# Fast check: Detect if a page image is mostly blank
+# -------------------------------------------------------
+def is_blank_image(image, threshold=10):
+    gray = image.convert("L")  # grayscale
+    histogram = gray.histogram()
+    dark_pixels = sum(histogram[:50])  # very dark pixels
+    total_pixels = sum(histogram)
+    darkness_ratio = dark_pixels / total_pixels * 100
+    return darkness_ratio < threshold
+
+
+
+# -------------------------------------------------------
+# Extract text from PDF (normal + OCR fallback)
+# -------------------------------------------------------
+def extract_pdf_text(pdf_path):
+    full_text = ""
+
+    try:
+        # Try normal extract first
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                text = page.extract_text()
+                if text:
+                    full_text += text + "\n"
+
+        # OCR if text still too small (likely scanned)
+        if len(full_text.strip()) < 20:
+            images = convert_from_path(pdf_path, dpi=300)
+            for img in tqdm(images, desc="OCR Pages", leave=False):
+
+                # Skip blank pages for speed
+                if is_blank_image(img):
+                    continue
+
+                text = pytesseract.image_to_string(img, lang="guj+eng")
+                full_text += text + "\n"
+
+    except Exception as e:
+        print(f"Error processing {pdf_path}: {e}")
+
+    return full_text
+
+
+
+# -------------------------------------------------------
+# Build or load index file
+# -------------------------------------------------------
+def load_or_build_index(folder_path):
+    index = {}
+
+    # If index exists, load it
+    if os.path.exists(INDEX_FILE):
+        with open(INDEX_FILE, "r", encoding="utf-8") as f:
+            index = json.load(f)
+
+    # Build index for missing PDFs
+    pdf_files = [f for f in os.listdir(folder_path) if f.endswith(".pdf")]
+
+    for filename in tqdm(pdf_files, desc="Indexing PDFs"):
+        if filename not in index:
+            pdf_path = os.path.join(folder_path, filename)
+            print(f"\nExtracting text from: {filename}")
+            text = extract_pdf_text(pdf_path)
+            index[filename] = text
+
+    # Save updated index
+    with open(INDEX_FILE, "w", encoding="utf-8") as f:
+        json.dump(index, f, ensure_ascii=False, indent=2)
+
+    return index
+
+
+
+# -------------------------------------------------------
+# Search inside index
+# -------------------------------------------------------
+def search_keywords(index, keywords):
+    results = []
+
+    for filename, text in index.items():
+        match = True
+        for kw in keywords:
+            if kw.lower() not in text.lower():
+                match = False
+                break
+        if match:
+            results.append(filename)
+
+    return results
+
+
+
+# -------------------------------------------------------
+# MAIN PROGRAM
+# -------------------------------------------------------
+if __name__ == "__main__":
+    folder = input("Enter folder path: ")
+    words = input("Enter words to search (comma or space separated): ")
+
+    # Prepare keyword list
+    if "," in words:
+        keywords = [w.strip() for w in words.split(",")]
+    else:
+        keywords = words.split()
+
+    print("\nLoading / Building index... (OCR may take time only once)\n")
+
+    index = load_or_build_index(folder)
+
+    print("\nSearching...\n")
+    results = search_keywords(index, keywords)
+
+    if results:
+        print("\n✔ Word(s) found in these PDF files:\n")
+        for r in results:
+            print(" -", r)
+    else:
+        print("\n❌ No PDF contains all of these words.")
+
+🎯 What this version can do
+💨 1. Progress Bar
+
+Shows progress while indexing & OCR.
+
+⚡ 2. Faster OCR
+
+Detects and skips blank pages
+
+Skips OCR if normal text extraction already works
+
+⚙️ 3. Index file (pdf_index.json)
+
+First run → slow (OCR + extraction)
+
+Future runs → instant search (no re-OCR)
+
+🔍 4. Search multiple words
+
+Examples:
+
+invoice payment
+
+
+or
+
+રકમ, બિલ
+
+
+Search matches only PDFs containing all keywords.
+
+Want More Features?
+
+I can also add:
+
+✔ GUI interface (Windows .exe)
+✔ Fuzzy search (matches similar Gujarati words)
+✔ Highlight found text inside PDF
+✔ Export results to Excel
+✔ Web dashboard search tool
+
+Just tell me — what do you want next?
+

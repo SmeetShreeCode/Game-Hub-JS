@@ -35,7 +35,7 @@ class PongGame {
         
         // Game objects
         this.player1 = {
-            x: 20,
+            x: 2,
             y: this.baseHeight / 2 - this.paddleHeight / 2,
             width: this.paddleWidth,
             height: this.paddleHeight,
@@ -110,7 +110,7 @@ class PongGame {
         
         // Update positions for new size (only if players are initialized)
         if (this.player1 && this.player2) {
-            this.player1.x = 20;
+            this.player1.x = 2;
             this.player2.x = this.baseWidth - this.paddleWidth - 20;
             if (this.ball) {
                 this.resetBall();

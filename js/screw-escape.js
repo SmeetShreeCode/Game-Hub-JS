@@ -65,6 +65,7 @@ let isTransitioning = false;
 const levelText = document.getElementById("levelText");
 const restartBtn = document.getElementById("restartBtn");
 const progressBar = document.getElementById("progressBar");
+const screwToolbox = document.getElementById("screwToolbox");
 
 const ground = Bodies.rectangle(BASE_WIDTH / 2, BASE_HEIGHT - 20, BASE_WIDTH + 10, 40, {isStatic: true});
 Composite.add(world, ground);
@@ -207,6 +208,18 @@ function updateProgress() {
     progressBar.style.width = `${p * 100}%`;
 }
 
+function updateScrewToolBox() {
+    const level = levels[currentLevel];
+    const totalScrews = level.screws.length;
+    if (totalScrews === 0) {
+        screwToolbox.style.width = `0`;
+        return;
+    }
+    const removedCount = totalScrews - screws.length;
+    const p = removedCount / totalScrews;
+    screwToolbox.style.width = `0`;
+}
+
 function unscrewScrew(screwObj, index) {
     if (isUnscrewing || isTransitioning) return;
     isUnscrewing = true;
@@ -229,6 +242,8 @@ function unscrewScrew(screwObj, index) {
             Composite.remove(world, screwObj.constraint);
             screws.splice(index, 1);
 
+            // ADD SCREW TO TOOLBOX
+            addScrewToToolbox(screwObj);
             updateProgress();
 
             isUnscrewing = false;
@@ -249,6 +264,24 @@ function unscrewScrew(screwObj, index) {
     }
 
     requestAnimationFrame(anim);
+}
+
+function addScrewToToolbox(screwObj) {
+    const screwEl = document.createElement("div");
+    screwEl.classList.add("toolbox-screw");
+
+    // Optional: animate into toolbox
+    screwEl.style.opacity = "0";
+    screwEl.style.transform = "scale(0.5)";
+
+    screwToolbox.appendChild(screwEl);
+
+    // Small delay for animation
+    requestAnimationFrame(() => {
+        screwEl.style.opacity = "1";
+        screwEl.style.transform = "scale(1)";
+    });
+
 }
 
 function transitionToNextLevel(nextLevelIndex) {
@@ -345,10 +378,10 @@ Events.on(render, "afterRender", () => {
         // screw body
         ctx.beginPath();
         ctx.arc(0, 0, 10, 0, Math.PI * 2);
-        ctx.fillStyle =
-            levels[currentLevel].order[currentOrderIndex] === s.index
-                ? "#ffcc00"
-                : "#777";
+        ctx.fillStyle ="#57ff00";
+            // levels[currentLevel].order[currentOrderIndex] === s.index
+            //     ? "#ffcc00"
+            //     : "#57ff00";
         ctx.fill();
 
         ctx.strokeStyle = "#333";
@@ -378,3 +411,36 @@ Events.on(render, "afterRender", () => {
 });
 
 loadLevel(currentLevel);
+
+// const scene = new THREE.Scene();
+// const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+// const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("canvas") });
+//
+// renderer.setSize(window.innerWidth, window.innerHeight);
+//
+// // Light
+// const light = new THREE.HemisphereLight(0xffffff, 0x000000, 1);
+// scene.add(light);
+//
+// // Load 3D model
+// // const loader = new THREE.GLTFLoader();
+// // loader.load('models/myModel.glb', function(gltf) {
+// //     scene.add(gltf.scene);
+// // const loader = new THREE.OBJLoader();
+// // loader.load('models/myModel.obj', function(object) {
+// //     scene.add(object);
+// const loader = new THREE.FBXLoader();
+// loader.load('./2D/screw-3D-model.fbx', function(object) {
+//     scene.add(object);
+// }, undefined, function(error) {
+//     console.error(error);
+// });
+//
+// camera.position.z = 5;
+//
+// // Render loop
+// function animate() {
+//     requestAnimationFrame(animate);
+//     renderer.render(scene, camera);
+// }
+// animate();

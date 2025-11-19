@@ -99,12 +99,65 @@ main {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.screwToolbox-container {
+    width: 100%;
+    max-width: 100px;
+    height: 45px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 5px solid rgba(255, 255, 255, 0.1);
+}
+
 .progress-bar {
-    width: 0%;
+    width: 0;
     height: 100%;
     background: linear-gradient(90deg, var(--accent), #ffaa00);
     transition: width 0.3s ease;
     border-radius: 10px;
+}
+
+.screw-toolbox {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #ffaa00);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    min-height: 40px;
+}
+
+.toolbox-screw {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(#57ff00, #2e8f00);
+    border: 2px solid #333;
+    position: relative;
+    transition: 0.25s ease;
+}
+
+/* Screw cross */
+.toolbox-screw::before,
+.toolbox-screw::after {
+    content: "";
+    position: absolute;
+    background: #222;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.toolbox-screw::before {
+    width: 12px;
+    height: 4px;
+}
+
+.toolbox-screw::after {
+    width: 4px;
+    height: 12px;
 }
 
 /* Canvas */

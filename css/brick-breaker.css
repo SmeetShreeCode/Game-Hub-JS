@@ -74,7 +74,7 @@ header h1 {
 }
 
 .score-display {
-    margin-bottom: 30px;
+    margin-bottom: 3px;
 }
 
 .info-item {
@@ -343,7 +343,7 @@ footer a:hover {
 
 @media (max-width: 768px) {
     body {
-        padding: 10px 5px;
+        padding: 10px 20px;
     }
 
     header {
@@ -425,7 +425,7 @@ footer a:hover {
 
 @media (max-width: 480px) {
     body {
-        padding: 8px 5px;
+        padding: 15px 20px;
     }
 
     header {

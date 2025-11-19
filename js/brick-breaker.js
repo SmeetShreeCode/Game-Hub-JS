@@ -157,6 +157,37 @@ class BrickBreaker {
             }, 200);
         });
 
+        // Mouse move (desktop) – move paddle with cursor
+        this.canvas.addEventListener('mousemove', (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const scaleX = this.baseWidth / rect.width;
+
+            const mouseX = (e.clientX - rect.left) * scaleX;
+            this.paddle.x = mouseX - this.paddle.width / 2;
+
+            // Clamp inside game boundaries
+            this.paddle.x = Math.max(0, Math.min(this.baseWidth - this.paddle.width, this.paddle.x));
+        });
+
+        // Touch move (mobile) – drag finger to move paddle
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const rect = this.canvas.getBoundingClientRect();
+            const scaleX = this.baseWidth / rect.width;
+
+            const touchX = (e.touches[0].clientX - rect.left) * scaleX;
+            this.paddle.x = touchX - this.paddle.width / 2;
+
+            // clamp
+            this.paddle.x = Math.max(0, Math.min(this.baseWidth - this.paddle.width, this.paddle.x));
+        }, {passive: false});
+
+        this.canvas.addEventListener('click', () => {
+            if (this.gameRunning && !this.gamePaused) {
+                this.launchBall();
+            }
+        });
+
         // Touch controls
         this.setupTouchControls();
     }
