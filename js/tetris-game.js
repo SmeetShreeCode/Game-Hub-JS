@@ -219,7 +219,6 @@ class Tetris {
     }
 
     createPiece(type) {
-        console.log(this.pieces.length, type)
         return {
             type: type,
             x: Math.floor(this.BOARD_WIDTH / 2) - 2,
@@ -230,9 +229,9 @@ class Tetris {
     }
 
     spawnPiece() {
-        const type = this.nextPiece ? this.nextPiece.type : Math.floor(Math.random() * 13) + 1;
+        const type = this.nextPiece ? this.nextPiece.type : Math.floor(Math.random() * 7) + 1;
         this.currentPiece = this.createPiece(type);
-        this.nextPiece = this.createPiece(Math.floor(Math.random() * 13) + 1);
+        this.nextPiece = this.createPiece(Math.floor(Math.random() * 7) + 1);
         this.drawNext();
 
         // Check game over
