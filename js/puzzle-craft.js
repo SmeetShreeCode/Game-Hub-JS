@@ -49,7 +49,7 @@ class PuzzleCraft {
                 if (this.tiles.length > 0) {
                     this.createTiles();
                 }
-            }, 200);
+            }, 100);
         });
     }
 
@@ -155,6 +155,7 @@ class PuzzleCraft {
 
         // Hide level select and show game screen
         document.getElementById('levelSelectScreen').classList.add('hidden');
+        document.getElementById('win-overlay').classList.add('hidden');
         document.getElementById('gameScreen').classList.remove('hidden');
 
         // Update display first
