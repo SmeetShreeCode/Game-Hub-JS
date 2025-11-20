@@ -1,4 +1,4 @@
-// Brick Breaker Game
+// Brick Breaker Game with Level System
 class BrickBreaker {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
@@ -13,9 +13,11 @@ class BrickBreaker {
         this.gameRunning = false;
         this.gamePaused = false;
         this.currentLevel = 1;
+        this.selectedLevel = 1;
         this.score = 0;
         this.lives = 3;
         this.ballLaunched = false;
+        this.completedLevels = new Set();
 
         // Paddle
         this.paddle = {
@@ -46,6 +48,9 @@ class BrickBreaker {
         this.brickOffsetTop = 60;
         this.brickOffsetLeft = 35;
 
+        // Level definitions
+        this.levelDefinitions = this.createLevelDefinitions();
+
         // Input
         this.keys = {};
         this.touchControls = {
@@ -55,9 +60,136 @@ class BrickBreaker {
 
         this.setupEventListeners();
         this.setupUI();
-        this.setCanvasSize(); // Set canvas size first
-        this.initLevel();
+        this.setCanvasSize();
+        this.createLevelSelect();
         this.draw();
+    }
+
+    createLevelDefinitions() {
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe'];
+        
+        return [
+            // Level 1: Easy - Full grid
+            {
+                rows: 4,
+                cols: 8,
+                pattern: 'full',
+                speed: 4,
+                description: 'Easy Start'
+            },
+            // Level 2: Easy - Pyramid
+            {
+                rows: 5,
+                cols: 9,
+                pattern: 'pyramid',
+                speed: 4.5,
+                description: 'Pyramid'
+            },
+            // Level 3: Medium - Checkerboard
+            {
+                rows: 5,
+                cols: 10,
+                pattern: 'checkerboard',
+                speed: 5,
+                description: 'Checkerboard'
+            },
+            // Level 4: Medium - Hollow
+            {
+                rows: 6,
+                cols: 10,
+                pattern: 'hollow',
+                speed: 5.5,
+                description: 'Hollow Center'
+            },
+            // Level 5: Medium - Lines
+            {
+                rows: 6,
+                cols: 10,
+                pattern: 'lines',
+                speed: 6,
+                description: 'Horizontal Lines'
+            },
+            // Level 6: Hard - Zigzag
+            {
+                rows: 7,
+                cols: 10,
+                pattern: 'zigzag',
+                speed: 6.5,
+                description: 'Zigzag'
+            },
+            // Level 7: Hard - Spiral
+            {
+                rows: 7,
+                cols: 10,
+                pattern: 'spiral',
+                speed: 7,
+                description: 'Spiral'
+            },
+            // Level 8: Hard - Corners
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'corners',
+                speed: 7.5,
+                description: 'Four Corners'
+            },
+            // Level 9: Very Hard - Cross
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'cross',
+                speed: 8,
+                description: 'Cross Pattern'
+            },
+            // Level 10: Very Hard - Full
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'full',
+                speed: 8.5,
+                description: 'Full Grid'
+            },
+            // Level 11: Expert - Double Pyramid
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'doublePyramid',
+                speed: 9,
+                description: 'Double Pyramid'
+            },
+            // Level 12: Expert - Diamond
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'diamond',
+                speed: 9.5,
+                description: 'Diamond'
+            },
+            // Level 13: Master - Complex
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'complex',
+                speed: 10,
+                description: 'Complex Pattern'
+            },
+            // Level 14: Master - Full Hard
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'full',
+                speed: 10.5,
+                description: 'Master Challenge'
+            },
+            // Level 15: Legendary
+            {
+                rows: 8,
+                cols: 10,
+                pattern: 'full',
+                speed: 11,
+                description: 'Legendary'
+            }
+        ];
     }
 
     setCanvasSize() {
@@ -67,19 +199,21 @@ class BrickBreaker {
         let maxWidth, maxHeight;
 
         if (isMobile) {
-            // Mobile: account for header, info panel, controls, and padding
-            const headerHeight = 80;
-            const infoHeight = isLandscape ? 0 : 180; // Hide info in landscape
-            const controlsHeight = isLandscape ? 0 : 100; // Hide controls in landscape
-            const mobileControlsHeight = isLandscape ? 0 : 80;
-            const padding = 40;
+            // Mobile: account for header, info bar, controls, and padding
+            const headerHeight = isLandscape ? 50 : 70;
+            const infoBarHeight = 60;
+            const mobileControlsHeight = isLandscape ? 0 : 70;
+            const padding = 20;
 
-            maxWidth = window.innerWidth - 20;
-            maxHeight = window.innerHeight - headerHeight - infoHeight - controlsHeight - mobileControlsHeight - padding;
+            maxWidth = window.innerWidth - 10;
+            maxHeight = window.innerHeight - headerHeight - infoBarHeight - mobileControlsHeight - padding;
         } else {
             // Desktop/Tablet
-            maxWidth = Math.min(window.innerWidth - 300, this.baseWidth); // Account for info panel
-            maxHeight = Math.min(window.innerHeight - 200, this.baseHeight);
+            const headerHeight = 70;
+            const infoBarHeight = 70;
+            const padding = 30;
+            maxWidth = Math.min(window.innerWidth - 40, this.baseWidth);
+            maxHeight = window.innerHeight - headerHeight - infoBarHeight - padding;
         }
 
         // Calculate scale maintaining aspect ratio
@@ -97,22 +231,20 @@ class BrickBreaker {
         if (isMobile) {
             this.brickCols = Math.max(6, Math.floor(10 * scale));
             this.brickRows = Math.max(5, Math.floor(8 * scale));
-            this.brickWidth = Math.floor(200 * scale);
-            this.brickHeight = Math.floor(75 * scale);
+            this.brickWidth = Math.floor(70 * scale);
+            this.brickHeight = Math.floor(25 * scale);
             this.brickPadding = Math.floor(5 * scale);
-            this.brickOffsetLeft = Math.floor(35 * scale);
         } else {
             this.brickCols = 10;
             this.brickRows = 8;
             this.brickWidth = 70;
             this.brickHeight = 25;
             this.brickPadding = 5;
-            this.brickOffsetLeft = 35;
         }
 
         // Reinitialize level if game is running
         if (this.gameRunning) {
-            this.initLevel();
+            this.initLevel(this.selectedLevel);
         }
     }
 
@@ -159,6 +291,7 @@ class BrickBreaker {
 
         // Mouse move (desktop) – move paddle with cursor
         this.canvas.addEventListener('mousemove', (e) => {
+            if (!this.gameRunning || this.gamePaused) return;
             const rect = this.canvas.getBoundingClientRect();
             const scaleX = this.baseWidth / rect.width;
 
@@ -171,6 +304,7 @@ class BrickBreaker {
 
         // Touch move (mobile) – drag finger to move paddle
         this.canvas.addEventListener('touchmove', (e) => {
+            if (!this.gameRunning || this.gamePaused) return;
             e.preventDefault();
             const rect = this.canvas.getBoundingClientRect();
             const scaleX = this.baseWidth / rect.width;
@@ -236,20 +370,86 @@ class BrickBreaker {
     }
 
     setupUI() {
-        document.getElementById('startBtn').addEventListener('click', () => this.start());
+        document.getElementById('backBtn').addEventListener('click', () => {
+            if (this.gameRunning) {
+                this.gameRunning = false;
+                this.gamePaused = false;
+            }
+            this.showLevelSelect();
+        });
         document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
-        document.getElementById('resumeBtn').addEventListener('click', () => this.togglePause());
         document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+        document.getElementById('resumeBtn').addEventListener('click', () => this.togglePause());
         document.getElementById('restartBtn').addEventListener('click', () => this.reset());
+        document.getElementById('levelSelectBtn').addEventListener('click', () => this.showLevelSelect());
+        document.getElementById('levelSelectBtn2').addEventListener('click', () => this.showLevelSelect());
         document.getElementById('nextLevelBtn').addEventListener('click', () => this.nextLevel());
     }
 
-    initLevel() {
+    createLevelSelect() {
+        const levelGrid = document.getElementById('levelGrid');
+        levelGrid.innerHTML = '';
+
+        this.levelDefinitions.forEach((level, index) => {
+            const levelNum = index + 1;
+            const isLocked = levelNum > 1 && !this.completedLevels.has(levelNum - 1);
+            const isCompleted = this.completedLevels.has(levelNum);
+
+            const btn = document.createElement('button');
+            btn.className = `level-btn ${isLocked ? 'locked' : ''} ${isCompleted ? 'completed' : ''}`;
+            btn.textContent = levelNum;
+            btn.setAttribute('data-level', levelNum);
+
+            if (!isLocked) {
+                btn.addEventListener('click', () => this.startLevel(levelNum));
+            }
+
+            levelGrid.appendChild(btn);
+        });
+    }
+
+    showLevelSelect() {
+        this.gameRunning = false;
+        this.gamePaused = false;
+        document.getElementById('gameScreen').classList.add('hidden');
+        document.getElementById('levelSelectScreen').classList.remove('hidden');
+        this.createLevelSelect();
+    }
+
+    startLevel(levelNum) {
+        this.selectedLevel = levelNum;
+        this.currentLevel = levelNum;
+        this.score = 0;
+        this.lives = 3;
+        this.ballLaunched = false;
+
+        const levelDef = this.levelDefinitions[levelNum - 1];
+        this.ball.speed = levelDef.speed;
+
+        document.getElementById('levelSelectScreen').classList.add('hidden');
+        document.getElementById('gameScreen').classList.remove('hidden');
+
+        // Show/hide mobile controls
+        const mobileControls = document.querySelector('.mobile-controls');
+        if (window.innerWidth <= 768) {
+            mobileControls.classList.remove('hidden');
+        } else {
+            mobileControls.classList.add('hidden');
+        }
+
+        this.setCanvasSize();
+        this.initLevel(levelNum);
+        this.updateScore();
+        this.start();
+    }
+
+    initLevel(levelNum) {
         this.bricks = [];
-        const colors = [
-            '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24',
-            '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe'
-        ];
+        const levelDef = this.levelDefinitions[levelNum - 1];
+        const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe'];
+
+        this.brickRows = levelDef.rows;
+        this.brickCols = levelDef.cols;
 
         // Calculate total brick area width and center bricks
         const totalBrickWidth = this.brickCols * this.brickWidth + (this.brickCols - 1) * this.brickPadding;
@@ -257,14 +457,70 @@ class BrickBreaker {
 
         for (let r = 0; r < this.brickRows; r++) {
             for (let c = 0; c < this.brickCols; c++) {
-                this.bricks.push({
-                    x: c * (this.brickWidth + this.brickPadding) + actualOffsetLeft,
-                    y: r * (this.brickHeight + this.brickPadding) + this.brickOffsetTop,
-                    width: this.brickWidth,
-                    height: this.brickHeight,
-                    color: colors[r % colors.length],
-                    visible: true
-                });
+                let visible = true;
+
+                // Apply pattern
+                switch (levelDef.pattern) {
+                    case 'full':
+                        visible = true;
+                        break;
+                    case 'pyramid':
+                        const center = Math.floor(this.brickCols / 2);
+                        visible = Math.abs(c - center) <= r;
+                        break;
+                    case 'checkerboard':
+                        visible = (r + c) % 2 === 0;
+                        break;
+                    case 'hollow':
+                        visible = r === 0 || r === this.brickRows - 1 || c === 0 || c === this.brickCols - 1;
+                        break;
+                    case 'lines':
+                        visible = r % 2 === 0;
+                        break;
+                    case 'zigzag':
+                        visible = (r + c) % 3 !== 0;
+                        break;
+                    case 'spiral':
+                        const minDist = Math.min(r, this.brickRows - 1 - r, c, this.brickCols - 1 - c);
+                        visible = minDist % 2 === 0;
+                        break;
+                    case 'corners':
+                        const cornerSize = 3;
+                        visible = (r < cornerSize && c < cornerSize) ||
+                                 (r < cornerSize && c >= this.brickCols - cornerSize) ||
+                                 (r >= this.brickRows - cornerSize && c < cornerSize) ||
+                                 (r >= this.brickRows - cornerSize && c >= this.brickCols - cornerSize);
+                        break;
+                    case 'cross':
+                        const centerRow = Math.floor(this.brickRows / 2);
+                        const centerCol = Math.floor(this.brickCols / 2);
+                        visible = r === centerRow || c === centerCol;
+                        break;
+                    case 'doublePyramid':
+                        const center2 = Math.floor(this.brickCols / 2);
+                        const distFromCenter = Math.abs(c - center2);
+                        visible = distFromCenter <= Math.min(r, this.brickRows - 1 - r);
+                        break;
+                    case 'diamond':
+                        const centerRow2 = Math.floor(this.brickRows / 2);
+                        const centerCol2 = Math.floor(this.brickCols / 2);
+                        visible = Math.abs(r - centerRow2) + Math.abs(c - centerCol2) <= Math.min(this.brickRows, this.brickCols) / 2;
+                        break;
+                    case 'complex':
+                        visible = (r * this.brickCols + c) % 3 !== 0 && !(r === Math.floor(this.brickRows / 2) && c === Math.floor(this.brickCols / 2));
+                        break;
+                }
+
+                if (visible) {
+                    this.bricks.push({
+                        x: c * (this.brickWidth + this.brickPadding) + actualOffsetLeft,
+                        y: r * (this.brickHeight + this.brickPadding) + this.brickOffsetTop,
+                        width: this.brickWidth,
+                        height: this.brickHeight,
+                        color: colors[r % colors.length],
+                        visible: true
+                    });
+                }
             }
         }
 
@@ -393,17 +649,21 @@ class BrickBreaker {
 
     completeLevel() {
         this.gameRunning = false;
+        this.completedLevels.add(this.currentLevel);
         document.getElementById('levelScore').textContent = this.score;
         document.getElementById('levelCompleteOverlay').classList.remove('hidden');
     }
 
     nextLevel() {
-        this.currentLevel++;
-        this.ball.speed = Math.min(8, 5 + this.currentLevel * 0.5);
-        this.initLevel();
-        document.getElementById('levelCompleteOverlay').classList.add('hidden');
-        this.updateScore();
-        this.start();
+        const nextLevelNum = this.currentLevel + 1;
+        if (nextLevelNum <= this.levelDefinitions.length) {
+            this.startLevel(nextLevelNum);
+        } else {
+            // All levels completed
+            document.getElementById('levelCompleteOverlay').classList.add('hidden');
+            document.getElementById('gameOverTitle').textContent = 'All Levels Complete!';
+            this.gameOver();
+        }
     }
 
     gameOver() {
@@ -422,18 +682,9 @@ class BrickBreaker {
     start() {
         this.gameRunning = true;
         this.gamePaused = false;
-        document.getElementById('startScreen').classList.add('hidden');
         document.getElementById('pausedOverlay').classList.add('hidden');
         document.getElementById('gameOverOverlay').classList.add('hidden');
         document.getElementById('levelCompleteOverlay').classList.add('hidden');
-
-        // Show/hide mobile controls
-        const mobileControls = document.querySelector('.mobile-controls');
-        if (window.innerWidth <= 768) {
-            mobileControls.classList.remove('hidden');
-        } else {
-            mobileControls.classList.add('hidden');
-        }
 
         this.gameLoop();
     }
@@ -441,16 +692,17 @@ class BrickBreaker {
     reset() {
         this.gameRunning = false;
         this.gamePaused = false;
-        this.currentLevel = 1;
         this.score = 0;
         this.lives = 3;
-        this.ball.speed = 5;
+        this.ballLaunched = false;
+
+        const levelDef = this.levelDefinitions[this.selectedLevel - 1];
+        this.ball.speed = levelDef.speed;
 
         this.paddle.x = this.baseWidth / 2 - 75;
-        this.initLevel();
+        this.initLevel(this.selectedLevel);
         this.updateScore();
 
-        document.getElementById('startScreen').classList.remove('hidden');
         document.getElementById('pausedOverlay').classList.add('hidden');
         document.getElementById('gameOverOverlay').classList.add('hidden');
         document.getElementById('levelCompleteOverlay').classList.add('hidden');
@@ -518,4 +770,3 @@ class BrickBreaker {
 window.addEventListener('DOMContentLoaded', () => {
     new BrickBreaker();
 });
-
