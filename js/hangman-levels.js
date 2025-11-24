@@ -275,7 +275,7 @@ const hangmanLevels = [
     },
     {
         word: "COMPUTER",
-        hint: "Device you're using right now",
+        hint: "Device you're using with keyboard",
         category: "Technology"
     },
     {

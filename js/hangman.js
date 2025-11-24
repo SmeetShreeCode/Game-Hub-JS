@@ -305,9 +305,28 @@ class HangmanGame {
     }
 
     giveHint() {
-        if (this.currentHint) {
-            alert(`Hint: ${this.currentHint}`);
+        // Get all distinct letters in the word (excluding spaces)
+        const wordLetters = [...new Set(this.currentWord.replace(/\s/g, '').split(''))];
+
+        // Filter letters that are NOT yet guessed
+        const hiddenLetters = wordLetters.filter(l => !this.correctGuesses.has(l));
+
+        if (hiddenLetters.length === 0) {
+            alert("No more hints available!");
+            return;
         }
+
+        // Pick a random hidden letter
+        const randomLetter = hiddenLetters[Math.floor(Math.random() * hiddenLetters.length)];
+
+        // Add the revealed letter
+        this.correctGuesses.add(randomLetter);
+        this.guessedLetters.add(randomLetter);
+
+        // Update the UI
+        this.renderWord();
+        this.updateKeyboard();
+        this.checkGameState();
     }
 
     setupUI() {
