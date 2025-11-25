@@ -1,11 +1,12 @@
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+const socket = io();
 
-// let shakeIntensity = 0;
-// let shakeDecay = 0.9;
+const devicePixelRatio = window.devicePixelRatio || 2;
+
+canvas.width = innerWidth * devicePixelRatio;
+canvas.height = innerHeight * devicePixelRatio;
 
 const scoreEl = document.querySelector('#scoreEl');
 const highScore = document.querySelector('#highScore');
@@ -14,233 +15,228 @@ const startGameOverlay = document.querySelector('#startGameOverlay');
 const endScore = document.querySelector('#endScore');
 let highScoreValue = localStorage.getItem('coreDefender_highScore') || 0;
 highScore.innerHTML = highScoreValue;
-class Player {
-    constructor(x, y, radius, color) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-    }
 
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-    }
-}
-
-class Projectile {
-    constructor(x, y, radius, color, velocity) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.velocity = velocity;
-    }
-
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-    }
-
-    update() {
-        this.draw();
-        this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
-    }
-}
-
-class Enemy {
-    constructor(x, y, radius, color, velocity) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.velocity = velocity;
-    }
-
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-    }
-
-    update() {
-        this.draw();
-        this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
-    }
-}
-
-const friction = 0.99;
-
-class Particle {
-    constructor(x, y, radius, color, velocity) {
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
-        this.velocity = velocity;
-        this.alpha = 1;
-    }
-
-    draw() {
-        ctx.save();
-        ctx.globalAlpha = 0.5;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-        ctx.fillStyle = this.color;
-        ctx.fill();
-        ctx.restore();
-    }
-
-    update() {
-        this.draw();
-        this.velocity.x *= friction;
-        this.velocity.y *= friction;
-        this.x = this.x + this.velocity.x;
-        this.y = this.y + this.velocity.y;
-        this.alpha -= 0.01;
-    }
-}
 
 const x = canvas.width / 2;
 const y = canvas.height / 2;
-let player = new Player(x, y, 15, 'white');
-let projectiles = [];
-let enemies = [];
-let particles = [];
 
-function init() {
-    player = new Player(x, y, 15, 'white');
-    projectiles = [];
-    enemies = [];
-    particles = [];
-    score = 0;
-    scoreEl.innerHTML = score;
-    endScore.innerHTML = score;
-}
+const frontEndPlayers = {};
+const frontEndProjectiles = {};
 
-function spawnEnemies() {
-    setInterval(() => {
-        const radius = Math.random() * (30 - 4) + 4;
-        let x, y;
-        if (Math.random() < 0.5) {
-            x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius;
-            y = Math.random() * canvas.height;
-        } else {
-            x = Math.random() * canvas.width;
-            y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius;
+socket.on('connect', () => {
+    socket.emit('initCanvas', {width: canvas.width, height: canvas.height});
+})
+
+socket.on('updateProjectiles', (backEndProjectiles) => {
+    for (const id in backEndProjectiles) {
+        const backEndProjectile = backEndProjectiles[id];
+
+        if (!frontEndProjectiles[id]) {
+            frontEndProjectiles[id] = new Projectile({
+                x: backEndProjectile.x,
+                y: backEndProjectile.y,
+                radius: 5,
+                color: frontEndPlayers[backEndProjectile.playerId]?.color,
+                velocity: backEndProjectile.velocity,
+            });
+        }else {
+            frontEndProjectiles[id].x += backEndProjectiles[id].velocity.x;
+            frontEndProjectiles[id].y += backEndProjectiles[id].velocity.y;
         }
-        const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
-        const angle = Math.atan2(canvas.height / 2 - y, canvas.width / 2 - x);
-        const velocity = {
-            x: Math.cos(angle),
-            y: Math.sin(angle),
-        };
-        enemies.push(new Enemy(x, y, radius, color, velocity));
-    }, 1000);
-}
+    }
+    for (const frontEndProjectileId in frontEndProjectiles) {
+        if (!backEndProjectiles[frontEndProjectileId]) {
+            delete frontEndProjectiles[frontEndProjectileId];
+        }
+    }
+});
+
+socket.on('updatePlayers', (backEndPlayers) => {
+    for (const id in backEndPlayers) {
+        const backEndPlayer = backEndPlayers[id];
+
+        if (!frontEndPlayers[id]) {
+            frontEndPlayers[id] = new Player({
+                x: backEndPlayer.x,
+                y: backEndPlayer.y,
+                radius: 10,
+                color: backEndPlayer.color
+            });
+        } else {
+            if (id === socket.id) {
+                //if player exist
+                frontEndPlayers[id].x = backEndPlayer.x;
+                frontEndPlayers[id].y = backEndPlayer.y;
+
+                const lastBackEndInputIndex = playerInputs.findIndex((input) => {
+                    return backEndPlayer.sequenceNumber === input.sequenceNumber;
+                });
+
+                if (lastBackEndInputIndex > -1) playerInputs.splice(0, lastBackEndInputIndex + 1);
+
+                playerInputs.forEach(input => {
+                    frontEndPlayers[id].x += input.dx;
+                    frontEndPlayers[id].y += input.dy;
+                });
+            } else {
+                frontEndPlayers[id].x = backEndPlayer.x;
+                frontEndPlayers[id].y = backEndPlayer.y;
+
+                gsap.to(frontEndPlayers[id], {
+                    x: backEndPlayer.x,
+                    y: backEndPlayer.y,
+                    duration: 0.015,
+                    ease: 'linear'
+                });
+            }
+        }
+    }
+    for (const id in frontEndPlayers) {
+        if (!backEndPlayers[id]) {
+            delete frontEndPlayers[id];
+        }
+    }
+});
 
 let animationId;
-let score = 0;
 
 function animate() {
     animationId = requestAnimationFrame(animate);
-    // // Apply screen shake
-    // if (shakeIntensity > 0.5) {
-    //     const dx = (Math.random() - 0.5) * shakeIntensity;
-    //     const dy = (Math.random() - 0.5) * shakeIntensity;
-    //     ctx.setTransform(1, 0, 0, 1, dx, dy); // apply translation
-    //     shakeIntensity *= shakeDecay; // reduce shake each frame
-    // } else {
-    //     ctx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
-    // }
-
     ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    player.draw();
-    particles.forEach((particle, index) => {
-        if (particle.alpha <= 0) {
-            particles.splice(index, 1);
-        } else {
-            particle.update();
-        }
-    });
-    projectiles.forEach((projectile, index) => {
-        projectile.update();
+    for (const id in frontEndPlayers) {
+        const frontEndPlayer = frontEndPlayers[id];
+        frontEndPlayer.draw();
+    }
 
-        //remove from edges of the screen
-        if (projectile.x + projectile.radius < 0 || projectile.x - projectile.radius > canvas.width ||
-            projectile.y + projectile.radius < 0 || projectile.y - projectile.radius > canvas.height) {
-            setTimeout(() => {
-                projectiles.splice(index, 1);
-            }, 0);
-        }
-    });
-    enemies.forEach((enemy, index) => {
-        enemy.update();
-        const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y);
-        if (dist - enemy.radius - player.radius < 1) {
-            cancelAnimationFrame(animationId);
-            startGameOverlay.style.display = 'flex';
-            endScore.innerHTML = score;
-            if (score > highScoreValue) {
-                highScoreValue = score;
-                localStorage.setItem('coreDefender_highScore', highScoreValue);
-                highScore.innerHTML = highScoreValue;
-            }
-        }
-        projectiles.forEach((projectile, projectileIndex) => {
-            const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y);
-            if (dist - enemy.radius - projectile.radius < 1) {
+    for (const id in frontEndProjectiles) {
+        const frontEndProjectile = frontEndProjectiles[id];
+        frontEndProjectile.draw();
+    }
 
-                for (let i = 0; i < enemy.radius * 2; i++) {
-                    particles.push(new Particle(projectile.x, projectile.y, Math.random() * 2, enemy.color, {
-                        x: (Math.random() - 0.5) * (Math.random() * 4),
-                        y: (Math.random() - 0.5) * (Math.random() * 4),
-                    }));
-                }
-                if (enemy.radius - 10 > 5) {
-                    score += 50;
-                    // shakeIntensity = 5;
-                    scoreEl.innerHTML = score;
-                    gsap.to(enemy, {
-                        radius: enemy.radius - 10,
-                    })
-                    setTimeout(() => {
-                        projectiles.splice(projectileIndex, 1);
-                    }, 0);
-                } else {
-                    score += 100;
-                    // shakeIntensity = 10;
-                    scoreEl.innerHTML = score;
-                    setTimeout(() => {
-                        enemies.splice(index, 1);
-                        projectiles.splice(projectileIndex, 1);
-                    }, 0);
-                }
-            }
-        });
-    });
+    // for (let i = frontEndProjectiles.length - 1; i >= 0; i--) {
+    //     const frontEndProjectile = frontEndProjectiles[i];
+    //     frontEndProjectile.update();
+    // }
 }
 
 window.addEventListener('click', (e) => {
-    const angle = Math.atan2(e.clientY - canvas.height / 2, e.clientX - canvas.width / 2);
-    const velocity = {
-        x: Math.cos(angle) * 5,
-        y: Math.sin(angle) * 5,
+    const playerPosition = {
+        x: frontEndPlayers[socket.id].x,
+        y: frontEndPlayers[socket.id].y,
     };
-    projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity));
+    const angle = Math.atan2((e.clientY * window.devicePixelRatio) - playerPosition.y,
+        (e.clientX * window.devicePixelRatio) - playerPosition.x);
+
+    // const velocity = {
+    //     x: Math.cos(angle) * 5,
+    //     y: Math.sin(angle) * 5,
+    // };
+
+    socket.emit('shoot', {
+        x: playerPosition.x,
+        y: playerPosition.y,
+        angle
+    });
+
+    // frontEndProjectiles.push(new Projectile({
+    //     x: playerPosition.x,
+    //     y: playerPosition.y,
+    //     radius: 5,
+    //     color: 'white',
+    //     velocity
+    // }));
+    console.log(frontEndProjectiles);
 });
 
-startGame.addEventListener('click', (e) => {
-    init();
-    animate();
-    spawnEnemies();
-    startGameOverlay.style.display = 'none';
+animate();
+
+const keys = {
+    moveUp: {
+        pressed: false,
+    },
+    moveDown: {
+        pressed: false,
+    },
+    moveLeft: {
+        pressed: false,
+    },
+    moveRight: {
+        pressed: false,
+    },
+};
+
+const SPEED = 10;
+const playerInputs = [];
+let sequenceNumber = 0;
+
+setInterval(() => {
+    if (keys.moveUp.pressed) {
+        sequenceNumber++;
+        playerInputs.push({sequenceNumber, dx: 0, dy: -SPEED});
+        frontEndPlayers[socket.id].y -= SPEED;
+        socket.emit('keydown', {keycode: 'KeyW', sequenceNumber});
+    }
+    if (keys.moveLeft.pressed) {
+        sequenceNumber++;
+        playerInputs.push({sequenceNumber, dx: -SPEED, dy: 0});
+        frontEndPlayers[socket.id].x -= SPEED;
+        socket.emit('keydown', {keycode: 'KeyA', sequenceNumber});
+    }
+    if (keys.moveDown.pressed) {
+        sequenceNumber++;
+        playerInputs.push({sequenceNumber, dx: 0, dy: SPEED});
+        frontEndPlayers[socket.id].y += SPEED;
+        socket.emit('keydown', {keycode: 'KeyS', sequenceNumber});
+    }
+    if (keys.moveRight.pressed) {
+        sequenceNumber++;
+        playerInputs.push({sequenceNumber, dx: SPEED, dy: 0});
+        frontEndPlayers[socket.id].x += SPEED;
+        socket.emit('keydown', {keycode: 'KeyD', sequenceNumber});
+    }
+}, 15);
+
+window.addEventListener('keydown', (e) => {
+    if (!frontEndPlayers[socket.id]) return;
+    switch (e.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+            keys.moveUp.pressed = true;
+            break;
+        case 'KeyA':
+        case 'ArrowLeft':
+            keys.moveLeft.pressed = true;
+            break;
+        case 'KeyS':
+        case 'ArrowDown':
+            keys.moveDown.pressed = true;
+            break;
+        case 'KeyD':
+        case 'ArrowRight':
+            keys.moveRight.pressed = true;
+            break;
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    if (!frontEndPlayers[socket.id]) return;
+    switch (e.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+            keys.moveUp.pressed = false;
+            break;
+        case 'KeyA':
+        case 'ArrowLeft':
+            keys.moveLeft.pressed = false;
+            break;
+        case 'KeyS':
+        case 'ArrowDown':
+            keys.moveDown.pressed = false;
+            break;
+        case 'KeyD':
+        case 'ArrowRight':
+            keys.moveRight.pressed = false;
+            break;
+    }
 });

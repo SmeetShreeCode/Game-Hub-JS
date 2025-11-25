@@ -11,5 +11,6 @@
     <orderEntry type="library" name="gsap" level="application" />
     <orderEntry type="library" name="matter-js" level="application" />
     <orderEntry type="library" name="@tailwindcss" level="application" />
+    <orderEntry type="library" name="socket.io" level="application" />
   </component>
 </module>
