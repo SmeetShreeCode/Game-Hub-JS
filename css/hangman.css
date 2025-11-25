@@ -267,12 +267,12 @@ header h1 {
 
 .hangman-svg.dancing #leftArm {
     animation: leftArmDance 0.35s ease-in-out infinite;
-    transform-origin: 200px 180px;
+    transform-origin: 200px 150px;
 }
 
 .hangman-svg.dancing #rightArm {
     animation: rightArmDance 0.35s ease-in-out infinite;
-    transform-origin: 200px 180px;
+    transform-origin: 200px 150px;
 }
 
 .hangman-svg.dancing #leftLeg {
@@ -566,12 +566,16 @@ header h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    /*background: rgba(0, 0, 0, 0.4);*/
     display: flex;
-    align-items: flex-end;
+    /*align-items: flex-end;*/
     justify-content: center;
     z-index: 1000;
     pointer-events: none;
+    background: rgba(0, 0, 0, -0.6);
+    align-items: flex-start;
+    margin-left: 50px;
+    flex-direction: column;
 }
 
 .overlay > * {

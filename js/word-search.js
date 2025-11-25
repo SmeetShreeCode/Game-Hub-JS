@@ -12,7 +12,7 @@ class WordSearchGame {
         // Current game state
         this.words = [];
         this.grid = [];
-        this.gridSize = 15;
+        this.gridSize = 10;
         this.foundWords = new Set();
         this.selectedCells = [];
         this.wordPositions = {}; // Store word positions for validation
@@ -96,7 +96,7 @@ class WordSearchGame {
             this.gridSize = level.gridSize;
         } else {
             const maxWordLength = Math.max(...this.words.map(w => w.length));
-            this.gridSize = Math.max(15, maxWordLength + 5);
+            this.gridSize = Math.max(10, maxWordLength + 5);
         }
 
         // Show game screen

@@ -1,0 +1,12 @@
+body {
+    background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+}
+
+button {
+    transition: all 0.2s ease-in-out;
+}
+button:hover {
+    transform: scale(1.05);
+}

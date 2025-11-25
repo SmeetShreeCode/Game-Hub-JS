@@ -63,7 +63,7 @@ class PuzzleCraft {
         });
 
         document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
-        document.getElementById('hintBtn').addEventListener('click', () => this.giveHint());
+        // document.getElementById('hintBtn').addEventListener('click', () => this.giveHint());
         document.getElementById('previewBtn').addEventListener('click', () => this.showPreview());
         document.getElementById('close-preview').addEventListener('click', () => this.hidePreview());
         document.getElementById('resumeBtn').addEventListener('click', () => this.togglePause());
@@ -160,13 +160,12 @@ class PuzzleCraft {
 
         // Update display first
         this.updateDisplay();
-        this.updateHintsDisplay();
+        // this.updateHintsDisplay();
         this.loadBestScore();
 
         // Preload image first, then create tiles
         const img = new Image();
         img.onload = () => {
-            console.log('Image loaded successfully:', this.imageURL);
             // Wait a bit for screen to be visible, then create tiles
             setTimeout(() => {
                 this.createTiles();
@@ -174,8 +173,6 @@ class PuzzleCraft {
             }, 300);
         };
         img.onerror = () => {
-            console.error('Image load error:', this.imageURL);
-            alert(`Failed to load image: ${this.imageURL}\n\nPlease check:\n1. Image file exists at this path\n2. File name is correct\n3. File format is supported (jpg, png, webp)`);
             // Still try to create tiles (might show broken image, but at least tiles will appear)
             setTimeout(() => {
                 this.createTiles();
@@ -187,7 +184,6 @@ class PuzzleCraft {
 
     createTiles() {
         if (!this.imageURL) {
-            console.error('No image URL set');
             return;
         }
 
@@ -198,7 +194,6 @@ class PuzzleCraft {
         const createTilesNow = () => {
             const gameBoardContainer = document.querySelector('.game-board-container');
             if (!gameBoardContainer) {
-                console.error('Game board container not found');
                 return;
             }
 
@@ -206,7 +201,6 @@ class PuzzleCraft {
             gameBoardContainer.offsetHeight;
             
             const containerRect = gameBoardContainer.getBoundingClientRect();
-            console.log('Container rect:', containerRect);
             
             // Calculate available space (with fallback)
             let availableWidth = containerRect.width - 20;
@@ -214,7 +208,6 @@ class PuzzleCraft {
             
             // Fallback if container not visible yet
             if (availableWidth <= 0 || availableHeight <= 0) {
-                console.log('Using fallback dimensions');
                 availableWidth = window.innerWidth - 100;
                 availableHeight = window.innerHeight - 250;
             }
@@ -222,8 +215,6 @@ class PuzzleCraft {
             const maxSize = Math.min(availableWidth, availableHeight, 600);
             const containerSize = Math.max(200, Math.floor(maxSize)); // Minimum 200px
             const tileSize = Math.floor(containerSize / this.size);
-            
-            console.log(`Calculated: containerSize=${containerSize}, tileSize=${tileSize}, size=${this.size}`);
 
             // Set container dimensions
             this.container.style.width = `${containerSize}px`;
@@ -258,8 +249,6 @@ class PuzzleCraft {
                 }
             }
 
-            console.log(`Created ${this.tiles.length} tiles, size: ${this.size}, containerSize: ${containerSize}`);
-
             // Shuffle after creating tiles
             if (this.tiles.length > 0) {
                 setTimeout(() => {
@@ -276,14 +265,12 @@ class PuzzleCraft {
 
     shuffleTiles() {
         if (!this.tiles || this.tiles.length <= 1) {
-            console.log('Cannot shuffle: not enough tiles');
             return;
         }
 
         // Get current tiles from DOM (they might have been reordered)
         const currentTiles = Array.from(this.container.children);
         if (currentTiles.length !== this.tiles.length) {
-            console.error('Tile count mismatch!');
             return;
         }
 
@@ -301,7 +288,6 @@ class PuzzleCraft {
             this.container.appendChild(tile);
         });
 
-        console.log('Tiles shuffled successfully');
     }
 
     handleDragStart(e) {
@@ -316,6 +302,10 @@ class PuzzleCraft {
         const img = new Image();
         img.src = '';
         e.dataTransfer.setDragImage(img, 0, 0);
+
+        // Play sound
+        const swapSound = document.getElementById('drag-sound');
+        if (swapSound) swapSound.play().catch(() => {});
     }
 
     handleDragOver(e) {
@@ -338,10 +328,6 @@ class PuzzleCraft {
             // Play sound
             const swapSound = document.getElementById('swap-sound');
             if (swapSound) swapSound.play().catch(() => {});
-
-            if (this.isSolved()) {
-                this.completeLevel();
-            }
         }
     }
 
@@ -365,6 +351,10 @@ class PuzzleCraft {
             this.touchStartPos = { x: touch.clientX, y: touch.clientY };
             this.touchStartTile = tile;
         }
+
+        // Play sound
+        const swapSound = document.getElementById('drag-sound');
+        if (swapSound) swapSound.play().catch(() => {});
     }
 
     handleTouchMove(e) {
@@ -387,10 +377,6 @@ class PuzzleCraft {
 
             const swapSound = document.getElementById('swap-sound');
             if (swapSound) swapSound.play().catch(() => {});
-
-            if (this.isSolved()) {
-                this.completeLevel();
-            }
         }
 
         this.touchStartPos = null;
@@ -410,6 +396,9 @@ class PuzzleCraft {
 
             tile1.classList.remove('swapping');
             tile2.classList.remove('swapping');
+            if (this.isSolved()) {
+                this.completeLevel();
+            }
         }, 150);
     }
 
@@ -479,23 +468,23 @@ class PuzzleCraft {
         }
     }
 
-    giveHint() {
-        if (this.hintsUsed >= this.maxHints || this.paused) return;
-
-        const tiles = Array.from(this.container.children);
-        const wrongTile = tiles.find((tile, index) => {
-            return parseInt(tile.dataset.order, 10) !== index;
-        });
-
-        if (wrongTile) {
-            wrongTile.style.boxShadow = '0 0 30px yellow, 0 0 60px yellow';
-            setTimeout(() => {
-                wrongTile.style.boxShadow = '';
-            }, 2000);
-            this.hintsUsed++;
-            this.updateHintsDisplay();
-        }
-    }
+    // giveHint() {
+    //     if (this.hintsUsed >= this.maxHints || this.paused) return;
+    //
+    //     const tiles = Array.from(this.container.children);
+    //     const wrongTile = tiles.find((tile, index) => {
+    //         return parseInt(tile.dataset.order, 10) !== index;
+    //     });
+    //
+    //     if (wrongTile) {
+    //         wrongTile.style.boxShadow = '0 0 30px yellow, 0 0 60px yellow';
+    //         setTimeout(() => {
+    //             wrongTile.style.boxShadow = '';
+    //         }, 2000);
+    //         this.hintsUsed++;
+    //         this.updateHintsDisplay();
+    //     }
+    // }
 
     showPreview() {
         const previewPanel = document.getElementById('preview-panel');
@@ -527,9 +516,9 @@ class PuzzleCraft {
         this.loadBestScore();
     }
 
-    updateHintsDisplay() {
-        document.getElementById('hints-left').textContent = this.maxHints - this.hintsUsed;
-    }
+    // updateHintsDisplay() {
+    //     document.getElementById('hints-left').textContent = this.maxHints - this.hintsUsed;
+    // }
 
     checkAndSaveBestScore() {
         const key = `bestScore_${this.currentLevel}`;
@@ -576,16 +565,4 @@ class PuzzleCraft {
 // Initialize game when page loads
 window.addEventListener('DOMContentLoaded', () => {
     const game = new PuzzleCraft();
-    
-    // Debug: Check if level select should show
-    const levelSelectScreen = document.getElementById('levelSelectScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    
-    console.log('Level Select Screen:', levelSelectScreen?.classList.contains('hidden') ? 'HIDDEN' : 'VISIBLE');
-    console.log('Game Screen:', gameScreen?.classList.contains('hidden') ? 'HIDDEN' : 'VISIBLE');
-    
-    // Make sure level select shows first
-    if (levelSelectScreen && !levelSelectScreen.classList.contains('hidden')) {
-        console.log('Level select screen is visible - user should select a level');
-    }
 });
