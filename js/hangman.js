@@ -98,8 +98,9 @@ class HangmanGame {
         this.levelSelectScreen.classList.add('hidden');
         this.gameScreen.classList.remove('hidden');
 
-        // Reset hangman drawing
+        // Reset hangman drawing and animations
         this.resetHangman();
+        this.hangmanSVG.classList.remove('dancing', 'crying');
 
         // Update UI
         this.updateDisplay();
@@ -238,6 +239,19 @@ class HangmanGame {
         this.updateScore(100);
         this.saveProgress();
 
+        // Make sure all body parts are visible for happy dance
+        const parts = ['head', 'body', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+        parts.forEach(part => {
+            const element = document.getElementById(part);
+            if (element) {
+                element.style.opacity = '1';
+            }
+        });
+
+        // Add happy dancing animation
+        this.hangmanSVG.classList.remove('crying');
+        this.hangmanSVG.classList.add('dancing');
+
         const winOverlay = document.getElementById('winOverlay');
         const winMessage = document.getElementById('winMessage');
         winMessage.textContent = `You guessed "${this.currentWord}"!`;
@@ -245,6 +259,19 @@ class HangmanGame {
     }
 
     loseLevel() {
+        // Make sure all body parts are visible first
+        const parts = ['head', 'body', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+        parts.forEach(part => {
+            const element = document.getElementById(part);
+            if (element) {
+                element.style.opacity = '1';
+            }
+        });
+
+        // Add crying animation only when losing
+        this.hangmanSVG.classList.remove('dancing');
+        this.hangmanSVG.classList.add('crying');
+
         const loseOverlay = document.getElementById('loseOverlay');
         const correctWord = document.getElementById('correctWord');
         correctWord.textContent = this.currentWord;
@@ -265,6 +292,7 @@ class HangmanGame {
     nextLevel() {
         const winOverlay = document.getElementById('winOverlay');
         winOverlay.classList.add('hidden');
+        this.hangmanSVG.classList.remove('dancing', 'crying');
 
         if (this.currentLevel < hangmanLevels.length) {
             this.startLevel(this.currentLevel + 1);
@@ -278,6 +306,7 @@ class HangmanGame {
     replayLevel() {
         document.getElementById('winOverlay').classList.add('hidden');
         document.getElementById('loseOverlay').classList.add('hidden');
+        this.hangmanSVG.classList.remove('dancing', 'crying');
         this.startLevel(this.currentLevel);
     }
 

@@ -2,12 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crossword</title>
     <link rel="stylesheet" href="css/crossword.css">
 </head>
 <body>
+    <!-- Level Select Screen -->
+    <div id="levelSelectScreen" class="screen active">
+        <div class="container">
+            <h1>Crossword Puzzle</h1>
+            <div class="stats">
+                <div class="stat">
+                    <span class="label">Completed:</span>
+                    <span id="completedCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Total Score:</span>
+                    <span id="totalScore">0</span>
+                </div>
+            </div>
+            <div id="levelGrid" class="level-grid"></div>
+        </div>
+    </div>
 
-<script src="js/crossword-levels.js"></script>
-<script src="js/crossword.js"></script>
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="container">
+            <div class="game-header">
+                <button id="backBtn" class="btn btn-secondary">← Back</button>
+                <div class="game-info">
+                    <span class="level-info">Level <span id="currentLevelNum">1</span></span>
+                    <button id="hintBtn" class="btn btn-hint">Hint</button>
+                    <button id="checkBtn" class="btn btn-check">Check</button>
+                </div>
+            </div>
+
+            <div class="game-content">
+                <div class="crossword-container">
+                    <div id="crosswordGrid" class="crossword-grid"></div>
+                </div>
+
+                <div class="clues-container">
+                    <div class="clues-section">
+                        <h3>Across</h3>
+                        <div id="acrossClues" class="clues-list"></div>
+                    </div>
+                    <div class="clues-section">
+                        <h3>Down</h3>
+                        <div id="downClues" class="clues-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-footer">
+                <div class="progress">
+                    <span>Progress: <span id="progressPercent">0</span>%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Complete Screen -->
+    <div id="completeScreen" class="screen overlay">
+        <div class="complete-modal">
+            <h2>Level Complete!</h2>
+            <p>Congratulations! You solved the puzzle!</p>
+            <div class="complete-actions">
+                <button id="nextLevelBtn" class="btn btn-primary">Next Level</button>
+                <button id="levelSelectBtn" class="btn btn-secondary">Level Select</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/crossword-levels.js"></script>
+    <script src="js/crossword.js"></script>
 </body>
 </html>

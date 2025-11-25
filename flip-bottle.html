@@ -2,19 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bottle Flip Game</title>
     <link rel="stylesheet" href="css/flip-bottle.css">
 </head>
 <body>
-<div class="game-container">
-    <div id="bottle"></div>
-    <div class="platform"></div>
-    <button id="flipBtn">Flip</button>
-</div>
+    <!-- Level Select Screen -->
+    <div id="levelSelectScreen" class="screen active">
+        <div class="container">
+            <h1>Bottle Flip Challenge</h1>
+            <div class="stats">
+                <div class="stat">
+                    <span class="label">Completed:</span>
+                    <span id="completedCount">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Best Score:</span>
+                    <span id="bestScore">0</span>
+                </div>
+            </div>
+            <div id="levelGrid" class="level-grid"></div>
+        </div>
+    </div>
 
-<footer>
-    <p><a href="index.html">⬅ Back to Games</a></p>
-</footer>
-<script src="js/flip-bottle.js"></script>
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="container">
+            <div class="game-header">
+                <button id="backBtn" class="btn btn-secondary">← Back</button>
+                <div class="game-info">
+                    <span class="level-info">Level <span id="currentLevelNum">1</span></span>
+                    <span class="attempts">Attempts: <span id="attemptCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="game-area">
+                <div id="gameContainer" class="game-container">
+                    <div id="bottle" class="bottle">
+                        <div class="bottle-body"></div>
+                        <div class="bottle-neck"></div>
+                        <div class="bottle-cap"></div>
+                    </div>
+                    <div id="platformsContainer" class="platforms-container"></div>
+                    <div id="trajectory" class="trajectory-line"></div>
+                    <div id="aimIndicator" class="aim-indicator"></div>
+                </div>
+                <div class="controls">
+                    <div class="power-meter">
+                        <label>Power:</label>
+                        <input type="range" id="powerSlider" min="30" max="100" value="50">
+                        <span id="powerValue">50%</span>
+                    </div>
+                    <div class="angle-control">
+                        <label>Angle:</label>
+                        <input type="range" id="angleSlider" min="-45" max="45" value="0">
+                        <span id="angleValue">0°</span>
+                    </div>
+                    <button id="flipBtn" class="flip-btn">Flip Bottle</button>
+                </div>
+            </div>
+
+            <div class="game-footer">
+                <div class="level-progress">
+                    <span>Level Progress: <span id="levelProgress">0</span>%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Level Complete Screen -->
+    <div id="completeScreen" class="screen overlay">
+        <div class="complete-modal">
+            <h2>Level Complete!</h2>
+            <p id="completeMessage">Great job! You landed it!</p>
+            <div class="complete-stats">
+                <p>Attempts: <span id="finalAttempts">0</span></p>
+                <p>Score: <span id="finalScore">0</span></p>
+            </div>
+            <div class="complete-actions">
+                <button id="nextLevelBtn" class="btn btn-primary">Next Level</button>
+                <button id="levelSelectBtn" class="btn btn-secondary">Level Select</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen overlay">
+        <div class="complete-modal">
+            <h2>Try Again!</h2>
+            <p>The bottle fell off. Keep practicing!</p>
+            <div class="complete-actions">
+                <button id="retryBtn" class="btn btn-primary">Retry</button>
+                <button id="backToSelectBtn" class="btn btn-secondary">Level Select</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><a href="index.html">⬅ Back to Games</a></p>
+    </footer>
+
+    <script src="js/flip-bottle-levels.js"></script>
+    <script src="js/flip-bottle.js"></script>
 </body>
 </html>
