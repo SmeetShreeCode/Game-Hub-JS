@@ -1,16 +1,26 @@
 class Player {
-    constructor({x, y, radius, color}) {
+    constructor({x, y, radius, color, username}) {
         this.x = x;
         this.y = y;
         this.radius = radius;
         this.color = color;
+        this.username = username;
     }
 
     draw() {
+        ctx.font = '12px sans-serif';
+        const textWidth = ctx.measureText(this.username).width;
+        ctx.fillStyle = 'white';
+        ctx.fillText(this.username, this.x - textWidth / 2, this.y - 20);
+        ctx.save();
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 20;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius * window.devicePixelRatio, 0, 2 * Math.PI, false);
+        // ctx.arc(this.x, this.y, this.radius * window.devicePixelRatio, 0, 2 * Math.PI, false);
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
         ctx.fillStyle = this.color;
         ctx.fill();
+        ctx.restore();
     }
 }
 
@@ -24,10 +34,14 @@ class Projectile {
     }
 
     draw() {
+        ctx.save();
+        ctx.shadowColor = this.color;
+        ctx.shadowBlur = 20
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
         ctx.fillStyle = this.color;
         ctx.fill();
+        ctx.restore();
     }
 
     update() {

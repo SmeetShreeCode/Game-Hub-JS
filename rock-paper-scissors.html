@@ -5,9 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rock Paper Scissors</title>
     <link rel="stylesheet" href="css/rock-paper-scissors.css">
-    <script src="js/rock-paper-scissors.js"></script>
 </head>
 <body>
+
+<div id="initial">
+    <button onclick="createGame()">Create Game</button>
+    <div>OR</div>
+    <label for="roomUniqueId">Enter RoomId:</label><input type="text" id="roomUniqueId">
+    <button onclick="joinGame()">Join Game</button>
+</div>
+<div id="gamePlay">
+    <div id="waitingArea">
+
+    </div>
+    <div id="gameArea" style="display: none">
+        You:
+        <div id="player1Choice">
+            <button onclick="sendChoice('Rock')">Rock</button>
+            <button onclick="sendChoice('Paper')">Paper</button>
+            <button onclick="sendChoice('Scissors')">Scissors</button>
+        </div>
+        Opponent:
+        <div id="player2Choice">
+            <p id="opponentState">Waiting For Opponent...</p>
+        </div>
+    </div>
+    <hr>
+    <div id="winnerArea">
+
+    </div>
+</div>
+
 <h1>Rock Paper Scissors</h1>
 <div id="score-container">
     <div>
@@ -36,5 +64,8 @@
 <footer>
     <p><a href="index.html">⬅ Back to Games</a></p>
 </footer>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="js/rock-paper-scissors.js"></script>
 </body>
 </html>
