@@ -66,7 +66,10 @@ const player = new Player({
                 
                 gsap.to(overlay, {
                     opacity: 1,
+                    duration: 0.5,
                     onComplete: () => {
+                        // Reset overlay immediately before going back
+                        overlay.opacity = 0;
                         // Go back to level selection instead of auto-playing next level
                         if (typeof goBackToLevelSelection === 'function') {
                             goBackToLevelSelection();
@@ -130,7 +133,12 @@ function checkPlayerEnemyCollision() {
 
 function animate() {
     window.requestAnimationFrame(animate);
-    if (gameState !== 'playing' || !gameStarted) return;
+    if (gameState !== 'playing' || !gameStarted) {
+        // Clear canvas when not playing to prevent black screen
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        return;
+    }
 
     background.draw();
     // collisionBlocks.forEach(collisionBlock => {
@@ -149,16 +157,32 @@ function animate() {
     enemies.draw()
     enemies.update()
 
-    ctx.save();
-    ctx.globalAlpha = overlay.opacity;
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.restore();
+    // Only draw overlay if opacity is greater than 0
+    if (overlay.opacity > 0) {
+        ctx.save();
+        ctx.globalAlpha = overlay.opacity;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    }
     checkPlayerEnemyCollision();
 }
 
 // Start game function - called when level is selected
 function startGame() {
+    // Kill any running GSAP animations on overlay
+    if (typeof gsap !== 'undefined') {
+        gsap.killTweensOf(overlay);
+    }
+    
+    // Reset overlay opacity to prevent black screen
+    overlay.opacity = 0;
+    
+    // Reset player state
+    if (player) {
+        player.preventInput = false;
+    }
+    
     levels[level].init();
     animate();
 }

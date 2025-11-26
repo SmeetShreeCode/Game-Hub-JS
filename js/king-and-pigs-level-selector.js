@@ -40,6 +40,17 @@ function selectLevel(levelNum) {
     selectedLevel = levelNum;
     level = levelNum;
     
+    // Kill any running GSAP animations on overlay and reset
+    if (typeof gsap !== 'undefined' && typeof overlay !== 'undefined') {
+        gsap.killTweensOf(overlay);
+        overlay.opacity = 0;
+    }
+    
+    // Reset overlay opacity to prevent black screen
+    if (typeof overlay !== 'undefined') {
+        overlay.opacity = 0;
+    }
+    
     // Hide level selection screen
     const levelSelectionScreen = document.getElementById('levelSelectionScreen');
     if (levelSelectionScreen) {
@@ -48,6 +59,7 @@ function selectLevel(levelNum) {
     
     // Start the game
     gameStarted = true;
+    gameState = 'playing';
     startGame();
 }
 
@@ -64,9 +76,20 @@ function goBackToLevelSelection() {
     gameStarted = false;
     gameState = 'menu';
     
+    // Kill any running GSAP animations on overlay
+    if (typeof gsap !== 'undefined' && typeof overlay !== 'undefined') {
+        gsap.killTweensOf(overlay);
+        overlay.opacity = 0;
+    }
+    
     const levelSelectionScreen = document.getElementById('levelSelectionScreen');
     if (levelSelectionScreen) {
         levelSelectionScreen.classList.remove('hidden');
+    }
+    
+    // Reset overlay opacity to prevent black screen
+    if (typeof overlay !== 'undefined') {
+        overlay.opacity = 0;
     }
     
     // Reset canvas
