@@ -6,10 +6,8 @@ class ConnectFourGame {
         this.cols = 7;
         this.board = [];
         this.currentPlayer = 1; // 1 or 2
-        this.gameMode = 'single'; // 'single' or 'twoPlayer'
+        this.gameMode = 'twoPlayer'; // 'ai' or 'twoPlayer'
         this.gameActive = false;
-        this.currentLevel = 1;
-        this.completedLevels = new Set();
         this.moveHistory = [];
         this.moveCount = 0;
         this.aiDifficulty = 'medium';
@@ -19,15 +17,14 @@ class ConnectFourGame {
         this.settings = {
             sound: true,
             music: true,
-            vibration: true,
-            difficulty: 'medium'
+            vibration: true
         };
 
         // DOM elements
         this.screens = {
             splash: document.getElementById('splashScreen'),
             mainMenu: document.getElementById('mainMenu'),
-            levelSelect: document.getElementById('levelSelectScreen'),
+            aiDifficulty: document.getElementById('aiDifficultyScreen'),
             settings: document.getElementById('settingsScreen'),
             game: document.getElementById('gameScreen'),
             result: document.getElementById('resultScreen')
@@ -35,8 +32,14 @@ class ConnectFourGame {
 
         // Initialize
         this.loadSettings();
-        this.loadProgress();
-        this.setupEventListeners();
+        // Delay event listener setup to ensure DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupEventListeners();
+            });
+        } else {
+            this.setupEventListeners();
+        }
         this.showSplash();
     }
 
@@ -75,103 +78,30 @@ class ConnectFourGame {
         document.getElementById('soundToggle').checked = this.settings.sound;
         document.getElementById('musicToggle').checked = this.settings.music;
         document.getElementById('vibrationToggle').checked = this.settings.vibration;
-        document.getElementById('difficultySelect').value = this.settings.difficulty;
-        this.aiDifficulty = this.settings.difficulty;
     }
 
-    // Progress Management
-    loadProgress() {
-        const saved = localStorage.getItem('connect4_progress');
-        if (saved) {
-            const progress = JSON.parse(saved);
-            this.completedLevels = new Set(progress.completedLevels || []);
-        }
-    }
-
-    saveProgress() {
-        localStorage.setItem('connect4_progress', JSON.stringify({
-            completedLevels: [...this.completedLevels]
-        }));
-    }
-
-    resetProgress() {
-        if (confirm('Are you sure you want to reset all progress?')) {
-            this.completedLevels.clear();
-            this.saveProgress();
-            this.createLevelSelect();
-            alert('Progress reset!');
-        }
-    }
-
-    // Level System
-    getLevelConfig(level) {
-        const baseConfig = {
-            rows: 6,
-            cols: 7,
-            winCount: 4,
-            timeLimit: null
-        };
-
-        // Increase difficulty with level
-        if (level <= 5) {
-            return { ...baseConfig, difficulty: 'easy' };
-        } else if (level <= 10) {
-            return { ...baseConfig, difficulty: 'medium' };
-        } else if (level <= 15) {
-            return { ...baseConfig, rows: 7, cols: 8, difficulty: 'hard' };
-        } else {
-            return { ...baseConfig, rows: 8, cols: 9, winCount: 5, difficulty: 'hard' };
-        }
-    }
-
-    createLevelSelect() {
-        const grid = document.getElementById('levelGrid');
-        grid.innerHTML = '';
-
-        for (let i = 1; i <= 20; i++) {
-            const card = document.createElement('div');
-            const isLocked = i > 1 && !this.completedLevels.has(i - 1);
-            const isCompleted = this.completedLevels.has(i);
-            const config = this.getLevelConfig(i);
-
-            card.className = `level-card ${isLocked ? 'locked' : ''} ${isCompleted ? 'completed' : ''}`;
-            
-            if (!isLocked) {
-                card.addEventListener('click', () => this.startLevel(i));
-            }
-
-            card.innerHTML = `
-                <div class="level-number">${i}</div>
-                <div class="level-difficulty">${config.difficulty}</div>
-            `;
-
-            grid.appendChild(card);
-        }
-    }
-
-    startLevel(level) {
-        this.currentLevel = level;
-        this.gameMode = 'single';
-        const config = this.getLevelConfig(level);
-        
-        // Apply level configuration
-        this.rows = config.rows || 6;
-        this.cols = config.cols || 7;
-        this.winCount = config.winCount || 4;
-        this.aiDifficulty = config.difficulty || 'medium';
-        
-        console.log(`Starting Level ${level}: ${this.rows}x${this.cols}, Difficulty: ${this.aiDifficulty}, Win Count: ${this.winCount}`);
-        
-        this.initGame();
-        this.showScreen('game');
-    }
 
     startTwoPlayer() {
         this.gameMode = 'twoPlayer';
         this.rows = 6;
         this.cols = 7;
         this.winCount = 4;
-        this.currentLevel = 0;
+        document.getElementById('aiDifficultyDisplay').style.display = 'none';
+        
+        this.initGame();
+        this.showScreen('game');
+    }
+
+    startAI(difficulty) {
+        this.gameMode = 'ai';
+        this.aiDifficulty = difficulty;
+        this.rows = 6;
+        this.cols = 7;
+        this.winCount = 4;
+        
+        // Show AI difficulty in game
+        document.getElementById('aiDifficultyDisplay').style.display = 'flex';
+        document.getElementById('aiDifficultyText').textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
         
         this.initGame();
         this.showScreen('game');
@@ -227,9 +157,10 @@ class ConnectFourGame {
     }
 
     // Game Logic
-    makeMove(col) {
+    makeMove(col, isAIMove = false) {
         if (!this.gameActive) return;
-        if (this.gameMode === 'single' && this.currentPlayer === 2) return;
+        // Prevent AI from making moves through UI, but allow programmatic AI moves
+        if (this.gameMode === 'ai' && this.currentPlayer === 2 && !isAIMove) return;
 
         const row = this.getAvailableRow(col);
         if (row === -1) return;
@@ -264,9 +195,13 @@ class ConnectFourGame {
         this.switchPlayer();
         this.updateDisplay();
 
-        // AI move in single player mode
-        if (this.gameMode === 'single' && this.currentPlayer === 2 && this.gameActive) {
-            setTimeout(() => this.makeAIMove(), 500);
+        // AI move in AI mode
+        if (this.gameMode === 'ai' && this.currentPlayer === 2 && this.gameActive) {
+            setTimeout(() => {
+                if (this.gameActive && this.currentPlayer === 2) {
+                    this.makeAIMove();
+                }
+            }, 800);
         }
     }
 
@@ -346,25 +281,45 @@ class ConnectFourGame {
     // AI Logic
     makeAIMove() {
         if (!this.gameActive) return;
+        if (this.currentPlayer !== 2) return;
 
-        let col;
+        let col = -1;
         
-        switch (this.aiDifficulty) {
-            case 'easy':
-                col = this.getEasyAIMove();
-                break;
-            case 'medium':
-                col = this.getMediumAIMove();
-                break;
-            case 'hard':
-                col = this.getHardAIMove();
-                break;
-            default:
-                col = this.getMediumAIMove();
+        try {
+            switch (this.aiDifficulty) {
+                case 'easy':
+                    col = this.getEasyAIMove();
+                    break;
+                case 'medium':
+                    col = this.getMediumAIMove();
+                    break;
+                case 'hard':
+                    col = this.getHardAIMove();
+                    break;
+                case 'impossible':
+                    col = this.getImpossibleAIMove();
+                    break;
+                default:
+                    col = this.getMediumAIMove();
+            }
+        } catch (error) {
+            console.error('Error in AI move calculation:', error);
+            col = this.getEasyAIMove(); // Fallback to easy
         }
 
-        if (col !== -1) {
-            this.makeMove(col);
+        // Ensure we have a valid column
+        if (col === -1 || col < 0 || col >= this.cols) {
+            // Fallback: find any valid column
+            for (let c = 0; c < this.cols; c++) {
+                if (this.getAvailableRow(c) !== -1) {
+                    col = c;
+                    break;
+                }
+            }
+        }
+
+        if (col !== -1 && col >= 0 && col < this.cols && this.getAvailableRow(col) !== -1) {
+            this.makeMove(col, true); // Pass true to indicate this is an AI move
         }
     }
 
@@ -412,9 +367,31 @@ class ConnectFourGame {
     }
 
     getHardAIMove() {
-        // Minimax algorithm for hard AI
-        const bestMove = this.minimax(this.board, 4, true, -Infinity, Infinity);
-        return bestMove.column;
+        // Minimax algorithm for hard AI (depth 5)
+        try {
+            const bestMove = this.minimax(this.board, 5, true, -Infinity, Infinity);
+            if (bestMove && bestMove.column !== undefined && bestMove.column !== -1) {
+                return bestMove.column;
+            }
+        } catch (error) {
+            console.error('Error in hard AI:', error);
+        }
+        // Fallback to medium if minimax fails
+        return this.getMediumAIMove();
+    }
+
+    getImpossibleAIMove() {
+        // Minimax algorithm for impossible AI (depth 7 - very strong)
+        try {
+            const bestMove = this.minimax(this.board, 7, true, -Infinity, Infinity);
+            if (bestMove && bestMove.column !== undefined && bestMove.column !== -1) {
+                return bestMove.column;
+            }
+        } catch (error) {
+            console.error('Error in impossible AI:', error);
+        }
+        // Fallback to medium if minimax fails
+        return this.getMediumAIMove();
     }
 
     minimax(board, depth, maximizingPlayer, alpha, beta) {
@@ -422,18 +399,24 @@ class ConnectFourGame {
         const winner = this.evaluateBoard(board);
         if (winner === 2) return { score: 1000, column: -1 };
         if (winner === 1) return { score: -1000, column: -1 };
-        if (this.isBoardFull(board) || depth === 0) {
+        if (this.isBoardFull(board)) {
+            return { score: 0, column: -1 };
+        }
+        
+        if (depth === 0) {
             return { score: this.evaluatePosition(board), column: -1 };
         }
 
         if (maximizingPlayer) {
             let maxScore = -Infinity;
             let bestCol = -1;
+            let hasValidMove = false;
 
             for (let col = 0; col < this.cols; col++) {
                 const row = this.getAvailableRowForBoard(board, col);
                 if (row === -1) continue;
 
+                hasValidMove = true;
                 board[row][col] = 2;
                 const result = this.minimax(board, depth - 1, false, alpha, beta);
                 board[row][col] = 0;
@@ -447,15 +430,27 @@ class ConnectFourGame {
                 if (beta <= alpha) break;
             }
 
+            // If no valid move found, return first available column
+            if (!hasValidMove || bestCol === -1) {
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.getAvailableRowForBoard(board, col) !== -1) {
+                        bestCol = col;
+                        break;
+                    }
+                }
+            }
+
             return { score: maxScore, column: bestCol };
         } else {
             let minScore = Infinity;
             let bestCol = -1;
+            let hasValidMove = false;
 
             for (let col = 0; col < this.cols; col++) {
                 const row = this.getAvailableRowForBoard(board, col);
                 if (row === -1) continue;
 
+                hasValidMove = true;
                 board[row][col] = 1;
                 const result = this.minimax(board, depth - 1, true, alpha, beta);
                 board[row][col] = 0;
@@ -467,6 +462,16 @@ class ConnectFourGame {
 
                 beta = Math.min(beta, result.score);
                 if (beta <= alpha) break;
+            }
+
+            // If no valid move found, return first available column
+            if (!hasValidMove || bestCol === -1) {
+                for (let col = 0; col < this.cols; col++) {
+                    if (this.getAvailableRowForBoard(board, col) !== -1) {
+                        bestCol = col;
+                        break;
+                    }
+                }
             }
 
             return { score: minScore, column: bestCol };
@@ -527,14 +532,65 @@ class ConnectFourGame {
 
     evaluatePosition(board) {
         let score = 0;
-        // Evaluate based on potential connections
+        
+        // Evaluate based on potential connections and threats
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                if (board[row][col] === 2) score += 10;
-                if (board[row][col] === 1) score -= 10;
+                if (board[row][col] === 2) {
+                    score += 10;
+                    // Bonus for center columns
+                    if (col === Math.floor(this.cols / 2)) score += 5;
+                }
+                if (board[row][col] === 1) {
+                    score -= 10;
+                    // Penalty for center columns
+                    if (col === Math.floor(this.cols / 2)) score -= 5;
+                }
             }
         }
+        
+        // Check for potential wins/threats
+        score += this.evaluateThreats(board, 2) * 50;
+        score -= this.evaluateThreats(board, 1) * 50;
+        
         return score;
+    }
+
+    evaluateThreats(board, player) {
+        let threats = 0;
+        const directions = [
+            [[0, 1], [0, -1]],   // Horizontal
+            [[1, 0], [-1, 0]],   // Vertical
+            [[1, 1], [-1, -1]],  // Diagonal \
+            [[1, -1], [-1, 1]]   // Diagonal /
+        ];
+
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (board[row][col] === player) {
+                    for (const direction of directions) {
+                        let count = 1;
+                        for (const [dx, dy] of direction) {
+                            let r = row + dx;
+                            let c = col + dy;
+                            while (
+                                r >= 0 && r < this.rows &&
+                                c >= 0 && c < this.cols &&
+                                board[r][c] === player
+                            ) {
+                                count++;
+                                r += dx;
+                                c += dy;
+                            }
+                        }
+                        if (count >= this.winCount - 1) {
+                            threats++;
+                        }
+                    }
+                }
+            }
+        }
+        return threats;
     }
 
     isBoardFull(board) {
@@ -546,11 +602,6 @@ class ConnectFourGame {
         this.gameActive = false;
         this.playSound('win');
         this.vibrate([100, 50, 100]);
-
-        if (this.gameMode === 'single' && this.currentPlayer === 1) {
-            this.completedLevels.add(this.currentLevel);
-            this.saveProgress();
-        }
 
         setTimeout(() => {
             this.showResultScreen(true);
@@ -569,24 +620,24 @@ class ConnectFourGame {
         const icon = document.getElementById('resultIcon');
         const title = document.getElementById('resultTitle');
         const message = document.getElementById('resultMessage');
-        const level = document.getElementById('resultLevel');
         const moves = document.getElementById('resultMoves');
-        const nextBtn = document.getElementById('nextLevelBtn');
 
         if (won) {
             icon.textContent = '🎉';
-            title.textContent = this.gameMode === 'single' ? 'Level Complete!' : 'Player ' + this.currentPlayer + ' Wins!';
-            message.textContent = 'Congratulations!';
+            if (this.gameMode === 'ai' && this.currentPlayer === 2) {
+                title.textContent = 'AI Wins!';
+                message.textContent = 'Better luck next time!';
+            } else {
+                title.textContent = this.gameMode === 'ai' ? 'You Win!' : 'Player ' + this.currentPlayer + ' Wins!';
+                message.textContent = 'Congratulations!';
+            }
         } else {
             icon.textContent = '😐';
             title.textContent = 'Draw!';
             message.textContent = 'No winner this time.';
         }
 
-        level.textContent = this.currentLevel || 'N/A';
         moves.textContent = this.moveCount;
-        nextBtn.style.display = (won && this.gameMode === 'single' && this.currentLevel < 20) ? 'block' : 'none';
-
         this.showScreen('result');
     }
 
@@ -605,33 +656,23 @@ class ConnectFourGame {
 
     restartGame() {
         if (confirm('Restart this game?')) {
-            if (this.gameMode === 'single') {
-                this.startLevel(this.currentLevel);
+            if (this.gameMode === 'ai') {
+                this.startAI(this.aiDifficulty);
             } else {
                 this.startTwoPlayer();
             }
         }
     }
 
-    nextLevel() {
-        if (this.currentLevel < 20) {
-            this.startLevel(this.currentLevel + 1);
-        } else {
-            alert('Congratulations! You completed all levels!');
-            this.showScreen('mainMenu');
-        }
-    }
-
     replayLevel() {
-        if (this.gameMode === 'single') {
-            this.startLevel(this.currentLevel);
+        if (this.gameMode === 'ai') {
+            this.startAI(this.aiDifficulty);
         } else {
             this.startTwoPlayer();
         }
     }
 
     updateDisplay() {
-        document.getElementById('currentLevelDisplay').textContent = this.currentLevel || 'N/A';
         document.getElementById('moveCount').textContent = this.moveCount;
     }
 
@@ -673,81 +714,138 @@ class ConnectFourGame {
 
     // Event Listeners Setup
     setupEventListeners() {
+        // Store reference to this for event listeners
+        const self = this;
+        
         // Main menu buttons
-        document.getElementById('playBtn').addEventListener('click', () => {
-            this.createLevelSelect();
-            this.showScreen('levelSelect');
-        });
+        const playWithFriendBtn = document.getElementById('playWithFriendBtn');
+        if (playWithFriendBtn) {
+            playWithFriendBtn.addEventListener('click', () => {
+                self.startTwoPlayer();
+            });
+        }
 
-        document.getElementById('twoPlayerBtn').addEventListener('click', () => {
-            this.startTwoPlayer();
-        });
+        const playWithAIBtn = document.getElementById('playWithAIBtn');
+        if (playWithAIBtn) {
+            playWithAIBtn.addEventListener('click', () => {
+                self.showScreen('aiDifficulty');
+            });
+        }
 
-        document.getElementById('settingsBtn').addEventListener('click', () => {
-            this.showScreen('settings');
-        });
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) {
+            settingsBtn.addEventListener('click', () => {
+                self.showScreen('settings');
+            });
+        }
+
+        // AI Difficulty buttons
+        const easyBtn = document.getElementById('easyBtn');
+        if (easyBtn) {
+            easyBtn.addEventListener('click', () => {
+                self.startAI('easy');
+            });
+        }
+
+        const mediumBtn = document.getElementById('mediumBtn');
+        if (mediumBtn) {
+            mediumBtn.addEventListener('click', () => {
+                self.startAI('medium');
+            });
+        }
+
+        const hardBtn = document.getElementById('hardBtn');
+        if (hardBtn) {
+            hardBtn.addEventListener('click', () => {
+                self.startAI('hard');
+            });
+        }
+
+        const impossibleBtn = document.getElementById('impossibleBtn');
+        if (impossibleBtn) {
+            impossibleBtn.addEventListener('click', () => {
+                self.startAI('impossible');
+            });
+        }
 
         // Back buttons
-        document.getElementById('backFromLevelsBtn').addEventListener('click', () => {
-            this.showScreen('mainMenu');
-        });
+        const backFromAIBtn = document.getElementById('backFromAIBtn');
+        if (backFromAIBtn) {
+            backFromAIBtn.addEventListener('click', () => {
+                self.showScreen('mainMenu');
+            });
+        }
 
-        document.getElementById('backFromSettingsBtn').addEventListener('click', () => {
-            this.showScreen('mainMenu');
-        });
+        const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
+        if (backFromSettingsBtn) {
+            backFromSettingsBtn.addEventListener('click', () => {
+                self.showScreen('mainMenu');
+            });
+        }
 
-        document.getElementById('backFromGameBtn').addEventListener('click', () => {
-            if (confirm('Leave current game?')) {
-                this.showScreen('mainMenu');
-            }
-        });
+        const backFromGameBtn = document.getElementById('backFromGameBtn');
+        if (backFromGameBtn) {
+            backFromGameBtn.addEventListener('click', () => {
+                if (confirm('Leave current game?')) {
+                    self.showScreen('mainMenu');
+                }
+            });
+        }
 
         // Settings
-        document.getElementById('soundToggle').addEventListener('change', (e) => {
-            this.settings.sound = e.target.checked;
-            this.saveSettings();
-        });
+        const soundToggle = document.getElementById('soundToggle');
+        if (soundToggle) {
+            soundToggle.addEventListener('change', (e) => {
+                self.settings.sound = e.target.checked;
+                self.saveSettings();
+            });
+        }
 
-        document.getElementById('musicToggle').addEventListener('change', (e) => {
-            this.settings.music = e.target.checked;
-            this.saveSettings();
-        });
+        const musicToggle = document.getElementById('musicToggle');
+        if (musicToggle) {
+            musicToggle.addEventListener('change', (e) => {
+                self.settings.music = e.target.checked;
+                self.saveSettings();
+            });
+        }
 
-        document.getElementById('vibrationToggle').addEventListener('change', (e) => {
-            this.settings.vibration = e.target.checked;
-            this.saveSettings();
-        });
-
-        document.getElementById('difficultySelect').addEventListener('change', (e) => {
-            this.settings.difficulty = e.target.value;
-            this.saveSettings();
-        });
-
-        document.getElementById('resetProgressBtn').addEventListener('click', () => {
-            this.resetProgress();
-        });
+        const vibrationToggle = document.getElementById('vibrationToggle');
+        if (vibrationToggle) {
+            vibrationToggle.addEventListener('change', (e) => {
+                self.settings.vibration = e.target.checked;
+                self.saveSettings();
+            });
+        }
 
         // Game controls
-        document.getElementById('undoBtn').addEventListener('click', () => {
-            this.undoMove();
-        });
+        const undoBtn = document.getElementById('undoBtn');
+        if (undoBtn) {
+            undoBtn.addEventListener('click', () => {
+                self.undoMove();
+            });
+        }
 
-        document.getElementById('restartBtn').addEventListener('click', () => {
-            this.restartGame();
-        });
+        const restartBtn = document.getElementById('restartBtn');
+        if (restartBtn) {
+            restartBtn.addEventListener('click', () => {
+                self.restartGame();
+            });
+        }
 
         // Result screen buttons
-        document.getElementById('nextLevelBtn').addEventListener('click', () => {
-            this.nextLevel();
-        });
+        const replayBtn = document.getElementById('replayBtn');
+        if (replayBtn) {
+            replayBtn.addEventListener('click', () => {
+                self.replayLevel();
+            });
+        }
 
-        document.getElementById('replayBtn').addEventListener('click', () => {
-            this.replayLevel();
-        });
-
-        document.getElementById('menuBtn').addEventListener('click', () => {
-            this.showScreen('mainMenu');
-        });
+        const menuBtn = document.getElementById('menuBtn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                self.showScreen('mainMenu');
+            });
+        }
     }
 }
 

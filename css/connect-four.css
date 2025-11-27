@@ -229,72 +229,94 @@ body {
     transform: scale(1.1);
 }
 
-/* Level Selection */
-#levelSelectScreen {
+/* AI Difficulty Selection */
+#aiDifficultyScreen {
     padding: 20px;
     overflow-y: auto;
 }
 
-.level-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 15px;
+.difficulty-content {
+    max-width: 600px;
+    margin: 0 auto;
     padding: 20px 0;
 }
 
-.level-card {
-    aspect-ratio: 1;
+.difficulty-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.difficulty-btn {
     background: var(--bg-board);
     border: 3px solid transparent;
     border-radius: 15px;
+    padding: 25px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    position: relative;
+    gap: 10px;
     box-shadow: 0 4px 15px var(--shadow);
 }
 
-.level-card:hover, .level-card:active {
+.difficulty-btn:hover, .difficulty-btn:active {
     transform: translateY(-5px);
-    border-color: var(--primary);
     box-shadow: 0 6px 20px var(--shadow);
 }
 
-.level-card.locked {
-    opacity: 0.5;
-    cursor: not-allowed;
-    filter: grayscale(100%);
+.difficulty-btn.easy {
+    border-color: var(--success);
 }
 
-.level-card.completed::after {
-    content: '✓';
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 25px;
-    height: 25px;
-    background: var(--success);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.difficulty-btn.easy:hover, .difficulty-btn.easy:active {
+    background: rgba(74, 222, 128, 0.1);
+    border-color: var(--success);
+}
+
+.difficulty-btn.medium {
+    border-color: var(--accent);
+}
+
+.difficulty-btn.medium:hover, .difficulty-btn.medium:active {
+    background: rgba(255, 230, 109, 0.1);
+    border-color: var(--accent);
+}
+
+.difficulty-btn.hard {
+    border-color: var(--primary);
+}
+
+.difficulty-btn.hard:hover, .difficulty-btn.hard:active {
+    background: rgba(255, 107, 107, 0.1);
+    border-color: var(--primary);
+}
+
+.difficulty-btn.impossible {
+    border-color: var(--danger);
+}
+
+.difficulty-btn.impossible:hover, .difficulty-btn.impossible:active {
+    background: rgba(248, 113, 113, 0.1);
+    border-color: var(--danger);
+}
+
+.difficulty-icon {
+    font-size: 3rem;
+}
+
+.difficulty-name {
+    font-size: 1.3rem;
     font-weight: bold;
+    color: var(--text-primary);
 }
 
-.level-number {
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--primary);
-}
-
-.level-difficulty {
-    font-size: 0.8rem;
+.difficulty-desc {
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    margin-top: 5px;
+    text-align: center;
 }
 
 /* Settings Screen */
@@ -676,10 +698,6 @@ body {
         height: 40px;
     }
 
-    .level-grid {
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 12px;
-    }
 }
 
 @media (max-width: 480px) {
@@ -698,9 +716,21 @@ body {
         height: 35px;
     }
 
-    .level-grid {
-        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-        gap: 10px;
+    .difficulty-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .difficulty-btn {
+        padding: 20px;
+    }
+
+    .difficulty-icon {
+        font-size: 2.5rem;
+    }
+
+    .difficulty-name {
+        font-size: 1.2rem;
     }
 
     .game-info {
@@ -710,6 +740,11 @@ body {
 
     .player-info {
         width: 100%;
+    }
+
+    .game-stats {
+        width: 100%;
+        justify-content: space-around;
     }
 }
 
