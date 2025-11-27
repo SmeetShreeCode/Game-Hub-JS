@@ -30,7 +30,7 @@ const backEndPlayers = {};
 const backEndProjectiles = {};
 
 //ROCK PAPER SCISSORS
-let rooms = {};
+const rooms = {};
 
 const SPEED = 5;
 const RADIUS = 10;
@@ -119,93 +119,47 @@ io.on('connection', (socket) => {
 
 
     // ------ROCK PAPER SCISSORS------
-    // socket.on('createGame', () => {
-    //     const roomUniqueId = makeid(6);
-    //     // rooms[roomUniqueId] = {};
-    //     rooms[roomUniqueId] = {
-    //         p1Choice: null,
-    //         p2Choice: null,
-    //         players: [socket.id]
-    //     }
-    //     socket.join(roomUniqueId);
-    //     socket.emit('newGame', {roomUniqueId});
-    // });
-    //
-    // socket.on('joinGame', (data) => {
-    //     if (rooms[data.roomUniqueId] !== undefined) {
-    //         socket.join(data.roomUniqueId);
-    //         socket.to(data.roomUniqueId).emit('playersConnected', {});
-    //         socket.emit('playersConnected');
-    //     }
-    // });
-    //
-    // socket.on('p1Choice', (data) => {
-    //     let rpsValue = data.rpsValue;
-    //     rooms[data.roomUniqueId].p1Choice = rpsValue;
-    //     socket.to(data.roomUniqueId).emit('p1Choice', {rpsValue});
-    //     if (rooms[data.roomUniqueId].p2Choice !== null) {
-    //         declareWinner(data.roomUniqueId);
-    //     }
-    // });
-    //
-    // socket.on('p2Choice', (data) => {
-    //     let rpsValue = data.rpsValue;
-    //     rooms[data.roomUniqueId].p2Choice = rpsValue;
-    //     socket.to(data.roomUniqueId).emit('p2Choice', {rpsValue});
-    //     if (rooms[data.roomUniqueId].p1Choice !== null) {
-    //         declareWinner(data.roomUniqueId);
-    //     }
-    // });
-    // CREATE GAME
     socket.on('createGame', () => {
-        const roomUniqueId = makeid(6);
+        const roomId = makeid(6);
 
-        rooms[roomUniqueId] = {
+        rooms[roomId] = {
+            p1: socket.id,
+            p2: null,
             p1Choice: null,
-            p2Choice: null,
-            players: [socket.id]
+            p2Choice: null
         };
-
-        socket.join(roomUniqueId);
-        socket.emit('newGame', { roomUniqueId });
+        socket.join(roomId);
+        socket.emit('newGame', {roomId});
     });
 
-// JOIN GAME
-    socket.on('joinGame', (data) => {
-        const room = rooms[data.roomUniqueId];
+    socket.on("joinGame", ({ roomId }) => {
+        const room = rooms[roomId];
+        if (!room) return;
 
-        if (!room) {
-            socket.emit("errorMessage", { message: "Room does not exist" });
-            return;
+        if (!room.p2) {
+            room.p2 = socket.id;
+            socket.join(roomId);
+
+            io.to(roomId).emit("playersConnected", {});
         }
-
-        room.players.push(socket.id);
-        socket.join(data.roomUniqueId);
-
-        socket.to(data.roomUniqueId).emit('playersConnected');
-        socket.emit('playersConnected');
     });
 
-// PLAYER 1 CHOICE
-    socket.on('p1Choice', (data) => {
-        const room = rooms[data.roomUniqueId];
-        if (!room) return;
+    socket.on("p1Choice", (data) => {
+        const room = rooms[data.roomId];
+        room.p1Choice = data.choice;
 
-        room.p1Choice = data.rpsValue;
-        socket.to(data.roomUniqueId).emit("p1Choice", { rpsValue: data.rpsValue });
+        socket.to(data.roomId).emit("p1Choice", { choice: data.choice });
 
-        if (room.p2Choice !== null) declareWinner(data.roomUniqueId);
+        if (room.p2Choice) declareWinner(data.roomId);
     });
 
-// PLAYER 2 CHOICE
-    socket.on('p2Choice', (data) => {
-        const room = rooms[data.roomUniqueId];
-        if (!room) return;
+    socket.on("p2Choice", (data) => {
+        const room = rooms[data.roomId];
+        room.p2Choice = data.choice;
 
-        room.p2Choice = data.rpsValue;
-        socket.to(data.roomUniqueId).emit("p2Choice", { rpsValue: data.rpsValue });
+        socket.to(data.roomId).emit("p2Choice", { choice: data.choice });
 
-        if (room.p1Choice !== null) declareWinner(data.roomUniqueId);
+        if (room.p1Choice) declareWinner(data.roomId);
     });
 
 
@@ -252,34 +206,26 @@ setInterval(() => {
 // ROCK PAPER SCISSORS
 function makeid(length) {
     let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let charactersLength = characters.length;
+    const chars  = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        result += chars .charAt(Math.floor(Math.random() * chars .length));
     }
     return result;
 }
 
-function declareWinner(roomUniqueId) {
-    let p1Choice = rooms[roomUniqueId].p1Choice;
-    let p2Choice = rooms[roomUniqueId].p2Choice;
-    let winner = null;
+function declareWinner(roomId) {
+    const { p1Choice, p2Choice } = rooms[roomId];
+    let winner = "d";
 
-    if (p1Choice === p2Choice) {
-        winner = "d";
-    } else if (p1Choice === "Paper") {
-        if (p2Choice === "Scissor") winner = "p2";
-        else winner = "p1";
-    } else if (p1Choice === "Rock") {
-        if (p2Choice === "Paper") winner = "p2";
-        else winner = "p1";
-    } else if (p1Choice === "Scissor") {
-        if (p2Choice === "Rock") winner = "p2";
-        else winner = "p1";
+    if (p1Choice !== p2Choice) {
+        if (p1Choice === "rock"     && p2Choice === "scissors") winner = "p1";
+        else if (p1Choice === "paper"    && p2Choice === "rock") winner = "p1";
+        else if (p1Choice === "scissors" && p2Choice === "paper") winner = "p1";
+        else winner = "p2";
     }
-    io.sockets.to(roomUniqueId).emit("result", {winner});
-    rooms[roomUniqueId].p1Choice = null;
-    rooms[roomUniqueId].p2Choice = null;
+    io.sockets.to(roomId).emit("result", {winner});
+    rooms[roomId].p1Choice = null;
+    rooms[roomId].p2Choice = null;
 }
 
 server.listen(port, () => {

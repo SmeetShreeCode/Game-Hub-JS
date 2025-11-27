@@ -119,14 +119,14 @@ class WordSearchGame {
 
         // Place words in grid
         const directions = [
-            { dx: 1, dy: 0 },   // Horizontal
-            { dx: 0, dy: 1 },   // Vertical
-            { dx: 1, dy: 1 },   // Diagonal down-right
-            { dx: 1, dy: -1 },  // Diagonal up-right
-            { dx: -1, dy: 0 },  // Horizontal reverse
-            { dx: 0, dy: -1 },  // Vertical reverse
-            { dx: -1, dy: -1 }, // Diagonal up-left
-            { dx: -1, dy: 1 }   // Diagonal down-left
+            {dx: 1, dy: 0},   // Horizontal
+            {dx: 0, dy: 1},   // Vertical
+            {dx: 1, dy: 1},   // Diagonal down-right
+            {dx: 1, dy: -1},  // Diagonal up-right
+            {dx: -1, dy: 0},  // Horizontal reverse
+            {dx: 0, dy: -1},  // Vertical reverse
+            {dx: -1, dy: -1}, // Diagonal up-left
+            {dx: -1, dy: 1}   // Diagonal down-left
         ];
 
         const shuffledWords = [...this.words].sort(() => Math.random() - 0.5);
@@ -174,7 +174,7 @@ class WordSearchGame {
             const newX = x + i * direction.dx;
             const newY = y + i * direction.dy;
             this.grid[newY][newX] = word[i];
-            positions.push({ x: newX, y: newY });
+            positions.push({x: newX, y: newY});
         }
         this.wordPositions[word] = positions;
     }
@@ -215,14 +215,14 @@ class WordSearchGame {
                     }
                 }
 
-                if (!isFound) {
+                // if (!isFound) {
                     cell.addEventListener('mousedown', (e) => this.handleCellStart(e, x, y));
                     cell.addEventListener('mouseenter', (e) => this.handleCellEnter(e, x, y));
                     cell.addEventListener('mouseup', () => this.handleCellEnd());
                     cell.addEventListener('touchstart', (e) => this.handleCellStart(e, x, y));
                     cell.addEventListener('touchmove', (e) => this.handleCellMove(e));
                     cell.addEventListener('touchend', () => this.handleCellEnd());
-                }
+                // }
 
                 this.wordGrid.appendChild(cell);
             }
@@ -232,7 +232,7 @@ class WordSearchGame {
     handleCellStart(e, x, y) {
         e.preventDefault();
         if (this.paused) return;
-        this.selectedCells = [{ x, y }];
+        this.selectedCells = [{x, y}];
         this.selectionDirection = null;
         this.updateSelection();
     }
@@ -258,10 +258,10 @@ class WordSearchGame {
 
     addCellToSelection(x, y) {
         const lastCell = this.selectedCells[this.selectedCells.length - 1];
-        
+
         // Don't add if it's the same cell
         if (lastCell.x === x && lastCell.y === y) return;
-        
+
         // Don't add if already selected
         if (this.selectedCells.some(c => c.x === x && c.y === y)) return;
 
@@ -291,23 +291,23 @@ class WordSearchGame {
                 // Different direction - don't allow
                 return;
             }
-            
+
             // Same direction - check if it continues the line
             if (this.selectedCells.length > 1) {
                 const prevCell = this.selectedCells[this.selectedCells.length - 2];
                 const prevDx = lastCell.x - prevCell.x;
                 const prevDy = lastCell.y - prevCell.y;
-                
+
                 // Must continue in same direction
                 if (prevDx !== 0 && dx !== 0 && Math.sign(prevDx) !== Math.sign(dx)) return;
                 if (prevDy !== 0 && dy !== 0 && Math.sign(prevDy) !== Math.sign(dy)) return;
             }
-            
-            this.selectedCells.push({ x, y });
+
+            this.selectedCells.push({x, y});
         } else {
             // First direction - set it
             this.selectionDirection = direction;
-            this.selectedCells.push({ x, y });
+            this.selectedCells.push({x, y});
         }
 
         this.updateSelection();

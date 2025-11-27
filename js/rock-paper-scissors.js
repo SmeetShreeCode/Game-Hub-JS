@@ -55,36 +55,38 @@ function selectChoice() {
 
 
 const socket = io("http://192.168.29.24:3000");
-let roomUniqueId = null;
-let player1 = false;
+let roomId = null;
+let isPlayer1 = false;
 
 function createGame() {
-    player1 = true;
+    isPlayer1 = true;
     socket.emit("createGame");
 }
 
 function joinGame() {
-    let roomUniqueId = document.querySelector('#roomUniqueId').value;
-    socket.emit("joinGame", {roomUniqueId});
-    console.log(roomUniqueId);
+    const id = document.getElementById('roomUniqueId').value.trim();
+    if (!id) return;
+
+    roomId = id;
+    socket.emit("joinGame", { roomId });
 }
 
-socket.on("newGame", (data) => {
-    roomUniqueId = data.roomUniqueId;
+socket.on("newGame", ({ roomId: id }) => {
+    roomId = id;
     document.querySelector('#initial').style.display = 'none';
     document.querySelector('#gameArea').style.display = 'block';
     let copyButton = document.createElement("button");
     copyButton.style.display = 'block';
     copyButton.innerText = 'Copied!';
     copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(roomUniqueId).then(() => {
+        navigator.clipboard.writeText(roomId).then(() => {
             console.log('Copied to clipboard successfully!');
         }, (e) => {
             console.error('Could not copy to clipboard!', e);
         });
     });
 
-    document.querySelector('#waitingArea').innerHTML = `Waiting... For Opponent, Please Share Code ${roomUniqueId} to join`;
+    document.querySelector('#waitingArea').innerHTML = `Waiting... For Opponent, Please Share Code ${roomId} to join`;
     document.querySelector('#waitingArea').appendChild(copyButton);
 });
 
@@ -95,25 +97,21 @@ socket.on("playersConnected", () => {
 });
 
 socket.on('p1Choice', (data) => {
-    if (!player1) {
-        createOpponentChoiceButton(data);
-    }
+    if (!isPlayer1) createOpponentChoiceButton(data);
 });
 
 socket.on('p2Choice', (data) => {
-    if (player1) {
-        createOpponentChoiceButton(data);
-    }
+    if (isPlayer1) createOpponentChoiceButton(data);
 });
 
 socket.on('result', (data) => {
    let winnerText = '';
    if (data.winner !== 'd') {
-       if (data.winner === 'p1' && player1) {
+       if (data.winner === 'p1' && isPlayer1) {
            winnerText = 'You WIN!';
        }else if (data.winner === 'p1') {
            winnerText = 'You LOSE!';
-       }else if (data.winner === 'p2' && !player1) {
+       }else if (data.winner === 'p2' && !isPlayer1) {
            winnerText = 'You WIN!';
        }else if (data.winner === 'p2') {
            winnerText = 'You LOSE!';
@@ -126,12 +124,15 @@ socket.on('result', (data) => {
 
 });
 
-function sendChoice(rpsValue) {
-    const choiceEvent = player1 ? "p1Choice" : "p2Choice";
-    socket.emit(choiceEvent, { rpsValue, roomUniqueId });
+function sendChoice(choice) {
+    const choiceEvent = isPlayer1 ? "p1Choice" : "p2Choice";
+    socket.emit(choiceEvent, {
+        roomId,
+        choice
+    });
     let playerChoiceButton = document.createElement("button");
     playerChoiceButton.style.display = 'block';
-    playerChoiceButton.innerText = rpsValue;
+    playerChoiceButton.innerText = choice;
     document.querySelector('#player1Choice').innerHTML = "";
     document.querySelector('#player1Choice').appendChild(playerChoiceButton);
 }
@@ -141,6 +142,6 @@ function createOpponentChoiceButton(data) {
     let opponentButton = document.createElement("button");
     opponentButton.id = "opponentButton";
     opponentButton.style.display = 'none';
-    opponentButton.innerText = data.rpsValue;
+    opponentButton.innerText = data.choice;
     document.querySelector('#player2Choice').appendChild(opponentButton);
 }
