@@ -27,121 +27,121 @@ const wordSearchLevels = [
         words: ["CAT", "DOG", "BIRD"],
         category: "Animals"
     },
-    
+
     // Level 2
     {
         words: ["SUN", "MOON", "STAR"],
         category: "Space"
     },
-    
+
     // Level 3
     {
         words: ["APPLE", "BANANA", "ORANGE", "MANGO"],
         category: "Fruits"
     },
-    
+
     // Level 4
     {
         words: ["RED", "BLUE", "GREEN", "YELLOW"],
         category: "Colors"
     },
-    
+
     // Level 5
     {
         words: ["BOOK", "PEN", "PAPER", "DESK"],
         category: "School"
     },
-    
+
     // Level 6
     {
         words: ["CAR", "BUS", "TRAIN", "PLANE"],
         category: "Transport"
     },
-    
+
     // Level 7
     {
         words: ["MUSIC", "SONG", "DANCE"],
         category: "Entertainment"
     },
-    
+
     // Level 8
     {
         words: ["WATER", "FIRE", "EARTH", "AIR"],
         category: "Elements"
     },
-    
+
     // Level 9
     {
         words: ["SPRING", "SUMMER", "WINTER", "AUTUMN"],
         category: "Seasons"
     },
-    
+
     // Level 10
     {
         words: ["MOUNTAIN", "RIVER", "OCEAN", "FOREST"],
         category: "Nature"
     },
-    
+
     // Level 11
     {
         words: ["COMPUTER", "KEYBOARD", "MOUSE", "MONITOR"],
         category: "Technology"
     },
-    
+
     // Level 12
     {
         words: ["PIZZA", "BURGER", "SANDWICH", "SALAD"],
         category: "Food"
     },
-    
+
     // Level 13
     {
         words: ["DOCTOR", "TEACHER", "ENGINEER", "ARTIST"],
         category: "Professions"
     },
-    
+
     // Level 14
     {
         words: ["BASKETBALL", "FOOTBALL", "TENNIS", "SWIMMING"],
         category: "Sports"
     },
-    
+
     // Level 15
     {
         words: ["LIBRARY", "HOSPITAL", "SCHOOL", "PARK"],
         category: "Places"
     },
-    
+
     // Level 16
     {
         words: ["ELEPHANT", "LION", "TIGER", "BEAR"],
         category: "Wild Animals"
     },
-    
+
     // Level 17
     {
         words: ["GUITAR", "PIANO", "DRUMS", "VIOLIN"],
         category: "Instruments"
     },
-    
+
     // Level 18
     {
         words: ["CHOCOLATE", "CANDY", "CAKE", "COOKIE"],
         category: "Desserts"
     },
-    
+
     // Level 19
     {
         words: ["RAINBOW", "CLOUD", "STORM", "LIGHTNING"],
         category: "Weather"
     },
-    
+
     // Level 20
     {
         words: ["ADVENTURE", "JOURNEY", "TRAVEL", "EXPLORE"],
         category: "Travel"
     },
-    
+
     // ADD MORE LEVELS BELOW THIS LINE
     // ================================
     // 

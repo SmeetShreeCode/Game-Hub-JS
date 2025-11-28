@@ -3,7 +3,9 @@
 # Vercel
 # Heroku
 # DigitalOcean
+# Glitch
 
+--------------------
 Here is a clear, beginner-friendly, step-by-step guide to run multiple games, each with its own socket logic, in one Node.js + Socket.IO server.
 
 Right now your server handles ONE game only, with hardcoded logic.

@@ -68,10 +68,10 @@ function joinGame() {
     if (!id) return;
 
     roomId = id;
-    socket.emit("joinGame", { roomId });
+    socket.emit("joinGame", {roomId});
 }
 
-socket.on("newGame", ({ roomId: id }) => {
+socket.on("newGame", ({roomId: id}) => {
     roomId = id;
     document.querySelector('#initial').style.display = 'none';
     document.querySelector('#gameArea').style.display = 'block';
@@ -105,18 +105,18 @@ socket.on('p2Choice', (data) => {
 });
 
 socket.on('result', (data) => {
-   let winnerText = '';
-   if (data.winner !== 'd') {
-       if (data.winner === 'p1' && isPlayer1) {
-           winnerText = 'You WIN!';
-       }else if (data.winner === 'p1') {
-           winnerText = 'You LOSE!';
-       }else if (data.winner === 'p2' && !isPlayer1) {
-           winnerText = 'You WIN!';
-       }else if (data.winner === 'p2') {
-           winnerText = 'You LOSE!';
-       }
-   }else winnerText = `It's a DRAW....!!!`;
+    let winnerText = '';
+    if (data.winner !== 'd') {
+        if (data.winner === 'p1' && isPlayer1) {
+            winnerText = 'You WIN!';
+        } else if (data.winner === 'p1') {
+            winnerText = 'You LOSE!';
+        } else if (data.winner === 'p2' && !isPlayer1) {
+            winnerText = 'You WIN!';
+        } else if (data.winner === 'p2') {
+            winnerText = 'You LOSE!';
+        }
+    } else winnerText = `It's a DRAW....!!!`;
 
     document.querySelector('#opponentState').style.display = 'none';
     document.querySelector('#opponentButton').style.display = 'block';

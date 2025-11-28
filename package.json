@@ -26,6 +26,7 @@
     "gsap": "^3.13.0",
     "intro.js": "^8.3.2",
     "matter-js": "^0.20.0",
+    "nipplejs": "^0.10.2",
     "nodemon": "^3.1.11",
     "poly-decomp": "^0.3.0",
     "socket.io": "^4.8.1"

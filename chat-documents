@@ -332,3 +332,329 @@ Zero Point Protocol
 HyperCore
 
 Radiant Front
+
+
+
+
+You have two main options, and both are perfectly valid depending on how much integration you want. I’ll explain them clearly and tell you which one is best.
+
+✅ Option 1: Run Phaser inside Angular (Recommended)
+
+You can embed your Phaser game directly inside an Angular component.
+This keeps your whole site inside Angular, and the Phaser game becomes just one part.
+
+✔ How it works
+
+Create a <game-canvas> Angular component
+
+Initialize Phaser in that component
+
+Mount Phaser to the component's DOM element
+
+✔ Structure
+src/
+  app/
+    phaser-game/
+      phaser-game.component.ts
+      phaser-game.component.html
+
+Example:
+phaser-game.component.html
+<div id="gameContainer"></div>
+
+phaser-game.component.ts
+import { Component, AfterViewInit } from '@angular/core';
+import Phaser from 'phaser';
+import { MainScene } from './main.scene';
+
+@Component({
+  selector: 'app-phaser-game',
+  templateUrl: './phaser-game.component.html',
+})
+export class PhaserGameComponent implements AfterViewInit {
+  game!: Phaser.Game;
+
+  ngAfterViewInit() {
+    this.game = new Phaser.Game({
+      type: Phaser.AUTO,
+      width: 800,
+      height: 600,
+      parent: 'gameContainer',   // Attach Phaser to Angular DOM element
+      scene: [MainScene],
+      physics: { default: 'arcade' },
+    });
+  }
+}
+
+main.scene.ts
+import Phaser from 'phaser';
+
+export class MainScene extends Phaser.Scene {
+  constructor() {
+    super('MainScene');
+  }
+
+  preload() {
+    this.load.image('logo', 'assets/logo.png');
+  }
+
+  create() {
+    this.add.image(400, 300, 'logo');
+  }
+}
+
+✔ Result:
+
+Your Phaser game appears inside your Angular page just like any component.
+
+You can route to it using Angular routing, like:
+
+<a routerLink="/game">Play Game</a>
+
+✅ Option 2: Host Phaser as a separate app, embed with iframe
+
+If your Phaser game is big and you want it separate from Angular, then:
+
+Build Phaser as a standalone website
+
+Host it at:
+example.com/game/
+
+Embed in Angular using iframe:
+
+<iframe src="/game/index.html" width="100%" height="600"></iframe>
+
+✔ Best when:
+
+You want the game completely isolated
+
+You want to reduce Angular → Phaser code complexity
+
+You want to host the game on its own domain or subfolder
+
+🟦 Which Option Should You Choose?
+👉 If your game is part of your Angular site (most common):
+
+Use Option 1 (Run Phaser inside Angular)
+
+👉 If the game is large, independent, or reused across apps:
+
+Use Option 2 (Standalone Phaser with iframe)
+
+🟢 Recommendation (Simple + Clean)
+
+Use Option 1 unless you have a reason not to.
+
+Because:
+
+easy to maintain
+
+works with Angular routing
+
+no cross-domain issues
+
+no iframe complexity
+
+you can communicate between Angular ↔ Phaser easily
+
+🎮 If you want, I can guide you next:
+
+I can generate:
+
+✔ Complete Angular + Phaser starter project
+✔ Step-by-step setup instructions
+✔ File structure and sample scenes
+✔ Best practices (destroying game on route change, sizing, etc.)
+
+Just tell me:
+Do you want a ready-to-use Angular + Phaser starter template?
+
+
+
+Great! Let’s do Option 1 (Phaser inside Angular) from scratch, step-by-step, as if you're building it for the first time.
+This guide is simple, complete, and production-ready.
+
+🎯 Goal
+
+We will create an Angular component that loads and runs a Phaser 3 game inside the Angular app.
+
+You will get:
+
+✔ A working Angular + Phaser project
+✔ Proper folder structure
+✔ Scene creation
+✔ Game initialization
+✔ Auto cleanup when leaving the page
+
+Let’s begin!
+
+🟦 STEP 1 — Create a New Angular Project
+
+If you don’t already have one:
+
+ng new angular-phaser
+cd angular-phaser
+
+
+If you already have an Angular project, skip this.
+
+🟦 STEP 2 — Install Phaser
+
+Inside your Angular project folder:
+
+npm install phaser
+
+
+This gives you all Phaser features.
+
+🟦 STEP 3 — Create a Phaser Component
+
+This is where the game will run.
+
+ng g c phaser-game
+
+
+Angular now creates:
+
+src/app/phaser-game/
+  phaser-game.component.ts
+  phaser-game.component.html
+  phaser-game.component.css
+
+🟦 STEP 4 — Create a Scene File
+
+We will create a folder for Phaser code:
+
+src/app/phaser/
+
+
+Inside it, create:
+
+main.scene.ts
+
+main.scene.ts
+import Phaser from 'phaser';
+
+export class MainScene extends Phaser.Scene {
+  constructor() {
+    super('MainScene');
+  }
+
+  preload() {
+    // Load assets (optional for now)
+    this.load.image('logo', 'assets/logo.png'); // Put logo.png inside assets folder
+  }
+
+  create() {
+    // Display logo at center
+    this.add.image(400, 300, 'logo');
+  }
+
+  update() {
+    // Runs @ 60 FPS
+  }
+}
+
+
+If you don’t have a logo, create a simple PNG or use any image named logo.png.
+
+🟦 STEP 5 — Game Container in HTML
+phaser-game.component.html
+<div id="gameContainer"></div>
+
+
+This is where Phaser will attach the canvas.
+
+🟦 STEP 6 — Initialize Phaser in Component
+phaser-game.component.ts
+import { Component, AfterViewInit, OnDestroy } from '@angular/core';
+import Phaser from 'phaser';
+import { MainScene } from '../phaser/main.scene';
+
+@Component({
+  selector: 'app-phaser-game',
+  templateUrl: './phaser-game.component.html',
+  styleUrls: ['./phaser-game.component.css'],
+})
+export class PhaserGameComponent implements AfterViewInit, OnDestroy {
+  game!: Phaser.Game;
+
+  ngAfterViewInit() {
+    const config: Phaser.Types.Core.GameConfig = {
+      type: Phaser.AUTO,
+      parent: 'gameContainer', // Attach to our div
+      width: 800,
+      height: 600,
+      backgroundColor: '#1d1d1d',
+      scene: [MainScene],
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 0 },
+          debug: false
+        }
+      }
+    };
+
+    this.game = new Phaser.Game(config);
+  }
+
+  ngOnDestroy() {
+    // Clean up when leaving the Angular route
+    if (this.game) {
+      this.game.destroy(true);
+    }
+  }
+}
+
+🟦 STEP 7 — Add Phaser Component to Router or Template
+Option A — Use a route:
+app-routing.module.ts
+const routes: Routes = [
+  { path: 'game', component: PhaserGameComponent }
+];
+
+
+Then open:
+
+http://localhost:4200/game
+
+Option B — Put component directly into HTML:
+
+app.component.html
+
+<app-phaser-game></app-phaser-game>
+
+🟦 STEP 8 — Add an Asset (Optional but recommended)
+
+Place logo.png inside:
+
+src/assets/logo.png
+
+
+Otherwise, change the preload URL.
+
+🟦 STEP 9 — Run the App
+ng serve
+
+
+Open:
+
+http://localhost:4200/game
+
+
+You should now see:
+
+🎉 Your Phaser game running inside Angular!
+No iframes. No hacks. Clean & stable.
+
+🟩 Extra Features (Optional Now, Useful Later)
+✔ Make game resize with screen
+✔ Add keyboard input
+✔ Add animation
+✔ Add character movement
+✔ Use multiple scenes
+✔ Add loading screen
+✔ Add physics objects
+
+If you want, I can walk you through each of these.

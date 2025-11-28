@@ -291,13 +291,22 @@ document.querySelector('#usernameForm').addEventListener('submit', (e) => {
     e.preventDefault();
     document.querySelector('#usernameForm').style.display = 'none';
     socket.emit('initGame', {
-        username: document.querySelector('#usernameInput').value,
+        username: document.querySelector('#usernameInput').value !== null ? makeid(4) : document.querySelector('#usernameInput').value,
         width: canvas.width,
         height: canvas.height,
         devicePixelRatio
     });
     console.log(e)
 });
+
+function makeid(length) {
+    let result = '';
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
 
 
 //server {

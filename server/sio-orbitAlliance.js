@@ -1,54 +1,22 @@
-const express = require('express');
-const app = express();
-
-// socket.io setup
-const http = require('http');
-const server = http.createServer(app); // <-- create HTTP server
-const {Server} = require('socket.io');
-const io = new Server(server, {
-    pingInterval: 2000,
-    pingTimeout: 5000,
-    cors: {
-        origin: "http://192.168.29.24:4200",
-        methods: ["GET", "POST"]
-    }
-});
-
-const port = 3000;
-
-// app.use(express.static(__dirname)); // serves everything in root
-// app.use('/css', express.static(__dirname + '/css'));
-// app.use('/js', express.static(__dirname + '/js'));
-// app.use('/images', express.static(__dirname + '/images'));
-// app.use('/music', express.static(__dirname + '/music'));
-
-// app.get('/orbitalAlliance.html', (req, res) => {
-//     res.sendFile(__dirname + '/orbitalAlliance.html')
-// });
-
 const backEndPlayers = {};
 const backEndProjectiles = {};
 
-//ROCK PAPER SCISSORS
-const rooms = {};
-
 const SPEED = 5;
-const PROJECTILES_SPEED = 10;
 const RADIUS = 10;
 const PROJECTILE_RADIUS = 5;
 let projectileId = 0;
 
 // Socket.IO connection
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('a user connected to the orbitAlliance');
 
     io.emit('updatePlayers', backEndPlayers);
 
     socket.on('shoot', ({x, y, angle}) => {
         projectileId++;
         const velocity = {
-            x: Math.cos(angle) * PROJECTILES_SPEED,
-            y: Math.sin(angle) * PROJECTILES_SPEED,
+            x: Math.cos(angle) * 5,
+            y: Math.sin(angle) * 5,
         };
         backEndProjectiles[projectileId] = {
             x,
@@ -117,56 +85,6 @@ io.on('connection', (socket) => {
         if (playerSides.top < 0) backEndPlayers[socket.id].y = backEndPlayer.radius;
         if (playerSides.bottom > 576) backEndPlayers[socket.id].y = 576 - backEndPlayer.radius;
     });
-
-
-    // ------ROCK PAPER SCISSORS------
-    socket.on('createGame', () => {
-        const roomId = makeid(6);
-
-        rooms[roomId] = {
-            p1: socket.id,
-            p2: null,
-            p1Choice: null,
-            p2Choice: null
-        };
-        socket.join(roomId);
-        socket.emit('newGame', {roomId});
-    });
-
-    socket.on("joinGame", ({roomId}) => {
-        const room = rooms[roomId];
-        if (!room) return;
-
-        if (!room.p2) {
-            room.p2 = socket.id;
-            socket.join(roomId);
-
-            io.to(roomId).emit("playersConnected", {});
-        }
-    });
-
-    socket.on("p1Choice", (data) => {
-        const room = rooms[data.roomId];
-        room.p1Choice = data.choice;
-
-        socket.to(data.roomId).emit("p1Choice", {choice: data.choice});
-
-        if (room.p2Choice) declareWinner(data.roomId);
-    });
-
-    socket.on("p2Choice", (data) => {
-        const room = rooms[data.roomId];
-        room.p2Choice = data.choice;
-
-        socket.to(data.roomId).emit("p2Choice", {choice: data.choice});
-
-        if (room.p1Choice) declareWinner(data.roomId);
-    });
-
-
-    socket.on('disconnect', (reason) => {
-        console.log('user disconnected');
-    });
 });
 
 //backend ticker
@@ -202,33 +120,3 @@ setInterval(() => {
     io.emit('updateProjectiles', backEndProjectiles);
     io.emit('updatePlayers', backEndPlayers);
 }, 15);
-
-
-// ROCK PAPER SCISSORS
-function makeid(length) {
-    let result = '';
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
-
-function declareWinner(roomId) {
-    const {p1Choice, p2Choice} = rooms[roomId];
-    let winner = "d";
-
-    if (p1Choice !== p2Choice) {
-        if (p1Choice === "rock" && p2Choice === "scissors") winner = "p1";
-        else if (p1Choice === "paper" && p2Choice === "rock") winner = "p1";
-        else if (p1Choice === "scissors" && p2Choice === "paper") winner = "p1";
-        else winner = "p2";
-    }
-    io.sockets.to(roomId).emit("result", {winner});
-    rooms[roomId].p1Choice = null;
-    rooms[roomId].p2Choice = null;
-}
-
-server.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-});

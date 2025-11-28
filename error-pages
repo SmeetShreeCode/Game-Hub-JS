@@ -1,0 +1,417 @@
+Here is a complete list of the common HTTP error status codes (especially the ones that usually have an “error page” like 404, 419, etc.).
+These are grouped by category for clarity.
+
+🔴 4xx — Client Error Pages
+
+These are the most common “error pages” users see.
+
+Code	Meaning
+400	Bad Request
+401	Unauthorized
+402	Payment Required (rare)
+403	Forbidden
+404	Not Found
+405	Method Not Allowed
+406	Not Acceptable
+407	Proxy Authentication Required
+408	Request Timeout
+409	Conflict
+410	Gone
+411	Length Required
+412	Precondition Failed
+413	Payload Too Large
+414	URI Too Long
+415	Unsupported Media Type
+416	Range Not Satisfiable
+417	Expectation Failed
+418	I'm a teapot (joke code, sometimes used)
+419	Page Expired / Session Timeout (used mainly in Laravel & some frameworks)
+421	Misdirected Request
+422	Unprocessable Content (Laravel also uses this often)
+423	Locked
+424	Failed Dependency
+425	Too Early
+426	Upgrade Required
+428	Precondition Required
+429	Too Many Requests (rate limit)
+431	Request Header Fields Too Large
+451	Unavailable For Legal Reasons
+🔴 5xx — Server Error Pages
+
+These occur when the server fails.
+
+Code	Meaning
+500	Internal Server Error
+501	Not Implemented
+502	Bad Gateway
+503	Service Unavailable
+504	Gateway Timeout
+505	HTTP Version Not Supported
+506	Variant Also Negotiates
+507	Insufficient Storage
+508	Loop Detected
+510	Not Extended
+511	Network Authentication Required
+
+
+Here is a clean, simple, short description for every major HTTP error code (4xx + 5xx).
+This is the easiest and clearest version to understand.
+
+✅ 4xx – Client Error Codes (User-side issues)
+400 – Bad Request
+
+The server can’t understand the request due to invalid syntax.
+
+401 – Unauthorized
+
+Login or authentication is required.
+
+402 – Payment Required
+
+Reserved for future use; sometimes used for paid access.
+
+403 – Forbidden
+
+Access is denied even if authenticated.
+
+404 – Not Found
+
+The requested page or resource does not exist.
+
+405 – Method Not Allowed
+
+The HTTP method (GET/POST/etc.) is not allowed for this URL.
+
+406 – Not Acceptable
+
+The server can't return a response matching the client's request format.
+
+407 – Proxy Authentication Required
+
+Client must authenticate with a proxy.
+
+408 – Request Timeout
+
+The client took too long to send the request.
+
+409 – Conflict
+
+Conflict in the request (e.g., editing a resource at the same time).
+
+410 – Gone
+
+The resource used to exist but is permanently deleted.
+
+411 – Length Required
+
+Request is missing the required “Content-Length” header.
+
+412 – Precondition Failed
+
+Preconditions in request headers were not met.
+
+413 – Payload Too Large
+
+Request body is too large for the server to handle.
+
+414 – URI Too Long
+
+The URL is too long.
+
+415 – Unsupported Media Type
+
+The server doesn’t support the media type sent in the request.
+
+416 – Range Not Satisfiable
+
+The requested portion of a file is invalid.
+
+417 – Expectation Failed
+
+Expectation in the “Expect” header cannot be met.
+
+418 – I'm a Teapot (Fun code)
+
+A joke code; server refuses to brew coffee in a teapot.
+
+419 – Page Expired / Session Timeout
+
+Used by some frameworks (Laravel) when CSRF token/session expires.
+
+421 – Misdirected Request
+
+The request was sent to the wrong server.
+
+422 – Unprocessable Content
+
+The server understands the request but validation fails.
+
+423 – Locked
+
+The resource is locked and cannot be accessed.
+
+424 – Failed Dependency
+
+A previous request failed, so this request cannot continue.
+
+425 – Too Early
+
+Server refuses to process because request may be replayed.
+
+426 – Upgrade Required
+
+Client must upgrade protocol (e.g., switch to HTTPS or HTTP/2).
+
+428 – Precondition Required
+
+Server requires conditional requests to avoid conflicts.
+
+429 – Too Many Requests
+
+Rate limit exceeded.
+
+431 – Request Header Fields Too Large
+
+Headers are too large for the server to process.
+
+451 – Unavailable For Legal Reasons
+
+Page blocked due to legal restrictions.
+
+✅ 5xx – Server Error Codes (Server-side issues)
+500 – Internal Server Error
+
+A general server crash or unexpected error.
+
+501 – Not Implemented
+
+Server does not support the requested functionality.
+
+502 – Bad Gateway
+
+Server received an invalid response from upstream server.
+
+503 – Service Unavailable
+
+Server is overloaded or down for maintenance.
+
+504 – Gateway Timeout
+
+Upstream server took too long to respond.
+
+505 – HTTP Version Not Supported
+
+Server does not support the HTTP version used.
+
+506 – Variant Also Negotiates
+
+Configuration error in content negotiation.
+
+507 – Insufficient Storage
+
+Server cannot store the needed data.
+
+508 – Loop Detected
+
+Infinite loop detected while processing request.
+
+510 – Not Extended
+
+Additional extensions are required to fulfill the request.
+
+511 – Network Authentication Required
+
+Network authentication is required (e.g., Wi-Fi login page).
+
+
+
+
+
+
+
+
+<canvas id="gameCanvas" width="300" height="500"></canvas>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let ball = { x: 150, y: 50, radius: 20, dx: 0, dy: 0 };
+
+window.addEventListener('deviceorientation', (e) => {
+    // gamma = left/right tilt
+    ball.dx = e.gamma / 10;
+    // beta = front/back tilt
+    ball.dy = e.beta / 10;
+});
+
+function update() {
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    // simple boundary check
+    if(ball.x < ball.radius) ball.x = ball.radius;
+    if(ball.x > canvas.width - ball.radius) ball.x = canvas.width - ball.radius;
+    if(ball.y < ball.radius) ball.y = ball.radius;
+    if(ball.y > canvas.height - ball.radius) ball.y = canvas.height - ball.radius;
+
+    draw();
+    requestAnimationFrame(update);
+}
+
+function draw() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+    ctx.fillStyle = 'blue';
+    ctx.fill();
+    ctx.closePath();
+}
+
+update();
+</script>
+
+Absolutely! Let’s go step by step and break down this piece of code from scratch so you understand exactly what it does and how you can use it in your game.
+
+The Code
+window.addEventListener('deviceorientation', (e) => {
+    // gamma = left/right tilt
+    ball.dx = e.gamma / 10;
+    // beta = front/back tilt
+    ball.dy = e.beta / 10;
+});
+
+1. window.addEventListener('deviceorientation', callback)
+
+window.addEventListener is a way to listen for events in the browser.
+
+'deviceorientation' is a special event fired when the device (phone/tablet) is tilted.
+
+The callback function (e) => { ... } is called every time the device orientation changes.
+
+So basically: this listens for your phone tilting and gives you the tilt data in e.
+
+2. e.gamma and e.beta
+
+The e object contains the orientation data:
+
+Property	What it measures	Range (approx.)	How it can be used
+e.gamma	Left/right tilt of the device	-90° (left) to 90° (right)	Move your ball/platform horizontally
+e.beta	Front/back tilt of the device	-180° (up) to 180° (down)	Move your ball/platform vertically
+e.alpha	Rotation around vertical axis	0° to 360°	Compass direction, optional for balance game
+
+💡 Tip: For most mobile balance games, you mainly use gamma (left/right) for horizontal movement.
+
+3. ball.dx = e.gamma / 10
+
+ball.dx represents how much the ball moves horizontally per frame.
+
+Dividing by 10 slows the movement down, because e.gamma can be a big number, and moving the ball that much would be too fast.
+
+Example:
+
+e.gamma = 20 → ball.dx = 2 → ball moves 2 pixels per frame.
+
+4. ball.dy = e.beta / 10
+
+Similarly, ball.dy is the vertical movement of the ball.
+
+e.beta tells how much the phone is tilted forward/backward.
+
+Dividing by 10 makes the movement smoother.
+
+5. How this affects your game
+
+Detect tilt: Your game now knows how the player is tilting the phone.
+
+Move the ball: You can use ball.dx and ball.dy in your game loop to update the ball’s position:
+
+ball.x += ball.dx;
+ball.y += ball.dy;
+
+
+Add boundaries: Prevent the ball from falling off the screen.
+
+Things you can do with this
+
+Move a ball or object in response to phone tilt.
+
+Make a balance game like “Ball on a platform.”
+
+Add obstacles or collectibles that the ball interacts with.
+
+Adjust sensitivity by changing the /10 to /20 (slower) or /5 (faster).
+
+6. Mouse / Drag Control
+
+Player can click and drag the ball or an on-screen platform.
+
+Works on both desktop and mobile (with touch events).
+
+let dragging = false;
+
+canvas.addEventListener('mousedown', e => dragging = true);
+canvas.addEventListener('mouseup', e => dragging = false);
+canvas.addEventListener('mousemove', e => {
+    if(dragging){
+        ball.x = e.clientX;
+        ball.y = e.clientY;
+    }
+});
+
+
+✅ Very intuitive for drag-and-drop games.
+✅ Works for touch by also listening to touchstart, touchmove, touchend.
+
+7. Gamepad / Controller Support
+
+Use a physical controller (Xbox, PlayStation, etc.) connected to the device.
+
+JavaScript has the Gamepad API
+.
+
+window.addEventListener("gamepadconnected", (e) => {
+    console.log("Gamepad connected:", e.gamepad);
+});
+
+function update() {
+    const gp = navigator.getGamepads()[0];
+    if(gp){
+        ball.dx = gp.axes[0] * 5; // left stick horizontal
+        ball.dy = gp.axes[1] * 5; // left stick vertical
+    }
+    requestAnimationFrame(update);
+}
+update();
+
+
+✅ Excellent for desktop or advanced users.
+✅ Can give analog control (smooth movement).
+
+8. Voice Control (Experimental)
+
+Use speech recognition for commands like "left", "right", "up", "down".
+
+Uses the Web Speech API:
+
+const recognition = new webkitSpeechRecognition();
+recognition.continuous = true;
+
+recognition.onresult = (event) => {
+    const command = event.results[event.results.length-1][0].transcript.trim();
+    if(command === "left") ball.dx = -5;
+    if(command === "right") ball.dx = 5;
+};
+recognition.start();
+
+
+✅ Fun and experimental!
+❌ Not very precise for fast games.
+
+9. Sensor Fusion / Motion Controller
+
+Use gyroscope, accelerometer, or external sensors (like Arduino, Bluetooth devices).
+
+Could make a custom balance board game or a real-world input controller.
+
+
+https://yoannmoi.net/nipplejs/
