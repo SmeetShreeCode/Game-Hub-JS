@@ -1,3 +1,5 @@
+const socket = io("http://192.168.29.24:3000/connectFour");
+
 // Connect Four Game - Complete Implementation
 class ConnectFourGame {
     constructor() {
@@ -24,6 +26,7 @@ class ConnectFourGame {
         this.screens = {
             splash: document.getElementById('splashScreen'),
             mainMenu: document.getElementById('mainMenu'),
+            friendOption: document.getElementById('friendOptionScreen'),
             aiDifficulty: document.getElementById('aiDifficultyScreen'),
             settings: document.getElementById('settingsScreen'),
             game: document.getElementById('gameScreen'),
@@ -90,6 +93,26 @@ class ConnectFourGame {
         
         this.initGame();
         this.showScreen('game');
+    }
+
+    startOnline(isFriend = true) {
+        if (isFriend) {
+            console.log(isFriend);
+            console.log("welcome to four connect");
+            this.gameWithFriend();
+        }else {
+            console.log(isFriend);
+            console.log("Hello how are you");
+            this.gameWithRandom();
+        }
+    }
+
+    gameWithFriend() {
+
+    }
+
+    gameWithRandom() {
+
     }
 
     startAI(difficulty) {
@@ -349,7 +372,7 @@ class ConnectFourGame {
             }
         }
 
-        // Check if need to block player
+        // Check if you need to block player
         for (let col = 0; col < this.cols; col++) {
             const row = this.getAvailableRow(col);
             if (row !== -1) {
@@ -721,7 +744,8 @@ class ConnectFourGame {
         const playWithFriendBtn = document.getElementById('playWithFriendBtn');
         if (playWithFriendBtn) {
             playWithFriendBtn.addEventListener('click', () => {
-                self.startTwoPlayer();
+                self.showScreen('friendOption');
+                // self.startTwoPlayer();
             });
         }
 
@@ -736,6 +760,28 @@ class ConnectFourGame {
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => {
                 self.showScreen('settings');
+            });
+        }
+
+        // Friend Option buttons
+        const offlineBtn = document.getElementById('offlineBtn');
+        if (offlineBtn) {
+            offlineBtn.addEventListener('click', () => {
+                self.startTwoPlayer();
+            });
+        }
+
+        const onlineFriendBtn = document.getElementById('onlineFriendBtn');
+        if (onlineFriendBtn) {
+            onlineFriendBtn.addEventListener('click', () => {
+                self.startOnline(true);
+            });
+        }
+
+        const onlineRandomBtn = document.getElementById('onlineRandomBtn');
+        if (onlineRandomBtn) {
+            onlineRandomBtn.addEventListener('click', () => {
+                self.startOnline(false);
             });
         }
 
@@ -770,8 +816,12 @@ class ConnectFourGame {
 
         // Back buttons
         const backFromAIBtn = document.getElementById('backFromAIBtn');
-        if (backFromAIBtn) {
+        const backFromFriendBtn = document.getElementById('backFromFriendBtn');
+        if (backFromAIBtn || backFromFriendBtn) {
             backFromAIBtn.addEventListener('click', () => {
+                self.showScreen('mainMenu');
+            });
+            backFromFriendBtn.addEventListener('click', () => {
                 self.showScreen('mainMenu');
             });
         }

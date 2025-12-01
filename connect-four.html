@@ -37,6 +37,33 @@
             </div>
         </div>
 
+        <!-- Friend Option Selection Screen -->
+        <div id="friendOptionScreen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-btn" id="backFromFriendBtn">←</button>
+                <h2>Select Friend Option</h2>
+            </div>
+            <div class="friend-content">
+                <div class="friend-grid">
+                    <button class="friend-btn offline" id="offlineBtn">
+                        <div class="friend-icon">😊</div>
+                        <div class="friend-name">Offline</div>
+                        <div class="friend-desc">Play With Your Friend</div>
+                    </button>
+                    <button class="friend-btn onlineFriend" id="onlineFriendBtn">
+                        <div class="friend-icon">🤔</div>
+                        <div class="friend-name">Online (With Your Friend)</div>
+                        <div class="friend-desc">Play With Your Friend Any Where</div>
+                    </button>
+                    <button class="friend-btn onlineRandom" id="onlineRandomBtn">
+                        <div class="friend-icon">😤</div>
+                        <div class="friend-name">Online (With Random Person)</div>
+                        <div class="friend-desc">Play With Random Person In Online</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- AI Difficulty Selection Screen -->
         <div id="aiDifficultyScreen" class="screen hidden">
             <div class="screen-header">
@@ -149,6 +176,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script src="js/connect-four.js"></script>
 </body>
 </html>

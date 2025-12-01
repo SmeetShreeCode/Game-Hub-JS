@@ -2,7 +2,8 @@ const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 
 // const socket = io();
-const socket = io("http://192.168.29.24:3000");
+// const socket = io("http://192.168.29.24:3000");
+const socket = io("http://192.168.29.24:3000/orbital");
 
 const devicePixelRatio = window.devicePixelRatio || 1;
 
@@ -291,7 +292,7 @@ document.querySelector('#usernameForm').addEventListener('submit', (e) => {
     e.preventDefault();
     document.querySelector('#usernameForm').style.display = 'none';
     socket.emit('initGame', {
-        username: document.querySelector('#usernameInput').value !== null ? makeid(4) : document.querySelector('#usernameInput').value,
+        username: document.querySelector('#usernameInput').value === '' ? makeid(4) : document.querySelector('#usernameInput').value,
         width: canvas.width,
         height: canvas.height,
         devicePixelRatio

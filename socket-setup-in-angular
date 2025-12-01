@@ -1,0 +1,237 @@
+Perfect — I will explain how to use Option 3 (Namespaces) inside Angular, starting from absolute scratch exactly like you requested.
+
+This guide will show you:
+
+✔ How to install Socket.IO in Angular
+✔ How to structure Angular services
+✔ How to connect to /orbital and /rps namespaces
+✔ How to use them in Angular components
+✔ Best practices for multiplayer games in Angular
+
+✅ STEP 1 — Install Socket.IO in Angular
+
+Go to your Angular project root and run:
+
+npm install socket.io-client
+
+✅ STEP 2 — Create a Socket Service
+
+In Angular, all real-time logic should go inside a service, not inside components.
+
+Run:
+
+ng generate service services/socket
+
+
+This will create:
+
+src/app/services/socket.service.ts
+
+✅ STEP 3 — Setup Namespaces Inside the Service
+
+Now open socket.service.ts and add this:
+
+import { Injectable } from '@angular/core';
+import { io, Socket } from 'socket.io-client';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class SocketService {
+
+  private orbitalSocket!: Socket;
+  private rpsSocket!: Socket;
+
+  constructor() { }
+
+  // ----------------------------
+  // ORBITAL ALLIANCE NAMESPACE
+  // ----------------------------
+  connectOrbital() {
+    this.orbitalSocket = io("http://192.168.29.24:3000/orbital");
+
+    this.orbitalSocket.on("connect", () => {
+      console.log("Connected to ORBITAL namespace:", this.orbitalSocket.id);
+    });
+  }
+
+  getOrbitalSocket() {
+    return this.orbitalSocket;
+  }
+
+  // ----------------------------
+  // RPS NAMESPACE
+  // ----------------------------
+  connectRPS() {
+    this.rpsSocket = io("http://192.168.29.24:3000/rps");
+
+    this.rpsSocket.on("connect", () => {
+      console.log("Connected to RPS namespace:", this.rpsSocket.id);
+    });
+  }
+
+  getRPSSocket() {
+    return this.rpsSocket;
+  }
+}
+
+✔ You now have two separate connections:
+
+/orbital
+
+/rps
+
+Both independent.
+
+✅ STEP 4 — Use the Service Inside Components
+
+Now you will create two Angular components:
+
+OrbitalGameComponent
+RpsGameComponent
+
+🟦 STEP 4A — ORBITAL GAME COMPONENT
+
+Generate:
+
+ng generate component components/orbital-game
+
+
+Open:
+
+orbital-game.component.ts
+
+
+Add:
+
+import { Component, OnInit } from '@angular/core';
+import { SocketService } from '../../services/socket.service';
+
+@Component({
+  selector: 'app-orbital-game',
+  templateUrl: './orbital-game.component.html'
+})
+export class OrbitalGameComponent implements OnInit {
+
+  socket: any;
+
+  constructor(private socketService: SocketService) {}
+
+  ngOnInit(): void {
+    this.socketService.connectOrbital();
+    this.socket = this.socketService.getOrbitalSocket();
+
+    this.listenForUpdates();
+  }
+
+  listenForUpdates() {
+    this.socket.on("updatePlayers", (players: any) => {
+      console.log("Orbital Players:", players);
+    });
+
+    this.socket.on("updateProjectiles", (projectiles: any) => {
+      console.log("Orbital Projectiles:", projectiles);
+    });
+  }
+
+  startGame() {
+    this.socket.emit("initGame", {
+      username: "Player123",
+      width: 1024,
+      height: 576
+    });
+  }
+
+  shoot(angle: number) {
+    this.socket.emit("shoot", {
+      x: 100,
+      y: 100,
+      angle
+    });
+  }
+}
+
+
+Done. Orbital Game now fully works inside Angular.
+
+🟩 STEP 4B — RPS GAME COMPONENT
+
+Generate:
+
+ng generate component components/rps-game
+
+
+Open:
+
+rps-game.component.ts
+
+
+Add:
+
+import { Component, OnInit } from '@angular/core';
+import { SocketService } from '../../services/socket.service';
+
+@Component({
+  selector: 'app-rps-game',
+  templateUrl: './rps-game.component.html'
+})
+export class RpsGameComponent implements OnInit {
+
+  socket: any;
+
+  constructor(private socketService: SocketService) {}
+
+  ngOnInit(): void {
+    this.socketService.connectRPS();
+    this.socket = this.socketService.getRPSSocket();
+
+    this.listenEvents();
+  }
+
+  listenEvents() {
+    this.socket.on("newGame", (data: any) => {
+      console.log("Room created:", data.roomId);
+    });
+
+    this.socket.on("result", (data: any) => {
+      console.log("Match result:", data.winner);
+    });
+  }
+
+  createGame() {
+    this.socket.emit("createGame");
+  }
+
+  joinGame(roomId: string) {
+    this.socket.emit("joinGame", { roomId });
+  }
+
+  sendChoice(choice: string, roomId: string) {
+    this.socket.emit("p1Choice", { roomId, choice });
+  }
+}
+
+
+Now RPS works perfectly inside Angular, fully isolated from the Orbital namespace.
+
+✅ STEP 5 — Add These Components to HTML
+
+Example route:
+
+<!-- orbital-game.component.html -->
+<button (click)="startGame()">Start Orbital Game</button>
+
+
+Example route:
+
+<!-- rps-game.component.html -->
+<button (click)="createGame()">Create RPS Room</button>
+
+🚀 Now Your Angular App Supports Two Multiplayer Games at the Same Time
+🎯 Benefits:
+
+✔ Orbital and RPS have their own sockets
+✔ They can have same event names (startGame, updatePlayers, etc.)
+✔ No collisions
+✔ Angular stays clean
+✔ Easy to scale to more games

@@ -54,7 +54,8 @@ function selectChoice() {
 }
 
 
-const socket = io("http://192.168.29.24:3000");
+// const socket = io("http://192.168.29.24:3000");
+const socket = io("http://192.168.29.24:3000/rps");
 let roomId = null;
 let isPlayer1 = false;
 

@@ -9,6 +9,7 @@
     --bg-secondary: #16213E;
     --bg-board: #0F3460;
     --text-primary: #FFFFFF;
+    --text-black: #000000;
     --text-secondary: #B8B8B8;
     --player1: #FF6B6B;
     --player2: #4ECDC4;
@@ -230,25 +231,25 @@ body {
 }
 
 /* AI Difficulty Selection */
-#aiDifficultyScreen {
+#aiDifficultyScreen, #friendOptionScreen {
     padding: 20px;
     overflow-y: auto;
 }
 
-.difficulty-content {
+.difficulty-content, .friend-content {
     max-width: 600px;
     margin: 0 auto;
     padding: 20px 0;
 }
 
-.difficulty-grid {
+.difficulty-grid, .friend-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 20px;
     padding: 20px 0;
 }
 
-.difficulty-btn {
+.difficulty-btn, .friend-btn {
     background: var(--bg-board);
     border: 3px solid transparent;
     border-radius: 15px;
@@ -262,34 +263,34 @@ body {
     box-shadow: 0 4px 15px var(--shadow);
 }
 
-.difficulty-btn:hover, .difficulty-btn:active {
+.difficulty-btn:hover, .friend-btn:hover, .difficulty-btn:active, .friend-btn:active {
     transform: translateY(-5px);
     box-shadow: 0 6px 20px var(--shadow);
 }
 
-.difficulty-btn.easy {
+.difficulty-btn.easy, .friend-btn.offline {
     border-color: var(--success);
 }
 
-.difficulty-btn.easy:hover, .difficulty-btn.easy:active {
+.difficulty-btn.easy:hover, .friend-btn.offline:hover, .difficulty-btn.easy:active, .friend-btn.offline:active {
     background: rgba(74, 222, 128, 0.1);
     border-color: var(--success);
 }
 
-.difficulty-btn.medium {
+.difficulty-btn.medium, .friend-btn.onlineFriend {
     border-color: var(--accent);
 }
 
-.difficulty-btn.medium:hover, .difficulty-btn.medium:active {
+.difficulty-btn.medium:hover, .friend-btn.onlineFriend:hover, .difficulty-btn.medium:active, .friend-btn.onlineFriend:active {
     background: rgba(255, 230, 109, 0.1);
     border-color: var(--accent);
 }
 
-.difficulty-btn.hard {
+.difficulty-btn.hard, .friend-btn.onlineRandom {
     border-color: var(--primary);
 }
 
-.difficulty-btn.hard:hover, .difficulty-btn.hard:active {
+.difficulty-btn.hard:hover, .friend-btn.onlineRandom:hover, .difficulty-btn.hard:active, .friend-btn.onlineRandom:active {
     background: rgba(255, 107, 107, 0.1);
     border-color: var(--primary);
 }
@@ -303,17 +304,17 @@ body {
     border-color: var(--danger);
 }
 
-.difficulty-icon {
+.difficulty-icon, .friend-icon {
     font-size: 3rem;
 }
 
-.difficulty-name {
+.difficulty-name, .friend-name {
     font-size: 1.3rem;
     font-weight: bold;
     color: var(--text-primary);
 }
 
-.difficulty-desc {
+.difficulty-desc, .friend-desc {
     font-size: 0.9rem;
     color: var(--text-secondary);
     text-align: center;
