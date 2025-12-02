@@ -140,8 +140,12 @@
         if (state.stock.length > 0 || (state.drawMode === 3 && state.waste.length > 0)) {
             const back = { faceUp: false };
             const cardEl = makeCardEl(back, { pileId: 'stock', index: 0 });
-            cardEl.style.left = '0px';
-            cardEl.style.top = '0px';
+            const cardW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-w')) || 60;
+            const cardH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-h')) || 84;
+            // Center horizontally and vertically
+            cardEl.style.left = '50%';
+            cardEl.style.top = '50%';
+            cardEl.style.transform = 'translate(-50%, -50%)';
             cardEl.addEventListener('click', drawFromStock);
             cardEl.addEventListener('touchend', (e) => {
                 e.preventDefault();
@@ -159,22 +163,27 @@
         label.textContent = 'Waste';
         node.appendChild(label);
         
+        const cardW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-w')) || 60;
+        
         if (state.drawMode === 1) {
             if (state.waste.length > 0) {
                 const card = state.waste[state.waste.length - 1];
                 const elCard = makeCardEl(card, { pileId: 'waste', index: state.waste.length - 1 });
-                elCard.style.left = '0px';
-                elCard.style.top = '0px';
+                elCard.style.left = '50%';
+                elCard.style.top = '50%';
+                elCard.style.transform = 'translate(-50%, -50%)';
                 node.appendChild(elCard);
             }
         } else {
             // 3-card mode: show last 3 cards
             const visibleStart = Math.max(0, state.waste.length - 3);
             const visibleCards = state.waste.slice(visibleStart);
+            const offset = 18; // Overlap offset
             visibleCards.forEach((card, index) => {
                 const elCard = makeCardEl(card, { pileId: 'waste', index: visibleStart + index });
-                elCard.style.left = (index * 20) + 'px';
-                elCard.style.top = '0px';
+                elCard.style.left = `calc(50% + ${(index - 1) * offset}px)`;
+                elCard.style.top = '50%';
+                elCard.style.transform = 'translate(-50%, -50%)';
                 elCard.style.zIndex = index;
                 node.appendChild(elCard);
             });
@@ -194,8 +203,9 @@
             if (f.length > 0) {
                 const top = f[f.length - 1];
                 const elCard = makeCardEl(top, { pileId: `foundation-${i}`, index: f.length - 1 });
-                elCard.style.left = '0px';
-                elCard.style.top = '0px';
+                elCard.style.left = '50%';
+                elCard.style.top = '50%';
+                elCard.style.transform = 'translate(-50%, -50%)';
                 node.appendChild(elCard);
             }
         }
@@ -207,15 +217,17 @@
             clearChildren(node);
             const pile = state.tableau[i];
             
+            const cardGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-gap')) || 22;
+            
             // Append each card positioned with vertical offset
             for (let j = 0; j < pile.length; j++) {
                 const card = pile[j];
                 const cardEl = makeCardEl(card, { pileId: `tableau-${i}`, index: j });
-                // Vertical stacking with overlap
-                const cardGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card-gap')) || 26;
+                // Vertical stacking with overlap, centered horizontally
                 const y = j * cardGap;
-                cardEl.style.left = '0px';
+                cardEl.style.left = '50%';
                 cardEl.style.top = y + 'px';
+                cardEl.style.transform = 'translateX(-50%)';
                 node.appendChild(cardEl);
             }
         }

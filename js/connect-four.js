@@ -14,6 +14,8 @@ class ConnectFourGame {
         this.moveCount = 0;
         this.aiDifficulty = 'medium';
         this.lastDroppedPiece = null; // Track last dropped piece for animation
+        this.winningPlayer = null; // Track which player won (for online games)
+        this.winCount = 4; // Default to 4 for Connect Four
 
         // Settings
         this.settings = {
@@ -161,6 +163,12 @@ class ConnectFourGame {
         this.moveHistory = [];
         this.moveCount = 0;
         this.lastDroppedPiece = null;
+        this.winningPlayer = null; // Reset winning player
+        
+        // Ensure winCount is set (default to 4 for Connect Four)
+        if (!this.winCount) {
+            this.winCount = 4;
+        }
 
         this.renderBoard();
         this.updateDisplay();
@@ -252,6 +260,9 @@ class ConnectFourGame {
         }, 500);
 
         if (this.checkWin(row, col)) {
+            // Store which player won (currentPlayer at the time of win)
+            this.winningPlayer = this.currentPlayer;
+            console.log('Win detected! Winning player:', this.winningPlayer, 'isPlayer1:', isPlayer1, 'gameMode:', this.gameMode);
             this.handleWin();
             return;
         }
@@ -694,8 +705,10 @@ class ConnectFourGame {
         if (won) {
             icon.textContent = '🎉';
             if (this.gameMode === 'online') {
-                // Check if current player won
-                const playerWon = (isPlayer1 && this.currentPlayer === 1) || (!isPlayer1 && this.currentPlayer === 2);
+                // Use winningPlayer if available, otherwise fall back to currentPlayer
+                const winner = this.winningPlayer !== null ? this.winningPlayer : this.currentPlayer;
+                // Check if we (the local player) won
+                const playerWon = (isPlayer1 && winner === 1) || (!isPlayer1 && winner === 2);
                 if (playerWon) {
                     title.textContent = 'You Win!';
                     message.textContent = 'Congratulations!';
@@ -704,11 +717,12 @@ class ConnectFourGame {
                     title.textContent = 'You Lost!';
                     message.textContent = 'Better luck next time!';
                 }
-            } else if (this.gameMode === 'ai' && this.currentPlayer === 2) {
+            } else if (this.gameMode === 'ai' && this.winningPlayer === 2) {
                 title.textContent = 'AI Wins!';
                 message.textContent = 'Better luck next time!';
             } else {
-                title.textContent = this.gameMode === 'ai' ? 'You Win!' : 'Player ' + this.currentPlayer + ' Wins!';
+                const winner = this.winningPlayer !== null ? this.winningPlayer : this.currentPlayer;
+                title.textContent = this.gameMode === 'ai' ? 'You Win!' : 'Player ' + winner + ' Wins!';
                 message.textContent = 'Congratulations!';
             }
         } else {
