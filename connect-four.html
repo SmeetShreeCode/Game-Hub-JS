@@ -96,6 +96,48 @@
             </div>
         </div>
 
+        <!-- Friend Settings Screen -->
+        <div id="friendSettingsScreen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-btn" id="backFromFriendSettingsBtn">←</button>
+                <h2>Select Settings Friend</h2>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item" id="createRoomDiv">
+                    <div id="createCode">
+                        <label>Create Room</label>
+                        <button id="createRoomBtn">Create</button>
+                    </div>
+                    <div id="codeCreated" style="display: none">
+                        <label>Room Created</label>
+                        Here Is The Code Share With Your Friend: <b id="code"></b>
+                        <button id="copyCode">Copy!</button>
+                    </div>
+                </div>
+                <div class="setting-item" id="joinRoomDiv">
+                    <label>Join Room</label>
+                    <input type="text" id="joinTheRoom">
+                    <button id="joinRoomBtn">Join Room</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Random Settings Screen -->
+        <div id="randomSettingsScreen" class="screen hidden">
+            <div class="screen-header">
+                <button class="back-btn" id="backFromRandomSettingsBtn">←</button>
+                <h2>Select Settings Friend</h2>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <label>Player 1</label>
+                </div>
+                <div class="setting-item">
+                    <label>Player 2</label>
+                </div>
+            </div>
+        </div>
+
         <!-- Settings Screen -->
         <div id="settingsScreen" class="screen hidden">
             <div class="screen-header">

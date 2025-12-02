@@ -14,7 +14,7 @@ class ConnectFourGame {
         this.moveCount = 0;
         this.aiDifficulty = 'medium';
         this.lastDroppedPiece = null; // Track last dropped piece for animation
-        
+
         // Settings
         this.settings = {
             sound: true,
@@ -27,6 +27,8 @@ class ConnectFourGame {
             splash: document.getElementById('splashScreen'),
             mainMenu: document.getElementById('mainMenu'),
             friendOption: document.getElementById('friendOptionScreen'),
+            friendSettings: document.getElementById('friendSettingsScreen'),
+            randomSettings: document.getElementById('randomSettingsScreen'),
             aiDifficulty: document.getElementById('aiDifficultyScreen'),
             settings: document.getElementById('settingsScreen'),
             game: document.getElementById('gameScreen'),
@@ -67,7 +69,7 @@ class ConnectFourGame {
     loadSettings() {
         const saved = localStorage.getItem('connect4_settings');
         if (saved) {
-            this.settings = { ...this.settings, ...JSON.parse(saved) };
+            this.settings = {...this.settings, ...JSON.parse(saved)};
         }
         this.applySettings();
     }
@@ -90,7 +92,7 @@ class ConnectFourGame {
         this.cols = 7;
         this.winCount = 4;
         document.getElementById('aiDifficultyDisplay').style.display = 'none';
-        
+
         this.initGame();
         this.showScreen('game');
     }
@@ -99,16 +101,26 @@ class ConnectFourGame {
         if (isFriend) {
             console.log(isFriend);
             console.log("welcome to four connect");
-            this.gameWithFriend();
-        }else {
+            this.showScreen('friendSettings');
+        } else {
             console.log(isFriend);
             console.log("Hello how are you");
-            this.gameWithRandom();
+            socket.emit("joinRandom");
+            this.showScreen('randomSettings');
         }
     }
 
-    gameWithFriend() {
+    gameWithFriend(isCreate = true) {
+        if (isCreate) {
+            isPlayer1 = true;
+            socket.emit("createGame");
+        } else {
+            const id = document.getElementById('joinTheRoom').value.trim();
+            if (!id) return;
 
+            roomId = id;
+            socket.emit("joinGame", {roomId});
+        }
     }
 
     gameWithRandom() {
@@ -121,11 +133,11 @@ class ConnectFourGame {
         this.rows = 6;
         this.cols = 7;
         this.winCount = 4;
-        
+
         // Show AI difficulty in game
         document.getElementById('aiDifficultyDisplay').style.display = 'flex';
         document.getElementById('aiDifficultyText').textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
-        
+
         this.initGame();
         this.showScreen('game');
     }
@@ -138,7 +150,7 @@ class ConnectFourGame {
         this.moveHistory = [];
         this.moveCount = 0;
         this.lastDroppedPiece = null;
-        
+
         this.renderBoard();
         this.updateDisplay();
         this.updatePlayerIndicator();
@@ -157,7 +169,7 @@ class ConnectFourGame {
                 cell.className = 'board-cell';
                 cell.dataset.row = row;
                 cell.dataset.col = col;
-                
+
                 if (this.board[row][col] === 1) {
                     cell.classList.add('player1');
                     // Only animate if this is the newly dropped piece
@@ -185,18 +197,25 @@ class ConnectFourGame {
         // Prevent AI from making moves through UI, but allow programmatic AI moves
         if (this.gameMode === 'ai' && this.currentPlayer === 2 && !isAIMove) return;
 
+        if (ConnectFour.gameMode === "online") {
+            if (isPlayer1 && ConnectFour.currentPlayer !== 1) return;
+            if (!isPlayer1 && ConnectFour.currentPlayer !== 2) return;
+
+            socket.emit("makeMove", { roomId, col });
+        }
+
         const row = this.getAvailableRow(col);
         if (row === -1) return;
 
         this.board[row][col] = this.currentPlayer;
-        this.moveHistory.push({ row, col, player: this.currentPlayer });
+        this.moveHistory.push({row, col, player: this.currentPlayer});
         this.moveCount++;
-        this.lastDroppedPiece = { row, col };
-        
+        this.lastDroppedPiece = {row, col};
+
         this.playSound('drop');
         this.vibrate(50);
         this.renderBoard(this.lastDroppedPiece);
-        
+
         // Remove animation class after animation completes
         setTimeout(() => {
             const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
@@ -204,7 +223,7 @@ class ConnectFourGame {
                 cell.classList.remove('drop-animate');
             }
         }, 500);
-        
+
         if (this.checkWin(row, col)) {
             this.handleWin();
             return;
@@ -258,7 +277,7 @@ class ConnectFourGame {
 
         for (const direction of directions) {
             let count = 1;
-            const winningCells = [{ row, col }];
+            const winningCells = [{row, col}];
 
             for (const [dx, dy] of direction) {
                 let r = row + dx;
@@ -269,8 +288,8 @@ class ConnectFourGame {
                     r >= 0 && r < this.rows &&
                     c >= 0 && c < this.cols &&
                     this.board[r][c] === this.currentPlayer
-                ) {
-                    winningCells.push({ row: r, col: c });
+                    ) {
+                    winningCells.push({row: r, col: c});
                     tempCount++;
                     r += dx;
                     c += dy;
@@ -289,7 +308,7 @@ class ConnectFourGame {
     }
 
     highlightWinningCells(cells) {
-        cells.forEach(({ row, col }) => {
+        cells.forEach(({row, col}) => {
             const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
             if (cell) {
                 cell.classList.add('winning');
@@ -307,7 +326,7 @@ class ConnectFourGame {
         if (this.currentPlayer !== 2) return;
 
         let col = -1;
-        
+
         try {
             switch (this.aiDifficulty) {
                 case 'easy':
@@ -420,14 +439,14 @@ class ConnectFourGame {
     minimax(board, depth, maximizingPlayer, alpha, beta) {
         // Check for terminal states
         const winner = this.evaluateBoard(board);
-        if (winner === 2) return { score: 1000, column: -1 };
-        if (winner === 1) return { score: -1000, column: -1 };
+        if (winner === 2) return {score: 1000, column: -1};
+        if (winner === 1) return {score: -1000, column: -1};
         if (this.isBoardFull(board)) {
-            return { score: 0, column: -1 };
+            return {score: 0, column: -1};
         }
-        
+
         if (depth === 0) {
-            return { score: this.evaluatePosition(board), column: -1 };
+            return {score: this.evaluatePosition(board), column: -1};
         }
 
         if (maximizingPlayer) {
@@ -463,7 +482,7 @@ class ConnectFourGame {
                 }
             }
 
-            return { score: maxScore, column: bestCol };
+            return {score: maxScore, column: bestCol};
         } else {
             let minScore = Infinity;
             let bestCol = -1;
@@ -497,7 +516,7 @@ class ConnectFourGame {
                 }
             }
 
-            return { score: minScore, column: bestCol };
+            return {score: minScore, column: bestCol};
         }
     }
 
@@ -542,7 +561,7 @@ class ConnectFourGame {
                     r >= 0 && r < this.rows &&
                     c >= 0 && c < this.cols &&
                     board[r][c] === player
-                ) {
+                    ) {
                     count++;
                     r += dx;
                     c += dy;
@@ -555,7 +574,7 @@ class ConnectFourGame {
 
     evaluatePosition(board) {
         let score = 0;
-        
+
         // Evaluate based on potential connections and threats
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
@@ -571,11 +590,11 @@ class ConnectFourGame {
                 }
             }
         }
-        
+
         // Check for potential wins/threats
         score += this.evaluateThreats(board, 2) * 50;
         score -= this.evaluateThreats(board, 1) * 50;
-        
+
         return score;
     }
 
@@ -600,7 +619,7 @@ class ConnectFourGame {
                                 r >= 0 && r < this.rows &&
                                 c >= 0 && c < this.cols &&
                                 board[r][c] === player
-                            ) {
+                                ) {
                                 count++;
                                 r += dx;
                                 c += dy;
@@ -667,7 +686,7 @@ class ConnectFourGame {
     // Utility Functions
     undoMove() {
         if (this.moveHistory.length === 0 || !this.gameActive) return;
-        
+
         const lastMove = this.moveHistory.pop();
         this.board[lastMove.row][lastMove.col] = 0;
         this.moveCount--;
@@ -693,6 +712,10 @@ class ConnectFourGame {
         } else {
             this.startTwoPlayer();
         }
+    }
+
+    showCode(code){
+        console.log(code);
     }
 
     updateDisplay() {
@@ -739,7 +762,7 @@ class ConnectFourGame {
     setupEventListeners() {
         // Store reference to this for event listeners
         const self = this;
-        
+
         // Main menu buttons
         const playWithFriendBtn = document.getElementById('playWithFriendBtn');
         if (playWithFriendBtn) {
@@ -814,6 +837,21 @@ class ConnectFourGame {
             });
         }
 
+        // Room Setting buttons
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        if (createRoomBtn) {
+            createRoomBtn.addEventListener('click', () => {
+                self.gameWithFriend();
+            });
+        }
+
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        if (joinRoomBtn) {
+            joinRoomBtn.addEventListener('click', () => {
+                self.gameWithFriend(false);
+            });
+        }
+
         // Back buttons
         const backFromAIBtn = document.getElementById('backFromAIBtn');
         const backFromFriendBtn = document.getElementById('backFromFriendBtn');
@@ -827,9 +865,17 @@ class ConnectFourGame {
         }
 
         const backFromSettingsBtn = document.getElementById('backFromSettingsBtn');
-        if (backFromSettingsBtn) {
+        const backFromFriendSettingsBtn = document.getElementById('backFromFriendSettingsBtn');
+        const backFromRandomSettingsBtn = document.getElementById('backFromRandomSettingsBtn');
+        if (backFromSettingsBtn || backFromFriendSettingsBtn || backFromRandomSettingsBtn) {
             backFromSettingsBtn.addEventListener('click', () => {
                 self.showScreen('mainMenu');
+            });
+            backFromFriendSettingsBtn.addEventListener('click', () => {
+                self.showScreen('friendOption');
+            });
+            backFromRandomSettingsBtn.addEventListener('click', () => {
+                self.showScreen('friendOption');
             });
         }
 
@@ -899,8 +945,56 @@ class ConnectFourGame {
     }
 }
 
+let ConnectFour;
+
 // Initialize game when page loads
 window.addEventListener('DOMContentLoaded', () => {
-    new ConnectFourGame();
+    ConnectFour=new ConnectFourGame();
 });
 
+let roomId = null;
+let isPlayer1 = false;
+let isOnline = false;
+
+socket.on("newGame", ({roomId: id}) => {
+    console.log(id);
+    document.getElementById("createCode").style.display = 'none';
+    document.getElementById("codeCreated").style.display = 'block';
+    roomId = id;
+    let copyButton = document.getElementById("copyCode");
+    copyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(roomId).then(() => {
+            console.log('Copied to clipboard successfully!');
+        }, (e) => {
+            console.error('Could not copy to clipboard!', e);
+        });
+    });
+    document.getElementById('code').innerHTML = roomId;
+    document.getElementById("joinRoomDiv").innerHTML = 'Waiting For Opponent To Join The Room...!';
+    ConnectFour.showCode(roomId);
+});
+
+socket.on("playersConnected", () => {
+    console.log('playersConnected');
+    ConnectFour.gameMode = "online";
+    isOnline = true;
+
+    // Player1 always starts
+    ConnectFour.currentPlayer = 1;
+
+    ConnectFour.initGame();
+    ConnectFour.showScreen("game");
+});
+
+socket.on("opponentMove", ({ col }) => {
+    ConnectFour.makeMove(col, true);
+});
+
+socket.on("waitingForRandom", () => {
+    document.getElementById("randomStatus").textContent = "Searching...";
+});
+
+socket.on("opponentLeft", () => {
+    alert("Opponent left the match.");
+    ConnectFour.showScreen("mainMenu");
+});
