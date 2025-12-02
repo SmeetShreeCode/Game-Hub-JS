@@ -207,6 +207,11 @@ class ConnectFourGame {
         if (!this.gameActive) return;
         // Prevent AI from making moves through UI, but allow programmatic AI moves
         if (this.gameMode === 'ai' && this.currentPlayer === 2 && !isAIMove) return;
+// FIX: Correct player turn in online opponent move
+        if (this.gameMode === "online" && isOpponentMove) {
+            this.currentPlayer = isPlayer1 ? 2 : 1;  // opponent
+        }
+
 
         // Online mode validation
         if (this.gameMode === "online" && !isOpponentMove) {
@@ -223,7 +228,7 @@ class ConnectFourGame {
                 return;
             }
             // Send move to server
-            socket.emit("makeMove", { roomId, col });
+            socket.emit("makeMove", {roomId, col});
         }
 
         const row = this.getAvailableRow(col);
@@ -719,7 +724,7 @@ class ConnectFourGame {
     // Utility Functions
     undoMove() {
         if (this.moveHistory.length === 0 || !this.gameActive) return;
-        
+
         // Disable undo in online mode
         if (this.gameMode === 'online') {
             alert('Undo is not available in online games.');
@@ -761,7 +766,7 @@ class ConnectFourGame {
             this.showScreen('mainMenu');
             return;
         }
-        
+
         if (this.gameMode === 'ai') {
             this.startAI(this.aiDifficulty);
         } else {
@@ -769,7 +774,7 @@ class ConnectFourGame {
         }
     }
 
-    showCode(code){
+    showCode(code) {
         console.log(code);
     }
 
@@ -1025,7 +1030,7 @@ let ConnectFour;
 
 // Initialize game when page loads
 window.addEventListener('DOMContentLoaded', () => {
-    ConnectFour=new ConnectFourGame();
+    ConnectFour = new ConnectFourGame();
 });
 
 let roomId = null;
@@ -1036,19 +1041,19 @@ socket.on("newGame", ({roomId: id}) => {
     console.log("Room created:", id);
     roomId = id;
     isPlayer1 = true; // Creator is always player 1
-    
+
     const createCodeDiv = document.getElementById("createCode");
     const codeCreatedDiv = document.getElementById("codeCreated");
     const joinRoomDiv = document.getElementById("joinRoomDiv");
-    
+
     if (createCodeDiv) createCodeDiv.style.display = 'none';
     if (codeCreatedDiv) codeCreatedDiv.style.display = 'block';
-    
+
     const codeElement = document.getElementById('code');
     if (codeElement) codeElement.innerHTML = roomId;
-    
+
     if (joinRoomDiv) joinRoomDiv.innerHTML = 'Waiting For Opponent To Join The Room...!';
-    
+
     // Setup copy button
     const copyButton = document.getElementById("copyCode");
     if (copyButton) {
@@ -1076,12 +1081,13 @@ socket.on("newGame", ({roomId: id}) => {
             });
         });
     }
-    
+
     if (ConnectFour) ConnectFour.showCode(roomId);
 });
 
-socket.on("playersConnected", ({ roomId: serverRoomId, isPlayer1: serverIsPlayer1 } = {}) => {
+socket.on("playersConnected", ({roomId: serverRoomId, isPlayer1: serverIsPlayer1} = {}) => {
     console.log('playersConnected', serverRoomId, serverIsPlayer1);
+
     ConnectFour.gameMode = "online";
     isOnline = true;
 
@@ -1112,7 +1118,7 @@ socket.on("playersConnected", ({ roomId: serverRoomId, isPlayer1: serverIsPlayer
 
     ConnectFour.initGame();
     ConnectFour.showScreen("game");
-    
+
     // Update player indicators for online mode
     const player1Indicator = document.getElementById('player1Indicator');
     const player2Indicator = document.getElementById('player2Indicator');
@@ -1120,7 +1126,7 @@ socket.on("playersConnected", ({ roomId: serverRoomId, isPlayer1: serverIsPlayer
         player1Indicator.textContent = isPlayer1 ? "You (P1)" : "Opponent (P1)";
         player2Indicator.textContent = isPlayer1 ? "Opponent (P2)" : "You (P2)";
     }
-    
+
     // Update random status if we were in random matching
     const randomStatus = document.getElementById('randomStatus');
     if (randomStatus) {
@@ -1128,11 +1134,12 @@ socket.on("playersConnected", ({ roomId: serverRoomId, isPlayer1: serverIsPlayer
     }
 });
 
-socket.on("opponentMove", ({ col }) => {
+socket.on("opponentMove", ({col}) => {
     console.log("Opponent made move:", col);
     // Make the move as opponent (player 2 if we're player 1, player 1 if we're player 2)
     ConnectFour.makeMove(col, false, true);
 });
+
 
 socket.on("waitingForRandom", () => {
     const randomStatus = document.getElementById("randomStatus");
@@ -1154,7 +1161,7 @@ socket.on("opponentLeft", () => {
     }
 });
 
-socket.on("joinGameError", ({ message }) => {
+socket.on("joinGameError", ({message}) => {
     alert(message || "Error joining game. Please try again.");
     // Stay on friend settings screen
     if (ConnectFour) {

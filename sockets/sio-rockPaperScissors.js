@@ -1,4 +1,4 @@
-module.exports = function(rps) {
+module.exports = function (rps) {
 //ROCK PAPER SCISSORS
     const rooms = {};
 

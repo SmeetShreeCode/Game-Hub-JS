@@ -1,4 +1,4 @@
-module.exports = function(connectFour) {
+module.exports = function (connectFour) {
 
     const rooms = {};
     let randomQueue = null;
@@ -22,12 +22,12 @@ module.exports = function(connectFour) {
             console.log("Attempting to join room:", roomId);
             const room = rooms[roomId];
             if (!room) {
-                socket.emit("joinGameError", { message: "Room not found. Please check the room code." });
+                socket.emit("joinGameError", {message: "Room not found. Please check the room code."});
                 return;
             }
 
             if (room.p2) {
-                socket.emit("joinGameError", { message: "Room is full. This room already has 2 players." });
+                socket.emit("joinGameError", {message: "Room is full. This room already has 2 players."});
                 return;
             }
 
@@ -35,11 +35,11 @@ module.exports = function(connectFour) {
             socket.join(roomId);
 
             // Emit to both players with their player info
-            const socket1 = connectFour.sockets.sockets.get(room.p1);
-            const socket2 = connectFour.sockets.sockets.get(room.p2);
-            
-            if (socket1) socket1.emit("playersConnected", { roomId, isPlayer1: true });
-            if (socket2) socket2.emit("playersConnected", { roomId, isPlayer1: false });
+            const socket1 = connectFour.sockets.get(room.p1);
+            const socket2 = connectFour.sockets.get(room.p2);
+
+            if (socket1) socket1.emit("playersConnected", {roomId, isPlayer1: true});
+            if (socket2) socket2.emit("playersConnected", {roomId, isPlayer1: false});
         });
 
         socket.on("joinRandom", () => {
@@ -52,23 +52,23 @@ module.exports = function(connectFour) {
                 randomQueue = null;
 
                 const roomId = makeId(6);
-                rooms[roomId] = { p1: player1, p2: player2 };
+                rooms[roomId] = {p1: player1, p2: player2};
 
-                const socket1 = connectFour.sockets.sockets.get(player1);
-                const socket2 = connectFour.sockets.sockets.get(player2);
-                
+                const socket1 = connectFour.sockets.get(player1);
+                const socket2 = connectFour.sockets.get(player2);
+
                 if (socket1) socket1.join(roomId);
                 if (socket2) socket2.join(roomId);
 
                 // Emit to both players with their player info
-                if (socket1) socket1.emit("playersConnected", { roomId, isPlayer1: true });
-                if (socket2) socket2.emit("playersConnected", { roomId, isPlayer1: false });
+                if (socket1) socket1.emit("playersConnected", {roomId, isPlayer1: true});
+                if (socket2) socket2.emit("playersConnected", {roomId, isPlayer1: false});
             }
         });
 
-        socket.on("makeMove", ({ roomId, col }) => {
+        socket.on("makeMove", ({roomId, col}) => {
             if (roomId && rooms[roomId]) {
-                socket.to(roomId).emit("opponentMove", { col });
+                socket.to(roomId).emit("opponentMove", {col});
             }
         });
 
