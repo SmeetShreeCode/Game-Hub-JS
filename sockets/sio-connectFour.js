@@ -19,16 +19,27 @@ module.exports = function(connectFour) {
         });
 
         socket.on("joinGame", ({roomId}) => {
-            console.log(roomId);
+            console.log("Attempting to join room:", roomId);
             const room = rooms[roomId];
-            if (!room) return;
-
-            if (!room.p2) {
-                room.p2 = socket.id;
-                socket.join(roomId);
-
-                connectFour.to(roomId).emit("playersConnected", {});
+            if (!room) {
+                socket.emit("joinGameError", { message: "Room not found. Please check the room code." });
+                return;
             }
+
+            if (room.p2) {
+                socket.emit("joinGameError", { message: "Room is full. This room already has 2 players." });
+                return;
+            }
+
+            room.p2 = socket.id;
+            socket.join(roomId);
+
+            // Emit to both players with their player info
+            const socket1 = connectFour.sockets.sockets.get(room.p1);
+            const socket2 = connectFour.sockets.sockets.get(room.p2);
+            
+            if (socket1) socket1.emit("playersConnected", { roomId, isPlayer1: true });
+            if (socket2) socket2.emit("playersConnected", { roomId, isPlayer1: false });
         });
 
         socket.on("joinRandom", () => {
@@ -43,15 +54,22 @@ module.exports = function(connectFour) {
                 const roomId = makeId(6);
                 rooms[roomId] = { p1: player1, p2: player2 };
 
-                connectFour.sockets.sockets.get(player1).join(roomId);
-                connectFour.sockets.sockets.get(player2).join(roomId);
+                const socket1 = connectFour.sockets.sockets.get(player1);
+                const socket2 = connectFour.sockets.sockets.get(player2);
+                
+                if (socket1) socket1.join(roomId);
+                if (socket2) socket2.join(roomId);
 
-                connectFour.to(roomId).emit("playersConnected");
+                // Emit to both players with their player info
+                if (socket1) socket1.emit("playersConnected", { roomId, isPlayer1: true });
+                if (socket2) socket2.emit("playersConnected", { roomId, isPlayer1: false });
             }
         });
 
         socket.on("makeMove", ({ roomId, col }) => {
-            socket.to(roomId).emit("opponentMove", { col });
+            if (roomId && rooms[roomId]) {
+                socket.to(roomId).emit("opponentMove", { col });
+            }
         });
 
         socket.on('disconnect', (reason) => {

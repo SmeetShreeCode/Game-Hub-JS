@@ -1,0 +1,623 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Flow Mini — Spiral Level 1 (Vanilla JS)</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        :root {
+            --tile-gap: 8px;
+            --board-bg: #f8fafc;
+            --tile-bg: #fff;
+            --wall-color: #111;
+            --size: 56px;
+        }
+
+        body {
+            font-family: Inter, system-ui, Arial;
+            background: linear-gradient(180deg, #e6f8ff, #f8fbff);
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: min(820px, 96vw);
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(10, 20, 40, 0.08);
+            padding: 16px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px
+        }
+
+        .title {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 20px
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center
+        }
+
+        button {
+            border: 0;
+            background: #eef2ff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600
+        }
+
+        button.primary {
+            background: linear-gradient(90deg, #4f46e5, #06b6d4);
+            color: white
+        }
+
+        .board-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+            background: linear-gradient(180deg, #ffffff, #f3f6ff);
+            border-radius: 12px
+        }
+
+        .board {
+            display: grid;
+            gap: var(--tile-gap);
+            background: var(--board-bg);
+            padding: 12px;
+            border-radius: 10px
+        }
+
+        .cell {
+            width: var(--size);
+            height: var(--size);
+            background: var(--tile-bg);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            user-select: none;
+            touch-action: none;
+            border: 1px solid rgba(15, 23, 42, 0.06)
+        }
+
+        .cell.wall {
+            background: var(--wall-color);
+            border-radius: 6px;
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.02)
+        }
+
+        .num-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #fff;
+            box-shadow: 0 6px 12px rgba(10, 20, 40, 0.08)
+        }
+
+        .path-seg {
+            position: absolute;
+            inset: 2px;
+            border-radius: 8px;
+            pointer-events: none;
+            transition: background .08s linear
+        }
+
+        .info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 10px;
+            justify-content: space-between
+        }
+
+        .small {
+            font-size: 13px;
+            color: #334155
+        }
+
+        .status {
+            font-weight: 700
+        }
+
+        .win-banner {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #ecfccb, #bbf7d0);
+            color: #065f46;
+            font-weight: 700;
+            text-align: center
+        }
+
+        @media (max-width:520px) {
+            :root {
+                --size: 42px;
+                --tile-gap: 6px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card" id="app">
+        <div class="header">
+            <div>
+                <div class="title">Flow Mini — Spiral Level 1</div>
+                <div class="small">1→2→3… fill all tiles. No overlaps. Backtrack allowed.</div>
+            </div>
+            <div class="controls">
+                <button id="prevLevel">Prev</button>
+                <button id="nextLevel" class="primary">Next</button>
+                <button id="resetBtn">Reset</button>
+            </div>
+        </div>
+
+        <div class="board-wrap">
+            <div id="board" class="board"></div>
+        </div>
+
+        <div class="info">
+            <div class="small">Level <span id="levelNum">1</span></div>
+            <div class="small">Next: <span id="nextBadge"
+                    style="display:inline-block;width:34px;height:24px;border-radius:6px;text-align:center;line-height:24px;color:#fff;font-weight:700"></span>
+            </div>
+            <div class="small">Moves: <span id="moves">0</span></div>
+            <div style="flex:1"></div>
+            <div id="hint" class="small status"></div>
+        </div>
+
+        <div id="winDiv" class="win-banner" style="display:none">🎉 Level Complete — Nice!</div>
+    </div>
+
+    <script>
+        /* ---------- WIN EFFECT CSS ---------- */
+        const style = document.createElement("style");
+        style.textContent = `
+        .win-glow { animation: winPulse 0.8s ease-out 3; }
+        @keyframes winPulse {
+            0% { box-shadow: 0 0 0 rgba(34,197,94,0.0); }
+            50% { box-shadow: 0 0 40px rgba(34,197,94,0.6); }
+            100% { box-shadow: 0 0 0 rgba(34,197,94,0.0); }
+        }
+        .cell.win-flash .path-seg { background: #4ade80 !important; }
+        .win-banner { animation: winFade 0.8s ease forwards; }
+        @keyframes winFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        `;
+        document.head.appendChild(style);
+
+        function launchConfetti() {
+            for (let i = 0; i < 40; i++) {
+                const c = document.createElement('div');
+                c.style.position = 'fixed';
+                c.style.width = '8px';
+                c.style.height = '8px';
+                c.style.left = (Math.random() * window.innerWidth) + 'px';
+                c.style.top = '-20px';
+                c.style.background = `hsl(${Math.random() * 360}, 90%, 60%)`;
+                c.style.borderRadius = '2px';
+                c.style.opacity = 0.9;
+                c.style.pointerEvents = 'none';
+                c.style.transform = `rotate(${Math.random() * 360}deg)`;
+                c.style.transition = `transform 1.2s linear, top 1.2s ease-out`;
+                document.body.appendChild(c);
+                setTimeout(() => c.style.top = window.innerHeight + 'px', 50);
+                setTimeout(() => c.remove(), 1600);
+            }
+        }
+
+        /* ---------- LEVEL DATA ---------- */
+
+        const levels = [
+            {
+                size: 7,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [5, 5], color: '#ef4444' },
+                    { num: 2, pos: [3, 3], color: '#3b82f6' },
+                    { num: 3, pos: [2, 6], color: '#10b981' },
+                    { num: 4, pos: [0, 4], color: '#f59e0b' },
+                    { num: 5, pos: [4, 0], color: '#8b5cf6' },
+                    { num: 6, pos: [1, 5], color: '#14b8a6' },
+                    { num: 7, pos: [2, 2], color: '#ec4899' },
+                    { num: 8, pos: [5, 1], color: '#0ea5e9' },
+                    { num: 9, pos: [6, 2], color: '#22c55e' },
+                    { num: 10, pos: [4, 4], color: '#f97316' }
+                ]
+            },
+            {
+                size: 4,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [0, 0], color: '#ef4444' },
+                    { num: 2, pos: [0, 3], color: '#3b82f6' },
+                    { num: 3, pos: [3, 3], color: '#10b981' },
+                    { num: 4, pos: [3, 0], color: '#f59e0b' }
+                ]
+            },
+            {
+                size: 4,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [0, 1], color: '#ef4444' },
+                    { num: 2, pos: [0, 3], color: '#3b82f6' },
+                    { num: 3, pos: [2, 3], color: '#10b981' },
+                    { num: 4, pos: [2, 0], color: '#f59e0b' },
+                    { num: 5, pos: [3, 1], color: '#8b5cf6' }
+                ]
+            },
+            {
+                size: 5,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [0, 0], color: '#ef4444' },
+                    { num: 2, pos: [0, 4], color: '#3b82f6' },
+                    { num: 3, pos: [2, 4], color: '#10b981' },
+                    { num: 4, pos: [2, 0], color: '#f59e0b' },
+                    { num: 5, pos: [4, 0], color: '#8b5cf6' },
+                    { num: 6, pos: [4, 4], color: '#14b8a6' }
+                ]
+            },
+
+            {
+                size: 5,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [0, 2], color: '#ef4444' },
+                    { num: 2, pos: [0, 4], color: '#3b82f6' },
+                    { num: 3, pos: [1, 4], color: '#10b981' },
+                    { num: 4, pos: [3, 4], color: '#f59e0b' },
+                    { num: 5, pos: [3, 1], color: '#8b5cf6' },
+                    { num: 6, pos: [1, 0], color: '#14b8a6' },
+                    { num: 7, pos: [4, 2], color: '#ec4899' }
+                ]
+            },
+            {
+                size: 6,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [0, 0], color: '#ef4444' },
+                    { num: 2, pos: [0, 5], color: '#3b82f6' },
+                    { num: 3, pos: [2, 5], color: '#10b981' },
+                    { num: 4, pos: [2, 0], color: '#f59e0b' },
+                    { num: 5, pos: [4, 0], color: '#8b5cf6' },
+                    { num: 6, pos: [4, 5], color: '#14b8a6' }
+                ]
+            },
+            {
+                size: 6,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [0, 1], color: '#ef4444' },
+                    { num: 2, pos: [0, 4], color: '#3b82f6' },
+                    { num: 3, pos: [3, 4], color: '#10b981' },
+                    { num: 4, pos: [3, 1], color: '#f59e0b' },
+                    { num: 5, pos: [5, 1], color: '#8b5cf6' },
+                    { num: 6, pos: [5, 3], color: '#14b8a6' }
+                ]
+            },
+            {
+                size: 7,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [0, 0], color: '#ef4444' },
+                    { num: 2, pos: [0, 6], color: '#3b82f6' },
+                    { num: 3, pos: [2, 6], color: '#10b981' },
+                    { num: 4, pos: [2, 0], color: '#f59e0b' },
+                    { num: 5, pos: [4, 0], color: '#8b5cf6' },
+                    { num: 6, pos: [4, 6], color: '#14b8a6' },
+                    { num: 7, pos: [6, 6], color: '#ec4899' }
+                ]
+            },
+            {
+                size: 7,
+                walls: [],
+                sequence: [
+                    { num: 1, pos: [5, 5], color: '#ef4444' },
+                    { num: 2, pos: [3, 3], color: '#3b82f6' },
+                    { num: 3, pos: [2, 6], color: '#10b981' },
+                    { num: 4, pos: [0, 4], color: '#f59e0b' },
+                    { num: 5, pos: [4, 0], color: '#8b5cf6' },
+                    { num: 6, pos: [1, 5], color: '#14b8a6' },
+                    { num: 7, pos: [2, 2], color: '#ec4899' },
+                    { num: 8, pos: [5, 1], color: '#0ea5e9' },
+                    { num: 9, pos: [6, 2], color: '#22c55e' },
+                    { num: 10, pos: [4, 4], color: '#f97316' }
+                ]
+            },
+        ];
+
+        /* ------------------------------------------------ */
+
+        let levelIndex = 0;
+        let level = levels[levelIndex];
+        let grid = [];
+        let path = [];
+        let isDrawing = false;
+        let currentNumber = 1;
+
+        const boardEl = document.getElementById('board');
+        const levelNumEl = document.getElementById('levelNum');
+        const nextBadge = document.getElementById('nextBadge');
+        const movesEl = document.getElementById('moves');
+        const hintEl = document.getElementById('hint');
+        const winDiv = document.getElementById('winDiv');
+
+        document.getElementById('resetBtn').addEventListener('click', initLevel);
+        document.getElementById('nextLevel').addEventListener('click', () => { levelIndex = Math.min(levels.length - 1, levelIndex + 1); initLevel(); });
+        document.getElementById('prevLevel').addEventListener('click', () => { levelIndex = Math.max(0, levelIndex - 1); initLevel(); });
+
+        function initLevel() {
+            level = levels[levelIndex];
+            currentNumber = 1;
+            path = [];
+            grid = Array(level.size).fill(null).map(() => Array(level.size).fill(null));
+
+            level.walls?.forEach(([r, c]) => grid[r][c] = 'wall');
+            level.sequence.forEach(s => grid[s.pos[0]][s.pos[1]] = 'num-' + s.num);
+
+            renderBoard();
+            updateUI();
+            winDiv.style.display = 'none';
+            hintEl.textContent = '';
+        }
+
+        function renderBoard() {
+            boardEl.innerHTML = '';
+            boardEl.style.gridTemplateColumns = `repeat(${level.size}, var(--size))`;
+
+            for (let r = 0; r < level.size; r++) {
+                for (let c = 0; c < level.size; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+
+                    let val = grid[r][c];
+                    if (val === 'wall') cell.classList.add('wall');
+
+                    if (val?.startsWith('num-')) {
+                        const n = parseInt(val.split('-')[1]);
+                        const seq = level.sequence.find(s => s.num === n);
+                        const badge = document.createElement('div');
+                        badge.className = 'num-badge';
+                        badge.textContent = n;
+                        badge.style.background = seq.color;
+
+                        if (n === currentNumber) {
+                            badge.style.transform = 'scale(1.05)';
+                            badge.style.boxShadow = '0 6px 18px rgba(99,102,241,0.28)';
+                        }
+                        cell.appendChild(badge);
+                    }
+
+                    const seg = document.createElement('div');
+                    seg.className = 'path-seg';
+                    cell.appendChild(seg);
+
+                    cell.addEventListener('pointerdown', e => { e.preventDefault(); onPointerDown(r, c); });
+                    cell.addEventListener('pointerenter', e => { if (e.buttons || isDrawing) onPointerEnter(r, c); });
+                    cell.addEventListener('pointerup', onPointerUp);
+
+                    boardEl.appendChild(cell);
+                }
+            }
+
+            drawPath();
+        }
+
+        function getNumberAt(r, c) {
+            const v = grid[r][c];
+            return v?.startsWith('num-') ? parseInt(v.split('-')[1]) : null;
+        }
+
+        function isAdjacent(r1, c1, r2, c2) {
+            return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
+        }
+
+        function updateGrid() {
+            let newGrid = Array(level.size).fill(null).map(() => Array(level.size).fill(null));
+
+            level.walls?.forEach(([r, c]) => newGrid[r][c] = 'wall');
+            level.sequence.forEach(s => newGrid[s.pos[0]][s.pos[1]] = 'num-' + s.num);
+            path.forEach(([r, c]) => {
+                if (!newGrid[r][c]) newGrid[r][c] = 'path';
+            });
+
+            grid = newGrid;
+            drawPath();
+            updateUI();
+        }
+
+        function drawPath() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                const r = +cell.dataset.r;
+                const c = +cell.dataset.c;
+                const seg = cell.querySelector('.path-seg');
+
+                if (grid[r][c] === 'path') {
+                    const cur = currentNumber;
+                    const color = (level.sequence.find(s => s.num === cur) || {}).color;
+                    seg.style.background = color;
+                    seg.style.display = 'block';
+                } else seg.style.display = 'none';
+            });
+        }
+
+        function onPointerDown(r, c) {
+            const num = getNumberAt(r, c);
+
+            // Can only start from number 1 or the current number (not previous numbers)
+            if (num === 1 || num === currentNumber) {
+                isDrawing = true;
+
+                if (num === 1) {
+                    path = [[r, c]];
+                    currentNumber = 1;
+                    updateGrid();
+                } else if (num === currentNumber) {
+                    // Allow adjusting path from current number, but don't allow going back to previous numbers
+                    const idx = path.findIndex(p => p[0] === r && p[1] === c);
+                    if (idx !== -1) {
+                        path = path.slice(0, idx + 1);
+                        let newCurr = 1;
+                        for (let [pr, pc] of path) {
+                            const n = getNumberAt(pr, pc);
+                            if (n && n > newCurr) newCurr = n;
+                        }
+                        currentNumber = newCurr;
+                        updateGrid();
+                    }
+                }
+            }
+        }
+
+        function onPointerEnter(r, c) {
+            if (!isDrawing || path.length === 0) return;
+            if (grid[r][c] === 'wall') return;
+
+            const last = path[path.length - 1];
+            if (!isAdjacent(last[0], last[1], r, c)) return;
+
+            const num = getNumberAt(r, c);
+            
+            // Prevent going back to any numbered tile that is <= currentNumber
+            // Once you've reached a number, you can't go back to it or any previous number
+            if (num !== null && num <= currentNumber) {
+                return; // Block backtracking to previous numbers
+            }
+
+            const idx = path.findIndex(p => p[0] === r && p[1] === c);
+            if (idx !== -1) {
+                // Allow backtracking only within the current path segment (not to previous numbers)
+                const backtrackNum = getNumberAt(r, c);
+                if (backtrackNum === null || backtrackNum > currentNumber) {
+                    path = path.slice(0, idx + 1);
+                    updateGrid();
+                }
+                return;
+            }
+
+            if (grid[r][c] === 'path') return;
+
+            // Only allow moving to the next number in sequence
+            if (num && num !== currentNumber + 1) return;
+
+            if (num === currentNumber + 1) {
+                path.push([r, c]);
+                currentNumber++;
+                updateGrid();
+                checkWin();
+                return;
+            }
+
+            if (!grid[r][c]) {
+                path.push([r, c]);
+                updateGrid();
+            }
+        }
+
+        function onPointerUp() {
+            isDrawing = false;
+
+            if (path.length === 0) return;
+
+            // --- STEP 1: Find last numbered tile in the path ---
+            let lastNum = 1;
+            let lastIndex = 0;
+
+            for (let i = 0; i < path.length; i++) {
+                const [r, c] = path[i];
+                const n = getNumberAt(r, c);
+                if (n && n >= lastNum) {
+                    lastNum = n;
+                    lastIndex = i;
+                }
+            }
+
+            // --- STEP 2: Trim path to last numbered tile ---
+            path = path.slice(0, lastIndex + 1);
+
+            // --- STEP 3: Update currentNumber to that tile ---
+            currentNumber = lastNum;
+
+            updateGrid();
+            checkWin();
+        }
+
+
+        function updateUI() {
+            levelNumEl.textContent = levelIndex + 1;
+            nextBadge.textContent = currentNumber;
+            nextBadge.style.background =
+                (level.sequence.find(s => s.num === currentNumber) || {}).color;
+            movesEl.textContent = path.length;
+        }
+
+        function checkWin() {
+            const lastNum = level.sequence.length;
+
+            let allCovered = true;
+            for (let r = 0; r < level.size; r++) {
+                for (let c = 0; c < level.size; c++) {
+                    if (grid[r][c] === 'wall') continue;
+                    const v = grid[r][c];
+                    if (!v || (!v.startsWith('num-') && v !== 'path')) {
+                        allCovered = false;
+                        break;
+                    }
+                }
+            }
+
+            if (allCovered && currentNumber >= lastNum) {
+                winDiv.style.display = 'block';
+                hintEl.textContent = 'WIN';
+
+                boardEl.classList.add('win-glow');
+                setTimeout(() => boardEl.classList.remove('win-glow'), 2000);
+
+                boardEl.querySelectorAll('.cell').forEach(cell => {
+                    if (!cell.classList.contains('wall')) {
+                        cell.classList.add('win-flash');
+                        setTimeout(() => cell.classList.remove('win-flash'), 1500);
+                    }
+                });
+
+                launchConfetti();
+            } else {
+                winDiv.style.display = 'none';
+                hintEl.textContent = '';
+            }
+
+            updateUI();
+        }
+
+        initLevel();
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Solitaire - Klondike</title>
+    <link rel="stylesheet" href="css/solitaire.css">
+</head>
+<body>
+    <div class="wrap" id="app">
+        <div class="top">
+            <div class="title">🃏 Solitaire</div>
+            <div class="controls">
+                <div class="meta">
+                    <span>⏱ <span id="timer">00:00</span></span>
+                    <span>📊 <span id="moveCount">0</span></span>
+                    <span>⭐ <span id="score">0</span></span>
+                </div>
+                <div class="draw-mode-toggle">
+                    <button id="draw1Btn" class="active">1 Card</button>
+                    <button id="draw3Btn">3 Cards</button>
+                </div>
+                <button id="undoBtn" title="Undo">↶ Undo</button>
+                <button id="autoPlayBtn" title="Auto-play">⚡ Auto</button>
+                <button id="restartBtn" title="New game">🔄 New</button>
+            </div>
+        </div>
+
+        <div class="board" id="board">
+            <!-- Stock and Waste -->
+            <div class="pile stock" id="stock">
+                <div class="label">Stock</div>
+            </div>
+            <div class="pile waste" id="waste">
+                <div class="label">Waste</div>
+            </div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <!-- Foundations -->
+            <div class="pile foundation" id="foundation-0">
+                <div class="label">♠</div>
+            </div>
+            <div class="pile foundation" id="foundation-1">
+                <div class="label">♥</div>
+            </div>
+            <div class="pile foundation" id="foundation-2">
+                <div class="label">♦</div>
+            </div>
+            <div class="pile foundation" id="foundation-3">
+                <div class="label">♣</div>
+            </div>
+            <!-- Tableau -->
+            <div class="pile tableau" id="tableau-0"></div>
+            <div class="pile tableau" id="tableau-1"></div>
+            <div class="pile tableau" id="tableau-2"></div>
+            <div class="pile tableau" id="tableau-3"></div>
+            <div class="pile tableau" id="tableau-4"></div>
+            <div class="pile tableau" id="tableau-5"></div>
+            <div class="pile tableau" id="tableau-6"></div>
+        </div>
+    </div>
+
+    <div class="drag-layer" id="dragLayer"></div>
+
+    <div class="win" id="win">
+        <div class="box">
+            <h2>🎉 You Win!</h2>
+            <div class="win-stats">
+                <div>Time: <span id="winTime"></span></div>
+                <div>Moves: <span id="winMoves"></span></div>
+                <div>Score: <span id="winScore"></span></div>
+            </div>
+            <button id="playAgain">Play Again</button>
+        </div>
+    </div>
+
+    <script src="js/solitaire.js"></script>
+</body>
+</html>

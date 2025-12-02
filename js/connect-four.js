@@ -105,26 +105,37 @@ class ConnectFourGame {
         } else {
             console.log(isFriend);
             console.log("Hello how are you");
-            socket.emit("joinRandom");
             this.showScreen('randomSettings');
+            // Show searching status
+            const randomStatus = document.getElementById('randomStatus');
+            if (randomStatus) {
+                randomStatus.textContent = "Searching for opponent...";
+            }
+            socket.emit("joinRandom");
         }
     }
 
     gameWithFriend(isCreate = true) {
         if (isCreate) {
             isPlayer1 = true;
+            roomId = null; // Will be set when newGame event is received
             socket.emit("createGame");
         } else {
             const id = document.getElementById('joinTheRoom').value.trim();
-            if (!id) return;
+            if (!id) {
+                alert("Please enter a room code");
+                return;
+            }
 
             roomId = id;
+            isPlayer1 = false; // Joining player is player 2
             socket.emit("joinGame", {roomId});
         }
     }
 
     gameWithRandom() {
-
+        // This is called when random match is found
+        // Already handled by socket events
     }
 
     startAI(difficulty) {
@@ -192,15 +203,26 @@ class ConnectFourGame {
     }
 
     // Game Logic
-    makeMove(col, isAIMove = false) {
+    makeMove(col, isAIMove = false, isOpponentMove = false) {
         if (!this.gameActive) return;
         // Prevent AI from making moves through UI, but allow programmatic AI moves
         if (this.gameMode === 'ai' && this.currentPlayer === 2 && !isAIMove) return;
 
-        if (ConnectFour.gameMode === "online") {
-            if (isPlayer1 && ConnectFour.currentPlayer !== 1) return;
-            if (!isPlayer1 && ConnectFour.currentPlayer !== 2) return;
-
+        // Online mode validation
+        if (this.gameMode === "online" && !isOpponentMove) {
+            // Only allow moves if it's the player's turn
+            if (isPlayer1 && this.currentPlayer !== 1) {
+                return; // Not player 1's turn
+            }
+            if (!isPlayer1 && this.currentPlayer !== 2) {
+                return; // Not player 2's turn
+            }
+            // Validate roomId exists
+            if (!roomId) {
+                console.error("No room ID available");
+                return;
+            }
+            // Send move to server
             socket.emit("makeMove", { roomId, col });
         }
 
@@ -666,7 +688,18 @@ class ConnectFourGame {
 
         if (won) {
             icon.textContent = '🎉';
-            if (this.gameMode === 'ai' && this.currentPlayer === 2) {
+            if (this.gameMode === 'online') {
+                // Check if current player won
+                const playerWon = (isPlayer1 && this.currentPlayer === 1) || (!isPlayer1 && this.currentPlayer === 2);
+                if (playerWon) {
+                    title.textContent = 'You Win!';
+                    message.textContent = 'Congratulations!';
+                } else {
+                    icon.textContent = '😢';
+                    title.textContent = 'You Lost!';
+                    message.textContent = 'Better luck next time!';
+                }
+            } else if (this.gameMode === 'ai' && this.currentPlayer === 2) {
                 title.textContent = 'AI Wins!';
                 message.textContent = 'Better luck next time!';
             } else {
@@ -686,6 +719,12 @@ class ConnectFourGame {
     // Utility Functions
     undoMove() {
         if (this.moveHistory.length === 0 || !this.gameActive) return;
+        
+        // Disable undo in online mode
+        if (this.gameMode === 'online') {
+            alert('Undo is not available in online games.');
+            return;
+        }
 
         const lastMove = this.moveHistory.pop();
         this.board[lastMove.row][lastMove.col] = 0;
@@ -698,6 +737,12 @@ class ConnectFourGame {
 
     restartGame() {
         if (confirm('Restart this game?')) {
+            if (this.gameMode === 'online') {
+                // For online games, restart means going back to menu
+                // or we could emit a restart event to server
+                alert('Cannot restart online game. Please leave and start a new game.');
+                return;
+            }
             if (this.gameMode === 'ai') {
                 this.startAI(this.aiDifficulty);
             } else {
@@ -707,6 +752,16 @@ class ConnectFourGame {
     }
 
     replayLevel() {
+        // Reset online state if in online mode
+        if (this.gameMode === 'online') {
+            isOnline = false;
+            roomId = null;
+            isPlayer1 = false;
+            this.gameMode = 'twoPlayer';
+            this.showScreen('mainMenu');
+            return;
+        }
+        
         if (this.gameMode === 'ai') {
             this.startAI(this.aiDifficulty);
         } else {
@@ -868,21 +923,42 @@ class ConnectFourGame {
         const backFromFriendSettingsBtn = document.getElementById('backFromFriendSettingsBtn');
         const backFromRandomSettingsBtn = document.getElementById('backFromRandomSettingsBtn');
         if (backFromSettingsBtn || backFromFriendSettingsBtn || backFromRandomSettingsBtn) {
-            backFromSettingsBtn.addEventListener('click', () => {
-                self.showScreen('mainMenu');
-            });
-            backFromFriendSettingsBtn.addEventListener('click', () => {
-                self.showScreen('friendOption');
-            });
-            backFromRandomSettingsBtn.addEventListener('click', () => {
-                self.showScreen('friendOption');
-            });
+            if (backFromSettingsBtn) {
+                backFromSettingsBtn.addEventListener('click', () => {
+                    self.showScreen('mainMenu');
+                });
+            }
+            if (backFromFriendSettingsBtn) {
+                backFromFriendSettingsBtn.addEventListener('click', () => {
+                    self.showScreen('friendOption');
+                });
+            }
+            if (backFromRandomSettingsBtn) {
+                backFromRandomSettingsBtn.addEventListener('click', () => {
+                    // Cancel random matching if in progress
+                    if (isOnline && !roomId) {
+                        // We're still searching, can cancel
+                        const randomStatus = document.getElementById('randomStatus');
+                        if (randomStatus) {
+                            randomStatus.textContent = "Searching for opponent...";
+                        }
+                    }
+                    self.showScreen('friendOption');
+                });
+            }
         }
 
         const backFromGameBtn = document.getElementById('backFromGameBtn');
         if (backFromGameBtn) {
             backFromGameBtn.addEventListener('click', () => {
                 if (confirm('Leave current game?')) {
+                    // Reset online state if leaving online game
+                    if (self.gameMode === 'online') {
+                        isOnline = false;
+                        roomId = null;
+                        isPlayer1 = false;
+                        self.gameMode = 'twoPlayer';
+                    }
                     self.showScreen('mainMenu');
                 }
             });
@@ -957,44 +1033,150 @@ let isPlayer1 = false;
 let isOnline = false;
 
 socket.on("newGame", ({roomId: id}) => {
-    console.log(id);
-    document.getElementById("createCode").style.display = 'none';
-    document.getElementById("codeCreated").style.display = 'block';
+    console.log("Room created:", id);
     roomId = id;
-    let copyButton = document.getElementById("copyCode");
-    copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(roomId).then(() => {
-            console.log('Copied to clipboard successfully!');
-        }, (e) => {
-            console.error('Could not copy to clipboard!', e);
+    isPlayer1 = true; // Creator is always player 1
+    
+    const createCodeDiv = document.getElementById("createCode");
+    const codeCreatedDiv = document.getElementById("codeCreated");
+    const joinRoomDiv = document.getElementById("joinRoomDiv");
+    
+    if (createCodeDiv) createCodeDiv.style.display = 'none';
+    if (codeCreatedDiv) codeCreatedDiv.style.display = 'block';
+    
+    const codeElement = document.getElementById('code');
+    if (codeElement) codeElement.innerHTML = roomId;
+    
+    if (joinRoomDiv) joinRoomDiv.innerHTML = 'Waiting For Opponent To Join The Room...!';
+    
+    // Setup copy button
+    const copyButton = document.getElementById("copyCode");
+    if (copyButton) {
+        // Remove existing listeners and add new one
+        const newCopyButton = copyButton.cloneNode(true);
+        copyButton.parentNode.replaceChild(newCopyButton, copyButton);
+        newCopyButton.addEventListener('click', () => {
+            navigator.clipboard.writeText(roomId).then(() => {
+                alert('Room code copied to clipboard!');
+                console.log('Copied to clipboard successfully!');
+            }, (e) => {
+                console.error('Could not copy to clipboard!', e);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = roomId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('Room code copied to clipboard!');
+                } catch (err) {
+                    console.error('Fallback copy failed', err);
+                }
+                document.body.removeChild(textArea);
+            });
         });
-    });
-    document.getElementById('code').innerHTML = roomId;
-    document.getElementById("joinRoomDiv").innerHTML = 'Waiting For Opponent To Join The Room...!';
-    ConnectFour.showCode(roomId);
+    }
+    
+    if (ConnectFour) ConnectFour.showCode(roomId);
 });
 
-socket.on("playersConnected", () => {
-    console.log('playersConnected');
+socket.on("playersConnected", ({ roomId: serverRoomId, isPlayer1: serverIsPlayer1 } = {}) => {
+    console.log('playersConnected', serverRoomId, serverIsPlayer1);
     ConnectFour.gameMode = "online";
     isOnline = true;
 
+    // Set roomId if provided (for random matches)
+    if (serverRoomId) {
+        roomId = serverRoomId;
+    }
+
+    // Determine player number based on who created/joined
+    // For friend games: creator is player1, joiner is player2
+    // For random games: first in queue is player1, second is player2
+    // If server doesn't send this info, use existing isPlayer1 variable
+    if (serverIsPlayer1 !== undefined) {
+        isPlayer1 = serverIsPlayer1;
+    }
+    // If we don't have roomId yet but we're in friend mode, we're player1 (creator)
+    if (!roomId && ConnectFour.screens.friendSettings && !ConnectFour.screens.friendSettings.classList.contains('hidden')) {
+        // We're still in friend settings, so we must be the creator
+        isPlayer1 = true;
+    }
+
     // Player1 always starts
     ConnectFour.currentPlayer = 1;
+    if (!isPlayer1) {
+        // If we're player 2, wait for opponent's move
+        ConnectFour.currentPlayer = 2;
+    }
 
     ConnectFour.initGame();
     ConnectFour.showScreen("game");
+    
+    // Update player indicators for online mode
+    const player1Indicator = document.getElementById('player1Indicator');
+    const player2Indicator = document.getElementById('player2Indicator');
+    if (player1Indicator && player2Indicator) {
+        player1Indicator.textContent = isPlayer1 ? "You (P1)" : "Opponent (P1)";
+        player2Indicator.textContent = isPlayer1 ? "Opponent (P2)" : "You (P2)";
+    }
+    
+    // Update random status if we were in random matching
+    const randomStatus = document.getElementById('randomStatus');
+    if (randomStatus) {
+        randomStatus.textContent = "Match found! Starting game...";
+    }
 });
 
 socket.on("opponentMove", ({ col }) => {
-    ConnectFour.makeMove(col, true);
+    console.log("Opponent made move:", col);
+    // Make the move as opponent (player 2 if we're player 1, player 1 if we're player 2)
+    ConnectFour.makeMove(col, false, true);
 });
 
 socket.on("waitingForRandom", () => {
-    document.getElementById("randomStatus").textContent = "Searching...";
+    const randomStatus = document.getElementById("randomStatus");
+    if (randomStatus) {
+        randomStatus.textContent = "Searching for opponent...";
+    }
 });
 
 socket.on("opponentLeft", () => {
     alert("Opponent left the match.");
-    ConnectFour.showScreen("mainMenu");
+    // Reset online state
+    isOnline = false;
+    roomId = null;
+    isPlayer1 = false;
+    if (ConnectFour) {
+        ConnectFour.gameActive = false;
+        ConnectFour.gameMode = 'twoPlayer';
+        ConnectFour.showScreen("mainMenu");
+    }
+});
+
+socket.on("joinGameError", ({ message }) => {
+    alert(message || "Error joining game. Please try again.");
+    // Stay on friend settings screen
+    if (ConnectFour) {
+        ConnectFour.showScreen("friendSettings");
+    }
+});
+
+// Handle socket connection errors
+socket.on("connect_error", (error) => {
+    console.error("Socket connection error:", error);
+    alert("Connection error. Please check your internet connection and try again.");
+});
+
+socket.on("disconnect", (reason) => {
+    console.log("Socket disconnected:", reason);
+    if (isOnline && ConnectFour) {
+        alert("Connection lost. Returning to main menu.");
+        isOnline = false;
+        roomId = null;
+        isPlayer1 = false;
+        ConnectFour.gameActive = false;
+        ConnectFour.gameMode = 'twoPlayer';
+        ConnectFour.showScreen("mainMenu");
+    }
 });
