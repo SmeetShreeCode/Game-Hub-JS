@@ -101,12 +101,9 @@ class ConnectFourGame {
 
     startOnline(isFriend = true) {
         if (isFriend) {
-            console.log(isFriend);
-            console.log("welcome to four connect");
+
             this.showScreen('friendSettings');
         } else {
-            console.log(isFriend);
-            console.log("Hello how are you");
             this.showScreen('randomSettings');
             // Show searching status
             const randomStatus = document.getElementById('randomStatus');
@@ -232,7 +229,6 @@ class ConnectFourGame {
             }
             // Validate roomId exists
             if (!roomId) {
-                console.error("No room ID available");
                 return;
             }
             // Send move to server
@@ -262,7 +258,6 @@ class ConnectFourGame {
         if (this.checkWin(row, col)) {
             // Store which player won (currentPlayer at the time of win)
             this.winningPlayer = this.currentPlayer;
-            console.log('Win detected! Winning player:', this.winningPlayer, 'isPlayer1:', isPlayer1, 'gameMode:', this.gameMode);
             this.handleWin();
             return;
         }
@@ -383,7 +378,6 @@ class ConnectFourGame {
                     col = this.getMediumAIMove();
             }
         } catch (error) {
-            console.error('Error in AI move calculation:', error);
             col = this.getEasyAIMove(); // Fallback to easy
         }
 
@@ -789,7 +783,7 @@ class ConnectFourGame {
     }
 
     showCode(code) {
-        console.log(code);
+
     }
 
     updateDisplay() {
@@ -1052,7 +1046,6 @@ let isPlayer1 = false;
 let isOnline = false;
 
 socket.on("newGame", ({roomId: id}) => {
-    console.log("Room created:", id);
     roomId = id;
     isPlayer1 = true; // Creator is always player 1
 
@@ -1087,7 +1080,6 @@ socket.on("newGame", ({roomId: id}) => {
                 textArea.select();
                 try {
                     document.execCommand('copy');
-                    alert('Room code copied to clipboard!');
                 } catch (err) {
                     console.error('Fallback copy failed', err);
                 }
@@ -1100,8 +1092,6 @@ socket.on("newGame", ({roomId: id}) => {
 });
 
 socket.on("playersConnected", ({roomId: serverRoomId, isPlayer1: serverIsPlayer1} = {}) => {
-    console.log('playersConnected', serverRoomId, serverIsPlayer1);
-
     ConnectFour.gameMode = "online";
     isOnline = true;
 
@@ -1176,7 +1166,6 @@ socket.on("opponentLeft", () => {
 });
 
 socket.on("joinGameError", ({message}) => {
-    alert(message || "Error joining game. Please try again.");
     // Stay on friend settings screen
     if (ConnectFour) {
         ConnectFour.showScreen("friendSettings");
@@ -1185,8 +1174,8 @@ socket.on("joinGameError", ({message}) => {
 
 // Handle socket connection errors
 socket.on("connect_error", (error) => {
-    console.error("Socket connection error:", error);
-    alert("Connection error. Please check your internet connection and try again.");
+    document.getElementById('onlineFriendBtn').style.display = "none";
+    document.getElementById('onlineRandomBtn').style.display = "none";
 });
 
 socket.on("disconnect", (reason) => {

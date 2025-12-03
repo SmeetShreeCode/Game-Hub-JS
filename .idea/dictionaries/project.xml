@@ -12,10 +12,12 @@
       <w>cherrys</w>
       <w>coinanimations</w>
       <w>cropbox</w>
+      <w>dificulty</w>
       <w>enemyanimations</w>
       <w>flappybird</w>
       <w>hexanaut</w>
       <w>hypercalcium</w>
+      <w>ihalf</w>
       <w>incress</w>
       <w>liveanimations</w>
       <w>pigbox</w>
@@ -23,6 +25,9 @@
       <w>rollercoast</w>
       <w>tileman</w>
       <w>toppipe</w>
+      <w>udlrfb</w>
+      <w>verts</w>
+      <w>viewbox</w>
     </words>
   </dictionary>
 </component>

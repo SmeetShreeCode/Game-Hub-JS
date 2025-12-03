@@ -1,360 +1,1149 @@
-:root {
-    --bg: #0b3a2f;
-    --panel: rgba(255, 255, 255, 0.06);
-    --accent: #ffd54f;
-    --card-w: 60px;
-    --card-h: 84px;
-    --card-gap: 22px;
+@font-face {
+    font-family: 'Suit-Regular';
+    src: url("https://bfa.github.io/solitaire-js/fonts/suit-regular.eot");
+    src: url("https://bfa.github.io/solitaire-js/fonts/suit-regular.eot?#iefix") format('embedded-opentype'), url("https://bfa.github.io/solitaire-js/fonts/suit-regular.woff") format('woff'), url("https://bfa.github.io/solitaire-js/fonts/suit-regular.ttf") format('truetype'), url("https://bfa.github.io/solitaire-js/fonts/suit-regular.svg#suit-regular") format('svg');
+    font-weight: normal;
+    font-style: normal;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
-}
-
-html,
-body {
-    height: 100%;
-    margin: 0;
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
-}
-
-body {
-    background: linear-gradient(180deg, #063b2e 0, #0b6b4f 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    color: #fff;
-    overflow-x: hidden;
-    touch-action: pan-y;
-}
-
-.wrap {
+html, body {
     width: 100%;
-    max-width: 1040px;
+    height: 100%;
 }
 
-.top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.title {
-    font-weight: 700;
-    font-size: clamp(18px, 4vw, 24px);
-}
-
-.controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.meta {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    font-size: clamp(11px, 2.5vw, 13px);
-    opacity: .95;
-    flex-wrap: wrap;
-}
-
-button {
-    background: var(--panel);
-    border: 0;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: clamp(11px, 2.5vw, 13px);
-    transition: all 0.2s;
-    touch-action: manipulation;
-}
-
-button:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: translateY(-1px);
-}
-
-button:active {
-    transform: translateY(1px);
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.draw-mode-toggle {
-    display: flex;
-    gap: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px;
-    border-radius: 8px;
-}
-
-.draw-mode-toggle button {
-    padding: 6px 10px;
-}
-
-.draw-mode-toggle button.active {
-    background: rgba(255, 255, 255, 0.2);
-    color: var(--accent);
-}
-
-.board {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 12px;
-    align-items: start;
-}
-
-.pile {
+body {
     position: relative;
-    min-height: 120px;
-    border-radius: 8px;
-    background: transparent;
-    touch-action: none;
+    color: #f3f5f7;
+    background-size: cover;
+    background: #0e8b44 url('../images/Solitaire/green_felt.jpg') center;
 }
 
-.pile .label {
-    position: absolute;
-    top: -18px;
-    left: 0;
-    font-size: clamp(10px, 2vw, 12px);
-    opacity: .9;
-    font-weight: 600;
+.navbar {
+    background: rgba(8, 8, 8, .75);
 }
 
-.card {
-    width: var(--card-w);
-    height: var(--card-h);
-    border-radius: 6px;
-    position: absolute;
-    user-select: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, .3);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 5px;
-    font-weight: 700;
-    font-size: clamp(11px, 2.2vw, 13px);
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    aspect-ratio: 5 / 7;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, .5);
-}
-
-.card .rank {
-    line-height: 1;
-    font-size: clamp(12px, 2.5vw, 14px);
-}
-
-.card .suit {
-    font-size: clamp(16px, 3.5vw, 20px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1;
-}
-
-.card.face-down {
-    background: linear-gradient(135deg, #1642a6, #1ea0ff);
+.navbar a {
     color: #fff;
-    background-size: 200% 200%;
-    animation: shimmer 3s ease-in-out infinite;
 }
 
-@keyframes shimmer {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+.navbar li[data-active="false"] {
+    opacity: 0.5;
+    pointer-events: none;
 }
 
-.card.face-up {
-    background: #fff;
-    color: #000;
+.navbar li[data-active="true"] {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.card.red {
-    color: #c33;
-}
-
-.card.black {
-    color: #000;
+.template {
+    display: none;
 }
 
 .card.dragging {
-    z-index: 9999;
-    transform: rotate(2deg) scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, .6);
-    opacity: 0.95;
-    cursor: grabbing;
-    pointer-events: none;
+    opacity: 0.4;
+    transform: scale(1.08);
 }
 
-.pile.foundation,
-.pile.stock,
-.pile.waste {
-    min-height: 104px;
+.pile.dragover {
+    outline: 2px dashed yellow;
 }
 
-.tableau {
-    min-height: 220px;
+#score {
+    position: relative;
+    background: rgba(0, 0, 0, .15);
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    padding: 1em;
+    line-height: 1;
 }
 
-.drag-layer {
-    position: fixed;
-    left: 0;
+#score > * {
+    display: inline-block;
+    min-width: 100px;
+}
+
+#score > *:last-child {
+    float: right;
+    text-align: right;
+}
+
+#score label {
+    margin-bottom: 0;
+}
+
+#score .timer button {
+    display: none;
+    position: absolute;
+    -webkit-appearance: none;
+    background: transparent;
+    outline: none;
+    border: 0;
+    padding: 0;
     top: 0;
+    left: 0;
+    width: 3em;
+    height: 100%;
+}
+
+#score .timer button i {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
-    z-index: 9998;
+    font-size: 0;
 }
 
-.valid {
-    outline: 3px solid rgba(255, 213, 79, .5);
-    border-radius: 8px;
-    background: rgba(255, 213, 79, .1);
-    animation: pulse 1s ease-in-out infinite;
+#score .timer button i::before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.75em;
+    height: 1em;
+    margin-left: -0.375em;
+    margin-top: -0.5em;
+    font-size: 1.5rem;
+    content: none;
 }
 
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.02); }
+#score .timer button i#play::before {
+    border-top: 8px solid transparent;
+    border-left: 12px solid #fff;
+    border-bottom: 8px solid transparent;
 }
 
-.win {
-    position: fixed;
-    inset: 0;
+#score .timer button i#pause::before {
+    border-right: 4px solid #fff;
+    border-left: 4px solid #fff;
+}
+
+[data-gameplay="active"] #score .timer button,
+[data-gameplay="paused"] #score .timer button {
+    display: inline-block;
+}
+
+[data-gameplay="active"] #score .timer button i#pause::before,
+[data-gameplay="paused"] #score .timer button i#play::before {
+    content: '';
+}
+
+[data-gameplay="active"] #score,
+[data-gameplay="paused"] #score {
+    padding-left: 3em;
+}
+
+#auto-win {
     display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, .7);
-    z-index: 10000;
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.5s;
+    -webkit-appearance: none;
+    outline: none;
+    border: 0;
+    position: absolute;
+    z-index: 1;
+    bottom: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, .8);
+    padding: 1em;
+    line-height: 1;
 }
 
-.win.show {
-    display: flex;
+#table {
+    opacity: 0;
+    width: 100%;
+    padding: 15px 0;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+#table > div {
+    position: relative;
+    margin-bottom: 10px;
 }
 
-.win .box {
-    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-    color: #000;
-    padding: clamp(20px, 5vw, 40px);
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-    max-width: 500px;
-    width: 90%;
+#table > div:last-child {
+    margin-bottom: 0;
 }
 
-.win .box h2 {
-    font-size: clamp(32px, 8vw, 48px);
-    margin-bottom: 20px;
-    animation: bounce 0.6s;
+#table > div::after {
+    content: '';
+    display: table-cell;
+    clear: both;
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+#table ul {
+    display: inline-block;
+    padding: 0;
 }
 
-.win-stats {
-    margin: 20px 0;
-    font-size: clamp(16px, 4vw, 18px);
+#table > div > ul {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
-.win-stats div {
-    margin: 10px 0;
-    font-weight: 600;
+.pile {
+    display: block;
+    position: relative;
+    float: left;
+    width: 13%;
+    margin-right: 1.5%;
+    margin-bottom: 10px;
+    padding: 5px;
 }
 
-.card-firework {
-    position: fixed;
-    width: clamp(20px, 4vw, 30px);
-    height: clamp(28px, 5.6vw, 42px);
-    background: #fff;
-    border-radius: 4px;
+.pile:last-child {
+    margin-right: 0;
+}
+
+.pile::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px dotted rgba(0, 0, 0, .25);
+    border-radius: 5px;
+}
+
+.card {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #ddd;
+    background-image: url('../images/Solitaire/card_back_bg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    font-family: 'Suit-Regular', sans-serif;
+    font-size: 0.6vw;
+    border-radius: 5px;
+    z-index: -1;
+}
+
+.card * {
     pointer-events: none;
-    z-index: 9999;
-    animation: firework 2s ease-out forwards;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-@keyframes firework {
-    0% {
-        transform: translate(0, 0) rotate(0deg) scale(1);
-        opacity: 1;
+@media screen and (min-width: 768px) {
+    .card {
+        font-size: 0.325em;
     }
-    100% {
-        transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0);
-        opacity: 0;
+
+    .pile::after, .card {
+        border-radius: 10px;
     }
 }
 
-@media (max-width: 720px) {
-    :root {
-        --card-w: 48px;
-        --card-h: 67px;
-        --card-gap: 18px;
-    }
-
-    .title {
-        font-size: 16px;
-    }
-
-    .board {
-        gap: 8px;
-    }
-
-    .pile {
-        min-height: 90px;
-    }
-
-    .tableau {
-        min-height: 180px;
+@media screen and (min-width: 992px) {
+    .card {
+        font-size: 0.425em;
     }
 }
 
-@media (max-width: 480px) {
-    :root {
-        --card-w: 40px;
-        --card-h: 56px;
-        --card-gap: 15px;
-    }
-
-    .board {
-        gap: 6px;
-    }
-
-    .pile {
-        min-height: 80px;
-    }
-
-    .tableau {
-        min-height: 150px;
+@media screen and (min-width: 1200px) {
+    .card {
+        font-size: 0.525em;
     }
 }
 
+.card > div {
+    display: none;
+}
+
+.card.up {
+    background-image: url('../images/Solitaire/card_face_bg.png');
+    background-repeat: repeat;
+    color: #111;
+}
+
+.card.up > div {
+    display: block;
+}
+
+.card::before {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+}
+
+.card[data-selected="true"]::before {
+    box-shadow: 0 0 6px 3px #FCDB1A;
+}
+
+@media screen and (min-width: 768px) {
+    .card::before {
+        border-radius: 10px;
+    }
+}
+
+.card .suit {
+    font-size: 5.8em;
+    font-weight: normal;
+    width: 0.6896551724137931em;
+    height: 0.786206896551724em;
+    line-height: 0.786206896551724em;
+    position: absolute;
+    text-align: center;
+}
+
+@media screen and (max-width: 767px) {
+    .card > div > .suit {
+        display: none;
+    }
+}
+
+.card .heart,
+.card .diamond {
+    color: #cc0000;
+}
+
+.card .spade .suit::before {
+    content: '♠'
+}
+
+.card .heart .suit::before {
+    content: '♥'
+}
+
+.card .diamond .suit::before {
+    content: '♦'
+}
+
+.card .club .suit::before {
+    content: '♣'
+}
+
+.card .corner {
+    line-height: 1;
+    position: absolute;
+    text-align: center;
+}
+
+.card .corner span {
+    display: block;
+    font-size: 9em;
+    font-weight: bold;
+    width: 1em;
+    text-align: center;
+}
+
+@media screen and (min-width: 768px) {
+    .card .corner span {
+        font-size: 3em;
+    }
+}
+
+.card .corner .suit {
+    margin-top: 0;
+    margin-left: 0;
+}
+
+.card .corner.top {
+    left: 0.64em;
+    top: 0.96em;
+}
+
+.card .corner.bottom {
+    bottom: 0.96em;
+    right: 0.64em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card .ace span.suit.middle_center {
+    font-size: 10.24em;
+    left: 50%;
+    top: 50%;
+    margin-top: -0.5em;
+    margin-left: -0.35em;
+}
+
+.card .face::before {
+    display: none;
+    content: '';
+    position: absolute;
+    top: 15.25%;
+    left: 19%;
+    width: 62%;
+    height: 70.5%;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+@media screen and (min-width: 768px) {
+    .card .face::before {
+        display: block;
+    }
+}
+
+.card .spade.king .face::before {
+    background-image: url('../images/Solitaire/face-king-spade.png');
+}
+
+.card .spade.queen .face::before {
+    background-image: url('../images/Solitaire/face-queen-spade.png');
+}
+
+.card .spade.jack .face::before {
+    background-image: url('../images/Solitaire/face-jack-spade.png');
+}
+
+.card .heart.king .face::before {
+    background-image: url('../images/Solitaire/face-king-heart.png');
+}
+
+.card .heart.queen .face::before {
+    background-image: url('../images/Solitaire/face-queen-heart.png');
+}
+
+.card .heart.jack .face::before {
+    background-image: url('../images/Solitaire/face-jack-heart.png');
+}
+
+.card .diamond.king .face::before {
+    background-image: url('../images/Solitaire/face-king-diamond.png');
+}
+
+.card .diamond.queen .face::before {
+    background-image: url('../images/Solitaire/face-queen-diamond.png');
+}
+
+.card .diamond.jack .face::before {
+    background-image: url('../images/Solitaire/face-jack-diamond.png');
+}
+
+.card .club.king .face::before {
+    background-image: url('../images/Solitaire/face-king-club.png');
+}
+
+.card .club.queen .face::before {
+    background-image: url('../images/Solitaire/face-queen-club.png');
+}
+
+.card .club.jack .face::before {
+    background-image: url('../images/Solitaire/face-jack-club.png');
+}
+
+.card .suit.top_center {
+    left: 50%;
+    top: 0;
+    margin-left: -0.35em;
+    margin-top: 0.65em;
+}
+
+.card .suit.top_left {
+    left: 0;
+    top: 0;
+    margin-left: 0.65em;
+    margin-top: 0.65em;
+}
+
+.card .suit.top_right {
+    right: 0;
+    top: 0;
+    margin-right: 0.65em;
+    margin-top: 0.65em;
+}
+
+.card .suit.middle_center {
+    left: 50%;
+    top: 50%;
+    margin-left: -0.35em;
+    margin-top: -0.5em;
+}
+
+.card .suit.middle_top {
+    left: 50%;
+    top: 0;
+    margin-left: -0.35em;
+    margin-top: 1.25em;
+}
+
+.card .suit.middle_bottom {
+    bottom: 0;
+    left: 50%;
+    margin-bottom: 0.65em;
+    margin-left: -0.35em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card .suit.middle_left {
+    left: 0;
+    top: 50%;
+    margin-left: 0.65em;
+    margin-top: -0.5em;
+}
+
+.card .suit.middle_right {
+    right: 0;
+    top: 50%;
+    margin-right: 0.65em;
+    margin-top: -0.5em;
+}
+
+.card .suit.middle_top_center {
+    left: 50%;
+    top: 50%;
+    margin-left: -0.35em;
+    margin-top: -1.35em;
+}
+
+.card .suit.middle_top_left {
+    left: 0;
+    top: 50%;
+    margin-left: 0.65em;
+    margin-top: -1em;
+}
+
+.card .suit.middle_top_right {
+    right: 0;
+    top: 50%;
+    margin-right: 0.65em;
+    margin-top: -1em;
+}
+
+.card .suit.middle_bottom_left {
+    bottom: 50%;
+    left: 0;
+    margin-left: 0.65em;
+    margin-bottom: -1em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card .suit.middle_bottom_right {
+    bottom: 50%;
+    right: 0;
+    margin-bottom: -1em;
+    margin-right: 0.65em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card .suit.middle_bottom_center {
+    bottom: 50%;
+    left: 50%;
+    margin-bottom: -1.35em;
+    margin-left: -0.35em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card .suit.bottom_center {
+    bottom: 0;
+    left: 50%;
+    margin-bottom: 0.65em;
+    margin-left: -0.35em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card .suit.bottom_left {
+    bottom: 0;
+    left: 0;
+    margin-bottom: 0.65em;
+    margin-left: 0.65em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card .suit.bottom_right {
+    bottom: 0;
+    right: 0;
+    margin-bottom: 0.65em;
+    margin-right: 0.65em;
+    -ms-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -webkit-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+
+.card:nth-child(1),
+.card:nth-child(2),
+.card:nth-child(3),
+.card:nth-child(4),
+.card:nth-child(5) {
+    box-shadow: 0 0 5px rgba(0, 0, 0, .25), 0 2px 1px rgba(0, 0, 0, .5);
+    z-index: 1;
+}
+
+.card:nth-child(1) {
+    top: 0;
+    z-index: 5;
+}
+
+.card:nth-child(2) {
+    top: 2px;
+    z-index: 4;
+}
+
+.card:nth-child(3) {
+    top: 4px;
+    z-index: 3;
+}
+
+.card:nth-child(4) {
+    top: 6px;
+    z-index: 2;
+}
+
+.card:nth-child(5) {
+    top: 8px;
+    z-index: 1;
+}
+
+/* stock */
+.stock {
+    z-index: 1;
+}
+
+.stock .reload-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 3vw;
+    font-weight: bold;
+    line-height: 1;
+    opacity: 0.25;
+    z-index: 1;
+}
+
+@media screen and (max-width: 767px) {
+    .stock .reload-icon {
+        font-size: 5vw;
+    }
+}
+
+.stock .reload-icon span {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 0.25em;
+    margin-top: -0.75em;
+    pointer-events: none;
+}
+
+.stock .reload-icon span::before,
+.stock .reload-icon span::after {
+    content: '';
+    display: inline-block;
+    border-style: solid;
+}
+
+.stock .reload-icon span::before {
+    width: 1.25em;
+    height: 1.25em;
+    border-color: transparent black black black;
+    border-radius: 50%;
+    border-width: .125em;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.stock .reload-icon span::after {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-color: transparent transparent transparent black;
+    border-width: .3125em 0 .3125em .5em;
+}
+
+
+/* waste */
+.waste {
+    z-index: 1;
+}
+
+/* foundation */
+.fnd .pile {
+    left: 43.5%;
+}
+
+.fnd .pile::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    color: #000;
+    font-family: 'Suit-Regular', sans-serif;
+    font-size: 10vw;
+    margin-top: -0.6em;
+    line-height: 1;
+    text-align: center;
+    opacity: 0.25;
+}
+
+@media screen and (min-width: 768px) {
+    .fnd .pile::before {
+        font-size: 6em;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    .fnd .pile::before {
+        font-size: 7em;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .fnd .pile::before {
+        font-size: 8em;
+    }
+}
+
+.fnd .pile.spades::before {
+    content: '♠'
+}
+
+.fnd .pile.hearts::before {
+    content: '♥'
+}
+
+.fnd .pile.diamonds::before {
+    content: '♦'
+}
+
+.fnd .pile.clubs::before {
+    content: '♣'
+}
+
+/* tableau */
+.tab .card {
+    box-shadow: 0 0 5px rgba(0, 0, 0, .5);
+    z-index: 1;
+    margin-bottom: 10em;
+}
+
+/* face up */
+.tab .card:nth-child(2) {
+    top: 6em;
+    left: 0;
+}
+
+.tab .card:nth-child(3) {
+    top: 12em;
+    left: 0;
+}
+
+.tab .card:nth-child(4) {
+    top: 18em;
+    left: 0;
+}
+
+.tab .card:nth-child(5) {
+    top: 24em;
+    left: 0;
+}
+
+.tab .card:nth-child(6) {
+    top: 30em;
+    left: 0;
+}
+
+.tab .card:nth-child(7) {
+    top: 36em;
+    left: 0;
+}
+
+.tab .card:nth-child(8) {
+    top: 42em;
+    left: 0;
+}
+
+.tab .card:nth-child(9) {
+    top: 48em;
+    left: 0;
+}
+
+.tab .card:nth-child(10) {
+    top: 54em;
+    left: 0;
+}
+
+.tab .card:nth-child(11) {
+    top: 60em;
+    left: 0;
+}
+
+.tab .card:nth-child(12) {
+    top: 66em;
+    left: 0;
+}
+
+.tab .card:nth-child(13) {
+    top: 72em;
+    left: 0;
+}
+
+.tab .card:nth-child(14) {
+    top: 78em;
+    left: 0;
+}
+
+.tab .card:nth-child(15) {
+    top: 84em;
+    left: 0;
+}
+
+.tab .card:nth-child(16) {
+    top: 90em;
+    left: 0;
+}
+
+.tab .card:nth-child(17) {
+    top: 96em;
+    left: 0;
+}
+
+.tab .card:nth-child(18) {
+    top: 102em;
+    left: 0;
+}
+
+.tab .card:nth-child(19) {
+    top: 108em;
+    left: 0;
+}
+
+.tab .card:nth-child(20) {
+    top: 114em;
+    left: 0;
+}
+
+.tab .card:nth-child(21) {
+    top: 120em;
+    left: 0;
+}
+
+/* face down */
+.tab .pile[data-unplayed='1'] .card:nth-child(2),
+.tab .pile[data-unplayed='2'] .card:nth-child(2),
+.tab .pile[data-unplayed='3'] .card:nth-child(2),
+.tab .pile[data-unplayed='4'] .card:nth-child(2),
+.tab .pile[data-unplayed='5'] .card:nth-child(2),
+.tab .pile[data-unplayed='6'] .card:nth-child(2) {
+    top: 3em;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(3),
+.tab .pile[data-unplayed='3'] .card:nth-child(3),
+.tab .pile[data-unplayed='4'] .card:nth-child(3),
+.tab .pile[data-unplayed='5'] .card:nth-child(3),
+.tab .pile[data-unplayed='6'] .card:nth-child(3) {
+    top: 6em;
+}
+
+.tab .pile[data-unplayed='3'] .card:nth-child(4),
+.tab .pile[data-unplayed='4'] .card:nth-child(4),
+.tab .pile[data-unplayed='5'] .card:nth-child(4),
+.tab .pile[data-unplayed='6'] .card:nth-child(4) {
+    top: 9em;
+}
+
+.tab .pile[data-unplayed='4'] .card:nth-child(5),
+.tab .pile[data-unplayed='5'] .card:nth-child(5),
+.tab .pile[data-unplayed='6'] .card:nth-child(5) {
+    top: 12em;
+}
+
+.tab .pile[data-unplayed='5'] .card:nth-child(6),
+.tab .pile[data-unplayed='6'] .card:nth-child(6) {
+    top: 15em;
+}
+
+.tab .pile[data-unplayed='6'] .card:nth-child(7) {
+    top: 18em;
+}
+
+/* piles with odd # of face down cards */
+.tab .pile[data-unplayed='1'] .card:nth-child(3) {
+    top: 9em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(4),
+.tab .pile[data-unplayed='3'] .card:nth-child(5) {
+    top: 15em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(5),
+.tab .pile[data-unplayed='3'] .card:nth-child(6),
+.tab .pile[data-unplayed='5'] .card:nth-child(7) {
+    top: 21em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(6),
+.tab .pile[data-unplayed='3'] .card:nth-child(7),
+.tab .pile[data-unplayed='5'] .card:nth-child(8) {
+    top: 27em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(7),
+.tab .pile[data-unplayed='3'] .card:nth-child(8),
+.tab .pile[data-unplayed='5'] .card:nth-child(9) {
+    top: 33em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(8),
+.tab .pile[data-unplayed='3'] .card:nth-child(9),
+.tab .pile[data-unplayed='5'] .card:nth-child(10) {
+    top: 39em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(9),
+.tab .pile[data-unplayed='3'] .card:nth-child(10),
+.tab .pile[data-unplayed='5'] .card:nth-child(11) {
+    top: 45em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(10),
+.tab .pile[data-unplayed='3'] .card:nth-child(11),
+.tab .pile[data-unplayed='5'] .card:nth-child(12) {
+    top: 51em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(11),
+.tab .pile[data-unplayed='3'] .card:nth-child(12),
+.tab .pile[data-unplayed='5'] .card:nth-child(13) {
+    top: 57em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(12),
+.tab .pile[data-unplayed='3'] .card:nth-child(13),
+.tab .pile[data-unplayed='5'] .card:nth-child(14) {
+    top: 63em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(13),
+.tab .pile[data-unplayed='3'] .card:nth-child(14),
+.tab .pile[data-unplayed='5'] .card:nth-child(15) {
+    top: 69em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(14),
+.tab .pile[data-unplayed='3'] .card:nth-child(15),
+.tab .pile[data-unplayed='5'] .card:nth-child(16) {
+    top: 75em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(15),
+.tab .pile[data-unplayed='3'] .card:nth-child(16),
+.tab .pile[data-unplayed='5'] .card:nth-child(17) {
+    top: 81em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(16),
+.tab .pile[data-unplayed='3'] .card:nth-child(17),
+.tab .pile[data-unplayed='5'] .card:nth-child(18) {
+    top: 87em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(17),
+.tab .pile[data-unplayed='3'] .card:nth-child(18),
+.tab .pile[data-unplayed='5'] .card:nth-child(19) {
+    top: 93em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(18),
+.tab .pile[data-unplayed='3'] .card:nth-child(19),
+.tab .pile[data-unplayed='5'] .card:nth-child(20) {
+    top: 99em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(19),
+.tab .pile[data-unplayed='3'] .card:nth-child(20),
+.tab .pile[data-unplayed='5'] .card:nth-child(21) {
+    top: 105em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(20),
+.tab .pile[data-unplayed='3'] .card:nth-child(21) {
+    top: 111em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='1'] .card:nth-child(21) {
+    top: 117em;
+    left: 0;
+}
+
+/* piles with even # of face down cards */
+.tab .pile[data-unplayed='2'] .card:nth-child(4) {
+    top: 12em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(5),
+.tab .pile[data-unplayed='4'] .card:nth-child(6) {
+    top: 18em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(6),
+.tab .pile[data-unplayed='4'] .card:nth-child(7),
+.tab .pile[data-unplayed='6'] .card:nth-child(8) {
+    top: 24em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(7),
+.tab .pile[data-unplayed='4'] .card:nth-child(8),
+.tab .pile[data-unplayed='6'] .card:nth-child(9) {
+    top: 30em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(8),
+.tab .pile[data-unplayed='4'] .card:nth-child(9),
+.tab .pile[data-unplayed='6'] .card:nth-child(10) {
+    top: 36em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(9),
+.tab .pile[data-unplayed='4'] .card:nth-child(10),
+.tab .pile[data-unplayed='6'] .card:nth-child(11) {
+    top: 42em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(10),
+.tab .pile[data-unplayed='4'] .card:nth-child(11),
+.tab .pile[data-unplayed='6'] .card:nth-child(12) {
+    top: 48em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(11),
+.tab .pile[data-unplayed='4'] .card:nth-child(12),
+.tab .pile[data-unplayed='6'] .card:nth-child(13) {
+    top: 54em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(12),
+.tab .pile[data-unplayed='4'] .card:nth-child(13),
+.tab .pile[data-unplayed='6'] .card:nth-child(14) {
+    top: 60em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(13),
+.tab .pile[data-unplayed='4'] .card:nth-child(14),
+.tab .pile[data-unplayed='6'] .card:nth-child(15) {
+    top: 66em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(14),
+.tab .pile[data-unplayed='4'] .card:nth-child(15),
+.tab .pile[data-unplayed='6'] .card:nth-child(16) {
+    top: 72em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(15),
+.tab .pile[data-unplayed='4'] .card:nth-child(16),
+.tab .pile[data-unplayed='6'] .card:nth-child(17) {
+    top: 78em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(16),
+.tab .pile[data-unplayed='4'] .card:nth-child(17),
+.tab .pile[data-unplayed='6'] .card:nth-child(18) {
+    top: 84em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(17),
+.tab .pile[data-unplayed='4'] .card:nth-child(18),
+.tab .pile[data-unplayed='6'] .card:nth-child(19) {
+    top: 90em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(18),
+.tab .pile[data-unplayed='4'] .card:nth-child(19),
+.tab .pile[data-unplayed='6'] .card:nth-child(20) {
+    top: 96em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(19),
+.tab .pile[data-unplayed='4'] .card:nth-child(20),
+.tab .pile[data-unplayed='6'] .card:nth-child(21) {
+    top: 102em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(20),
+.tab .pile[data-unplayed='4'] .card:nth-child(21) {
+    top: 108em;
+    left: 0;
+}
+
+.tab .pile[data-unplayed='2'] .card:nth-child(21) {
+    top: 114em;
+    left: 0;
+}
+
+/* Confetti */
+#confetti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* Disable Grammarly */
+grammarly-card {
+    display: none;
+}
