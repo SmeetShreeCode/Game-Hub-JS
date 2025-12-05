@@ -125,14 +125,14 @@ header h1 {
 }
 
 /* Difficulty Selection */
-.difficulty-buttons {
+.difficulty-buttons, .friendOption-buttons, .onlineOption-buttons {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     margin-bottom: 20px;
 }
 
-.difficulty-btn {
+.difficulty-btn, .friendOption-btn, .onlineOption-btn {
     background: var(--bg-secondary);
     border: 3px solid var(--border-color);
     color: var(--text-primary);
@@ -150,22 +150,22 @@ header h1 {
     justify-content: center;
 }
 
-.difficulty-btn:hover {
+.difficulty-btn:hover, .friendOption-btn:hover, .onlineOption-btn:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
 }
 
-.difficulty-btn[data-difficulty="easy"]:hover {
+.difficulty-btn[data-difficulty="easy"]:hover, .friendOption-btn[data-friendOption="offline"]:hover, .onlineOption-btn[data-onlineOption="createGame"]:hover {
     border-color: #4ade80;
     background: rgba(74, 222, 128, 0.1);
 }
 
-.difficulty-btn[data-difficulty="medium"]:hover {
+.difficulty-btn[data-difficulty="medium"]:hover, .friendOption-btn[data-friendOption="onlineWithFriend"]:hover, .onlineOption-btn[data-onlineOption="joinGame"]:hover {
     border-color: #60a5fa;
     background: rgba(96, 165, 250, 0.1);
 }
 
-.difficulty-btn[data-difficulty="hard"]:hover {
+.difficulty-btn[data-difficulty="hard"]:hover, .friendOption-btn[data-friendOption="onlineWithRandom"]:hover {
     border-color: #f59e0b;
     background: rgba(245, 158, 11, 0.1);
 }
@@ -175,19 +175,19 @@ header h1 {
     background: rgba(239, 68, 68, 0.1);
 }
 
-.difficulty-btn:active {
+.difficulty-btn:active, .friendOption-btn:active, .onlineOption-btn:active {
     transform: translateY(-2px);
 }
 
-.difficulty-icon {
+.difficulty-icon, .friendOption-icon, .onlineOption-icon {
     font-size: 2.5rem;
 }
 
-.difficulty-name {
+.difficulty-name, .friendOption-name, .onlineOption-name {
     font-size: 1.3rem;
 }
 
-.difficulty-btn small {
+.difficulty-btn, .friendOption-btn, .onlineOption-btn small {
     font-size: 0.85rem;
     color: var(--text-secondary);
     font-weight: normal;
@@ -539,21 +539,21 @@ footer a:hover {
         font-size: 1rem;
     }
 
-    .difficulty-buttons {
+    .difficulty-buttons, .friendOption-buttons, .onlineOption-buttons {
         grid-template-columns: 1fr;
         gap: 12px;
     }
 
-    .difficulty-btn {
+    .difficulty-btn, .friendOption-btn, .onlineOption-btn {
         padding: 20px 15px;
         min-height: 100px;
     }
 
-    .difficulty-icon {
+    .difficulty-icon, .friendOption-icon, .onlineOption-icon {
         font-size: 2rem;
     }
 
-    .difficulty-name {
+    .difficulty-name, .friendOption-name, .onlineOption-name {
         font-size: 1.1rem;
     }
 
@@ -650,16 +650,16 @@ footer a:hover {
         padding: 18px 20px;
     }
 
-    .difficulty-btn {
+    .difficulty-btn, .friendOption-btn, .onlineOption-btn {
         padding: 18px 12px;
         min-height: 85px;
     }
 
-    .difficulty-icon {
+    .difficulty-icon, .friendOption-icon, .onlineOption-icon {
         font-size: 1.8rem;
     }
 
-    .difficulty-name {
+    .difficulty-name, .friendOption-name, .onlineOption-name {
         font-size: 1rem;
     }
 

@@ -7,133 +7,178 @@
     <link rel="stylesheet" href="css/pong.css">
 </head>
 <body>
-    <div class="game-container">
-        <header>
-            <h1>Pong</h1>
-        </header>
+<div class="game-container">
+    <header>
+        <h1>Pong</h1>
+    </header>
 
-        <div id="menuScreen" class="screen">
-            <div class="menu-content">
-                <h2>Select Game Mode</h2>
-                <div class="mode-buttons">
-                    <button id="vsFriendBtn" class="mode-btn">
-                        <span class="icon">👥</span>
-                        <span>Play with Friend</span>
-                        <small>2 Players</small>
-                    </button>
-                    <button id="vsAiBtn" class="mode-btn">
-                        <span class="icon">🤖</span>
-                        <span>Play with AI</span>
-                        <small>Single Player</small>
-                    </button>
-                </div>
+    <div id="menuScreen" class="screen">
+        <div class="menu-content">
+            <h2>Select Game Mode</h2>
+            <div class="mode-buttons">
+                <button id="vsFriendBtn" class="mode-btn">
+                    <span class="icon">👥</span>
+                    <span>Play with Friend</span>
+                    <small>2 Players</small>
+                </button>
+                <button id="vsAiBtn" class="mode-btn">
+                    <span class="icon">🤖</span>
+                    <span>Play with AI</span>
+                    <small>Single Player</small>
+                </button>
             </div>
         </div>
-
-        <div id="difficultyScreen" class="screen hidden">
-            <div class="menu-content">
-                <h2>Select AI Difficulty</h2>
-                <div class="difficulty-buttons">
-                    <button class="difficulty-btn" data-difficulty="easy">
-                        <span class="difficulty-icon">😊</span>
-                        <span class="difficulty-name">Easy</span>
-                        <small>Slow & Forgiving</small>
-                    </button>
-                    <button class="difficulty-btn" data-difficulty="medium">
-                        <span class="difficulty-icon">😐</span>
-                        <span class="difficulty-name">Medium</span>
-                        <small>Balanced Challenge</small>
-                    </button>
-                    <button class="difficulty-btn" data-difficulty="hard">
-                        <span class="difficulty-icon">😤</span>
-                        <span class="difficulty-name">Hard</span>
-                        <small>Fast & Accurate</small>
-                    </button>
-                    <button class="difficulty-btn" data-difficulty="impossible">
-                        <span class="difficulty-icon">🔥</span>
-                        <span class="difficulty-name">Impossible</span>
-                        <small>Perfect AI</small>
-                    </button>
-                </div>
-                <button id="backToMenuBtn" class="back-btn">← Back to Menu</button>
-            </div>
-        </div>
-
-        <div id="gameScreen" class="screen hidden">
-            <div class="game-info">
-                <div class="score-display">
-                    <div class="player-score">
-                        <span class="player-label" id="player1Label">Player 1</span>
-                        <span class="score-value" id="player1Score">0</span>
-                    </div>
-                    <div class="vs-divider">VS</div>
-                    <div class="player-score">
-                        <span class="player-label" id="player2Label">Player 2</span>
-                        <span class="score-value" id="player2Score">0</span>
-                    </div>
-                </div>
-                <div class="game-controls-top">
-                    <button id="pauseBtn" class="control-btn">Pause</button>
-                    <button id="menuBtn" class="control-btn">Menu</button>
-                </div>
-            </div>
-
-            <div class="canvas-wrapper">
-                <canvas id="board"></canvas>
-                <div id="pausedOverlay" class="overlay hidden">
-                    <div class="overlay-content">
-                        <h2>Paused</h2>
-                        <button id="resumeBtn" class="btn">Resume</button>
-                        <button id="quitBtn" class="btn">Quit to Menu</button>
-                    </div>
-                </div>
-                <div id="gameOverOverlay" class="overlay hidden">
-                    <div class="overlay-content">
-                        <h2 id="winnerText">Player 1 Wins!</h2>
-                        <p>Final Score</p>
-                        <div class="final-scores">
-                            <span id="finalScore1">0</span> - <span id="finalScore2">0</span>
-                        </div>
-                        <button id="playAgainBtn" class="btn">Play Again</button>
-                        <button id="menuBtn2" class="btn">Menu</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="controls-info">
-                <div class="controls-section">
-                    <h3>Player 1</h3>
-                    <div class="control-item">
-                        <kbd>W</kbd> / <kbd>S</kbd> Move
-                    </div>
-                </div>
-                <div class="controls-section">
-                    <h3 id="player2ControlsLabel">Player 2</h3>
-                    <div class="control-item" id="player2Controls">
-                        <kbd>↑</kbd> / <kbd>↓</kbd> Move
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mobile-controls hidden">
-            <div class="mobile-paddle-controls">
-                <div class="mobile-paddle left-paddle">
-                    <button class="mobile-btn up" id="mobileP1Up">↑</button>
-                    <button class="mobile-btn down" id="mobileP1Down">↓</button>
-                </div>
-                <div class="mobile-paddle right-paddle">
-                    <button class="mobile-btn up" id="mobileP2Up">↑</button>
-                    <button class="mobile-btn down" id="mobileP2Down">↓</button>
-                </div>
-            </div>
-        </div>
-
-        <footer>
-            <p><a href="index.html">⬅ Back to Games</a></p>
-        </footer>
     </div>
 
-    <script src="js/pong.js"></script>
+    <div id="friendOptionScreen" class="screen hidden">
+        <div class="menu-content">
+            <h2>Select Friend Option</h2>
+            <div class="friendOption-buttons">
+                <button class="friendOption-btn" data-friendOption="offline">
+                    <span class="friendOption-icon">😊</span>
+                    <span class="friendOption-name">Offline</span>
+                    <small>Slow & Forgiving</small>
+                </button>
+                <button class="friendOption-btn" data-friendOption="onlineWithFriend">
+                    <span class="friendOption-icon">😐</span>
+                    <span class="friendOption-name">Online With Friend</span>
+                    <small>Balanced Challenge</small>
+                </button>
+                <button class="friendOption-btn" data-friendOption="onlineWithRandom">
+                    <span class="friendOption-icon">😤</span>
+                    <span class="friendOption-name">Online With Random</span>
+                    <small>Fast & Accurate</small>
+                </button>
+            </div>
+            <button id="backToMenuFromFriendBtn" class="back-btn">← Back to Menu</button>
+        </div>
+    </div>
+
+    <div id="onlineFriendOptionScreen" class="screen hidden">
+        <div class="menu-content">
+            <h2>Select Online Friend Option</h2>
+            <div class="onlineOption-buttons">
+                <button class="onlineOption-btn" data-onlineOption="createGame">
+                    <span class="onlineOption-icon">😊</span>
+                    <span class="onlineOption-name">Create Game</span>
+                    <small>Slow & Forgiving</small>
+                </button>
+                <button class="onlineOption-btn" data-onlineOption="joinGame">
+                    <span class="onlineOption-icon">😐</span>
+                    <input type="text" id="joinTheGame">
+                    <span class="onlineOption-name">Join Game</span>
+                    <small>Balanced Challenge</small>
+                </button>
+            </div>
+            <button id="backToFriendOptionBtn" class="back-btn">← Back</button>
+        </div>
+    </div>
+
+    <div id="difficultyScreen" class="screen hidden">
+        <div class="menu-content">
+            <h2>Select AI Difficulty</h2>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" data-difficulty="easy">
+                    <span class="difficulty-icon">😊</span>
+                    <span class="difficulty-name">Easy</span>
+                    <small>Slow & Forgiving</small>
+                </button>
+                <button class="difficulty-btn" data-difficulty="medium">
+                    <span class="difficulty-icon">😐</span>
+                    <span class="difficulty-name">Medium</span>
+                    <small>Balanced Challenge</small>
+                </button>
+                <button class="difficulty-btn" data-difficulty="hard">
+                    <span class="difficulty-icon">😤</span>
+                    <span class="difficulty-name">Hard</span>
+                    <small>Fast & Accurate</small>
+                </button>
+                <button class="difficulty-btn" data-difficulty="impossible">
+                    <span class="difficulty-icon">🔥</span>
+                    <span class="difficulty-name">Impossible</span>
+                    <small>Perfect AI</small>
+                </button>
+            </div>
+            <button id="backToMenuBtn" class="back-btn">← Back to Menu</button>
+        </div>
+    </div>
+
+    <div id="gameScreen" class="screen hidden">
+        <div class="game-info">
+            <div class="score-display">
+                <div class="player-score">
+                    <span class="player-label" id="player1Label">Player 1</span>
+                    <span class="score-value" id="player1Score">0</span>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="player-score">
+                    <span class="player-label" id="player2Label">Player 2</span>
+                    <span class="score-value" id="player2Score">0</span>
+                </div>
+            </div>
+            <div class="game-controls-top">
+                <button id="pauseBtn" class="control-btn">Pause</button>
+                <button id="menuBtn" class="control-btn">Menu</button>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper">
+            <canvas id="board"></canvas>
+            <div id="pausedOverlay" class="overlay hidden">
+                <div class="overlay-content">
+                    <h2>Paused</h2>
+                    <button id="resumeBtn" class="btn">Resume</button>
+                    <button id="quitBtn" class="btn">Quit to Menu</button>
+                </div>
+            </div>
+            <div id="gameOverOverlay" class="overlay hidden">
+                <div class="overlay-content">
+                    <h2 id="winnerText">Player 1 Wins!</h2>
+                    <p>Final Score</p>
+                    <div class="final-scores">
+                        <span id="finalScore1">0</span> - <span id="finalScore2">0</span>
+                    </div>
+                    <button id="playAgainBtn" class="btn">Play Again</button>
+                    <button id="menuBtn2" class="btn">Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls-info">
+            <div class="controls-section">
+                <h3>Player 1</h3>
+                <div class="control-item">
+                    <kbd>W</kbd> / <kbd>S</kbd> Move
+                </div>
+            </div>
+            <div class="controls-section">
+                <h3 id="player2ControlsLabel">Player 2</h3>
+                <div class="control-item" id="player2Controls">
+                    <kbd>↑</kbd> / <kbd>↓</kbd> Move
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-controls hidden">
+        <div class="mobile-paddle-controls">
+            <div class="mobile-paddle left-paddle">
+                <button class="mobile-btn up" id="mobileP1Up">↑</button>
+                <button class="mobile-btn down" id="mobileP1Down">↓</button>
+            </div>
+            <div class="mobile-paddle right-paddle">
+                <button class="mobile-btn up" id="mobileP2Up">↑</button>
+                <button class="mobile-btn down" id="mobileP2Down">↓</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><a href="index.html">⬅ Back to Games</a></p>
+    </footer>
+</div>
+
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+<script src="js/pong.js"></script>
 </body>
 </html>

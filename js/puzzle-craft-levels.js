@@ -91,6 +91,7 @@ const chapters = {
             {size: 3, image: `${IMAGE_PATH}L68.jpg`},
             {size: 3, image: `${IMAGE_PATH}L69.jpg`},
             {size: 3, image: `${IMAGE_PATH}L70.jpg`},
+            {size: 3, image: `${IMAGE_PATH}L71.jpeg`},
         ]
     },
     // Add more chapters here if needed

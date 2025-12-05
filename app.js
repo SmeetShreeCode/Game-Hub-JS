@@ -31,11 +31,13 @@ const port = 3000;
 const orbital = io.of("/orbital");
 const rps = io.of("/rps");
 const connectFour = io.of("/connectFour");
+const pong = io.of("/pong");
 
 // IMPORT SOCKET FILES
 require('./sockets/sio-orbitAlliance')(orbital);
 require('./sockets/sio-rockPaperScissors')(rps);
 require('./sockets/sio-connectFour')(connectFour);
+require('./sockets/sio-pong')(pong);
 
 // Socket.IO connection
 io.on('connection', (socket) => {

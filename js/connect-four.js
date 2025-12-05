@@ -161,7 +161,7 @@ class ConnectFourGame {
         this.moveCount = 0;
         this.lastDroppedPiece = null;
         this.winningPlayer = null; // Reset winning player
-        
+
         // Ensure winCount is set (default to 4 for Connect Four)
         if (!this.winCount) {
             this.winCount = 4;
@@ -782,10 +782,6 @@ class ConnectFourGame {
         }
     }
 
-    showCode(code) {
-
-    }
-
     updateDisplay() {
         document.getElementById('moveCount').textContent = this.moveCount;
     }
@@ -1087,8 +1083,6 @@ socket.on("newGame", ({roomId: id}) => {
             });
         });
     }
-
-    if (ConnectFour) ConnectFour.showCode(roomId);
 });
 
 socket.on("playersConnected", ({roomId: serverRoomId, isPlayer1: serverIsPlayer1} = {}) => {

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15 Puzzle</title>
+    <link rel="stylesheet" href="css/tile-puzzle.css">
+</head>
+<body>
+<div class="container">
+    <h1>15 Puzzle</h1>
+    <div class="info">
+        Move: <span id="move-count">0</span>
+        Time: <span id="timer">00:00</span>
+        Best Moves: <span id="best-move">-</span>
+        Best Time: <span id="best-time">--:--</span>
+        <a href="index.html" class="back-button">Back</a>
+        <a class="back-button" onclick="stopTimer(true)">⏸</a>
+    </div>
+    <select id="level-select" onchange="loadLevel()">
+        <option value="images/Puzzle-craft/L1.webp">Level 1</option>
+        <option value="images/Puzzle-craft/L2.jpg">Level 2</option>
+        <option value="images/Puzzle-craft/L1.webp">Level 3</option>
+    </select>
+
+
+    <div class="puzzle-container" id="puzzle-container"></div>
+    <button id="restart-btn">Restart</button>
+</div>
+
+<div id="messageOverlay">
+    <div id="message">
+        Congratulations! You solve the puzzle.<br>
+        <button onclick="shuffleTiles()">Play Again</button>
+    </div>
+</div>
+
+<div id="pauseOverlay">
+    <div id="pauseMessage">
+        <h2>Game Paused</h2><br>
+        <p>You have paused the game. Take your time and come back!</p><br>
+        <button onclick="startTimer(false)">▶ Resume</button>
+        <button onclick="shuffleTiles()">🔄 Restart Game</button>
+    </div>
+</div>
+
+<script src="js/tile-puzzle.js"></script>
+</body>
+</html>
