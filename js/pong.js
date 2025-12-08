@@ -198,13 +198,11 @@ class PongGame {
                 const friendOption = btn.getAttribute('data-friendOption');
                 if (friendOption === 'offline') this.startGame('friend');
                 else if (friendOption === 'onlineWithFriend') this.showOnlineFriendOptionSelection();
-                else console.log('user disconnected to the pong');
             });
         });
 
         // Online Option selection
         document.querySelectorAll('.onlineOption-btn').forEach(btn => {
-            console.log(btn)
             btn.addEventListener('click', () => {
                 const onlineOption = btn.getAttribute('data-onlineOption');
                 if (onlineOption === 'createGame') {
@@ -441,6 +439,16 @@ class PongGame {
             }
         }
 
+        // 🔥 Send real-time sync if online mode
+        if (isOnline && isPlayer1) {
+            socket.emit("updateGameState", {
+                roomId,
+                ball: this.ball,
+                player1Y: this.player1.y,
+                player2Y: this.player2.y
+            });
+        }
+
         // Ball out of bounds - scoring
         if (this.ball.x < 0) {
             this.player2.score++;
@@ -608,9 +616,11 @@ class PongGame {
     }
 }
 
+let pongGame = null;
+
 // Initialize game when page loads
 window.addEventListener('DOMContentLoaded', () => {
-    new PongGame();
+    pongGame = new PongGame();
 });
 
 const socket = io("http://192.168.29.24:3000/pong");
@@ -620,28 +630,33 @@ let isPlayer1 = false;
 let isOnline = false;
 
 socket.on("newGame", ({roomId: id}) => {
-    console.log(id);
     roomId = id;
     // document.querySelector('#initial').style.display = 'none';
     // document.querySelector('#gameArea').style.display = 'block';
     const classes = document.querySelectorAll('.onlineOption-name');
     const btn = document.querySelectorAll('.onlineOption-btn');
-    console.log(classes[0])
-    console.log(classes[1])
-    console.log(btn)
+
 
     classes[0].innerHTML = `Game Created: <b>${roomId}</b>`;
     btn[1].innerHTML = `Waiting for Opponent to join the game...!`;
-    let copyButton = document.createElement("button");
-    copyButton.style.display = 'block';
-    copyButton.innerText = 'Copied!';
-    copyButton.addEventListener('click', () => {
-        navigator.clipboard.writeText(roomId).then(() => {
-            console.log('Copied to clipboard successfully!');
-        }, (e) => {
-            console.error('Could not copy to clipboard!', e);
-        });
-    });
+
+    const div = document.createElement('div');
+    div.className = btn[0].className;  // keep same classes
+    div.dataset.onlineoption = btn[0].dataset.onlineoption;
+    div.innerHTML = btn[0].innerHTML;  // keep its content
+
+    btn[0].replaceWith(div);
+
+    // let copyButton = document.createElement("button");
+    // copyButton.style.display = 'block';
+    // copyButton.innerText = 'Copied!';
+    // copyButton.addEventListener('click', () => {
+    //     navigator.clipboard.writeText(roomId).then(() => {
+    //         console.log('Copied to clipboard successfully!');
+    //     }, (e) => {
+    //         console.error('Could not copy to clipboard!', e);
+    //     });
+    // });
 
     // document.querySelector('#waitingArea').innerHTML = `Waiting... For Opponent, Please Share Code ${roomId} to join`;
     // document.querySelector('#waitingArea').appendChild(copyButton);
@@ -657,6 +672,44 @@ socket.on("playersConnected", ({roomId: serverRoomId, isPlayer1: serverIsPlayer1
     if (serverIsPlayer1 !== undefined) {
         isPlayer1 = serverIsPlayer1;
     }
-    console.log(isOnline, roomId);
+
+    console.log("ONLINE READY:", {isOnline, roomId, isPlayer1});
+
+    // 🔥 Start game automatically when both players join
+    document.getElementById('onlineFriendOptionScreen').innerHTML = `<b><h1>Ready For the PLay, Game will be starting soon...!</h1></b>`;
+
+    setTimeout(() => {
+        document.getElementById('onlineFriendOptionScreen').classList.add('hidden');
+        pongGame.startGame("friend"); // Online mode still uses the 2-player logic
+    }, 5000);
 });
 
+socket.on("gameState", (state) => {
+    pongGame.ball.x = state.ball.x;
+    pongGame.ball.y = state.ball.y;
+
+    pongGame.player1.y = state.paddles.p1;
+    pongGame.player2.y = state.paddles.p2;
+
+    // pongGame.scorePlayer1 = state.score.p1;
+    // pongGame.scorePlayer2 = state.score.p2;
+    // update UI scores
+    document.getElementById('player1Score').textContent = state.score.p1;
+    document.getElementById('player2Score').textContent = state.score.p2;
+});
+
+socket.on('gameStarted', () => {
+    // hide menus etc
+    pongGame.gameMode = 'online';
+    pongGame.gameRunning = true;
+    // important: in game.update() guard local physics with `if (game.gameMode !== 'online') { /* local physics */ }`
+    pongGame.gameLoop();
+});
+
+socket.on("gameStateUpdate", (data) => {
+    if (!isPlayer1) {
+        pongGame.ball = data.ball;
+        pongGame.player1.y = data.player1Y;
+        pongGame.player2.y = data.player2Y;
+    }
+});

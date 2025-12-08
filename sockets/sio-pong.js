@@ -42,6 +42,43 @@ module.exports = function (pong) {
             if (socket2) socket2.emit("playersConnected", {roomId, isPlayer1: false});
         });
 
+        socket.on("playerJoined", ({isPlayer1}) => {
+            isOnline = true;
+            playerRole = isPlayer1 ? "host" : "guest";
+
+            document.getElementById("onlineFriendOptionScreen").classList.add("hidden");
+            setTimeout(() => {
+                game.startOnlineGame(); // NEW METHOD
+            }, 300);
+        });
+
+
+        socket.on("joinRoom", ({roomId}) => {
+            if (!rooms[roomId]) {
+                rooms[roomId] = {
+                    players: [],
+                    ball: {x: 400, y: 200, dx: 4, dy: 4, radius: 10},
+                    paddles: {p1: 200, p2: 200},
+                    score: {p1: 0, p2: 0},
+                    interval: null
+                };
+            }
+
+            if (rooms[roomId].players.length < 2) {
+                rooms[roomId].players.push(socket.id);
+                socket.join(roomId);
+
+                const isPlayer1 = rooms[roomId].players[0] === socket.id;
+
+                io.to(roomId).emit("playerJoined", {isPlayer1});
+
+                if (rooms[roomId].players.length === 2) {
+                    startGame(roomId);
+                }
+            }
+        });
+
+
         socket.on("joinRandom", () => {
             if (!randomQueue) {
                 randomQueue = socket.id;
@@ -70,6 +107,16 @@ module.exports = function (pong) {
             if (roomId && rooms[roomId]) {
                 socket.to(roomId).emit("opponentMove", {col});
             }
+        });
+
+        socket.on("movePaddle", ({roomId, y}) => {
+            const room = rooms[roomId];
+            if (!room) return;
+
+            const playerIndex = room.players.indexOf(socket.id);
+
+            if (playerIndex === 0) room.paddles.p1 = y;
+            if (playerIndex === 1) room.paddles.p2 = y;
         });
 
         socket.on('disconnect', (reason) => {

@@ -31,7 +31,6 @@ body {
     flex-direction: column;
     max-width: 100%;
     margin: 0 auto;
-    padding: 20px;
 }
 
 header {
@@ -216,7 +215,6 @@ header h1 {
 .game-info {
     width: 100%;
     max-width: 800px;
-    margin-bottom: 20px;
 }
 
 .score-display {
@@ -224,9 +222,9 @@ header h1 {
     justify-content: space-between;
     align-items: center;
     background: rgba(26, 26, 26, 0.9);
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
     border: 2px solid var(--border-color);
 }
 
@@ -377,7 +375,6 @@ header h1 {
     justify-content: space-around;
     width: 100%;
     max-width: 800px;
-    margin-top: 20px;
     flex-wrap: wrap;
     gap: 20px;
 }
@@ -483,7 +480,7 @@ kbd {
 /* Footer */
 footer {
     text-align: center;
-    padding: 20px;
+    padding: 5px;
     margin-top: auto;
 }
 

@@ -63,7 +63,6 @@ module.exports = function (rps) {
 // ROCK PAPER SCISSORS
     function makeId(length) {
         let result = '';
-        // const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         for (let i = 0; i < length; i++) {
             result += chars.charAt(Math.floor(Math.random() * chars.length));
