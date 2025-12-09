@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-title" content="CodePen">
+    <title>Jigsaw Puzzle</title>
+    <link rel="stylesheet" href="css/jigsaw-puzzle.css">
+    <script>
+        window.console = window.console || function (t) {
+        };
+    </script>
+</head>
+<body>
+<div id=forPuzzle></div>
+<ul id="menu">
+    <li>&#x2630;</li>
+    <li>default image</li>
+    <li>load image</li>
+    <li><input type=checkbox id="enablerot"><label for="enablerot" id="enablerotlabel">enable rotation</label></li>
+    <li>restart game</li>
+    <li>shape: <select id="shape">
+        <option value="1" selected>classic</option>
+        <option value="2">triangle</option>
+        <option value="3">round</option>
+        <option value="4">straight</option>
+    </select></li>
+    <li>12 pieces</li>
+    <li>25 pieces</li>
+    <li>50 pieces</li>
+    <li>100 pieces</li>
+    <li>200 pieces</li>
+</ul>
+
+<script src="js/jigsaw-puzzle-levels.js"></script>
+<script src="js/jigsaw-puzzle.js"></script>
+</body>
+</html>

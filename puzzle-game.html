@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Puzzle Game</title>
+    <link rel="stylesheet" href="css/puzzle-game.css">
+    <script>
+        window.console = window.console || function (t) {
+        };
+    </script>
+</head>
+<body>
+<!--<select id="levelSelect"></select>-->
+<h3>Arrange the boxes in order with the help of blank box, in time ;)</h3>
+<div class="mainBox">
+    <div class="box" id="id_0"></div>
+    <div class="box" id="id_1"></div>
+    <div class="box" id="id_2"></div>
+    <div class="box" id="id_3"></div>
+    <div class="box" id="id_4"></div>
+    <div class="box" id="id_5"></div>
+    <div class="box" id="id_6"></div>
+    <div class="box" id="id_7"></div>
+    <div class="box" id="id_8"></div>
+    <div class="box" id="id_9"></div>
+    <div class="box" id="id_10"></div>
+    <div class="box" id="id_11"></div>
+    <div class="box" id="id_12"></div>
+    <div class="box" id="id_13"></div>
+    <div class="box" id="id_14"></div>
+    <div class="activeBox" id="id_15"></div>
+
+</div>
+<div id="timeLeft">
+    <div>
+        <span class="minutes"></span>
+        <div class="smalltext">Minutes</div>
+        <h5>Time</h5>
+    </div>
+    <div>
+        <span class="seconds"></span>
+        <div class="smalltext">Seconds</div>
+        <h5>Left</h5>
+    </div>
+    <div id="demoPic"></div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/puzzle-game-levels.js"></script>
+<script src="js/puzzle-game.js"></script>
+</body>
+</html>
