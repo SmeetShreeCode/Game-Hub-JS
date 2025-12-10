@@ -201,7 +201,7 @@ function initializeClock(id, endtime) {
 
         if (t.total <= 0) {
             clearInterval(timeinterval);
-            alert("SORRY!!! You lost the game :( Please try again.");
+            // alert("SORRY!!! You lost the game :( Please try again.");
             var deadline = new Date(Date.parse(new Date()) + 5 * 60 * 1000);
             initializeClock('timeLeft', deadline);
             putValue();

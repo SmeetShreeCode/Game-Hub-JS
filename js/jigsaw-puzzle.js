@@ -1,8 +1,9 @@
-"use strict";
+// "use strict";
 // last update: 2025/10/29
 let puzzle, autoStart;
 let rotEnableElement, playing, restartElement;
 let useMouse = true;
+let currentLevel = 3;
 
 const mhypot = Math.hypot,
     mrandom = Math.random,
@@ -1372,7 +1373,7 @@ let loadFile;
 } //  // scope for loadFile
 
 function loadInitialFile() {
-    puzzle.srcImage.src = chapters.levels[0].image;
+    puzzle.srcImage.src = chapters.levels[currentLevel].image;
 }
 
 //-----------------------------------------------------------------------------

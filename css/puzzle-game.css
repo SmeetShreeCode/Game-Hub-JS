@@ -25,8 +25,8 @@ body {
 }
 
 .box {
+    background-image: url(https://s3-ap-southeast-1.amazonaws.com/dearsaiftest/cats.jpg) !important;
     /*background-image: url(../images/Puzzle-craft/L1.webp) !important;*/
-    background-image: url(../images/Puzzle-craft/L1.webp) !important;
     border-radius: 10px;
     border: 1px solid #72726E;
     float: left;
