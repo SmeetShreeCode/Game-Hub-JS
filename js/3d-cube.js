@@ -251,7 +251,7 @@ function RoundedBoxGeometry(size, radius, radiusSegments) {
             var cosVa = Math.cos(va);
             var sinVa = Math.sin(va);
 
-            if (y == radiusSegments) {
+            if (y === radiusSegments) {
 
                 vertex.set(0, 1, 0);
                 var vert = vertex.clone().multiplyScalar(radius).add(cornerOffset);
@@ -568,10 +568,10 @@ function RoundedBoxGeometry(size, radius, radiusSegments) {
             for (var u = 0; u <= end; u++) {
 
                 var a = cStart + radiusSegments + u * rs1;
-                var b = cStart + (u != end ? radiusSegments + (u + 1) * rs1 : cornerVertNumber - 1);
+                var b = cStart + (u !== end ? radiusSegments + (u + 1) * rs1 : cornerVertNumber - 1);
 
                 var c = cEnd + radiusSegments + u * rs1;
-                var d = cEnd + (u != end ? radiusSegments + (u + 1) * rs1 : cornerVertNumber - 1);
+                var d = cEnd + (u !== end ? radiusSegments + (u + 1) * rs1 : cornerVertNumber - 1);
 
                 if (!needsFlip[i]) {
 
@@ -766,12 +766,12 @@ class Cube {
                     let position = new THREE.Vector3(first + x, first + y, first + z);
                     let edges = [];
 
-                    if (x == 0) edges.push(0);
-                    if (x == m) edges.push(1);
-                    if (y == 0) edges.push(2);
-                    if (y == m) edges.push(3);
-                    if (z == 0) edges.push(4);
-                    if (z == m) edges.push(5);
+                    if (x === 0) edges.push(0);
+                    if (x === m) edges.push(1);
+                    if (y === 0) edges.push(2);
+                    if (y === m) edges.push(3);
+                    if (z === 0) edges.push(4);
+                    if (z === m) edges.push(5);
 
                     position.edges = edges;
                     this.positions.push(position);
@@ -1113,8 +1113,8 @@ class Draggable {
 
             start: (event) => {
 
-                if (event.type == 'mousedown' && event.which != 1) return;
-                if (event.type == 'touchstart' && event.touches.length > 1) return;
+                if (event.type === 'mousedown' && event.which !== 1) return;
+                if (event.type === 'touchstart' && event.touches.length > 1) return;
 
                 this.getPositionCurrent(event);
 
@@ -1126,7 +1126,7 @@ class Draggable {
 
                 }
 
-                this.touch = (event.type == 'touchstart');
+                this.touch = (event.type === 'touchstart');
 
                 this.onDragStart(this.position);
 
@@ -1381,12 +1381,12 @@ class Controls {
 
                 } else {
 
-                    const axis = (this.dragDirection != 'x')
-                        ? ((this.dragDirection == 'y' && position.current.x > this.game.world.width / 2) ? 'z' : 'x')
+                    const axis = (this.dragDirection !== 'x')
+                        ? ((this.dragDirection === 'y' && position.current.x > this.game.world.width / 2) ? 'z' : 'x')
                         : 'y';
 
                     this.flipAxis = new THREE.Vector3();
-                    this.flipAxis[axis] = 1 * ((axis == 'x') ? -1 : 1);
+                    this.flipAxis[axis] = 1 * ((axis === 'x') ? -1 : 1);
 
                 }
 
@@ -1470,7 +1470,7 @@ class Controls {
 
         const easing = this.flipEasings[config];
         const duration = this.flipSpeeds[config];
-        const bounce = (config == 2) ? this.bounceCube() : (() => {
+        const bounce = (config === 2) ? this.bounceCube() : (() => {
         });
 
         this.rotationTween = new Tween({
@@ -1606,7 +1606,7 @@ class Controls {
 
             const piecePosition = piece.position.clone().multiplyScalar(scalar).round();
 
-            if (piecePosition[axis] == position[axis]) layer.push(piece.name);
+            if (piecePosition[axis] === position[axis]) layer.push(piece.name);
 
         });
 
@@ -1844,8 +1844,8 @@ class Scrambler {
                     faces[Math.floor(Math.random() * faces.length)] +
                     modifiers[Math.floor(Math.random() * 3)];
 
-                if (count > 0 && move.charAt(0) == this.moves[count - 1].charAt(0)) continue;
-                if (count > 1 && move.charAt(0) == this.moves[count - 2].charAt(0)) continue;
+                if (count > 0 && move.charAt(0) === this.moves[count - 1].charAt(0)) continue;
+                if (count > 1 && move.charAt(0) === this.moves[count - 2].charAt(0)) continue;
 
                 this.moves.push(move);
                 count++;
@@ -1873,7 +1873,7 @@ class Scrambler {
             const modifier = move.charAt(1);
 
             this.converted.push(convertedMove);
-            if (modifier == "2") this.converted.push(convertedMove);
+            if (modifier === "2") this.converted.push(convertedMove);
 
         });
 
@@ -1892,7 +1892,7 @@ class Scrambler {
         const position = new THREE.Vector3();
         position[{D: 'y', U: 'y', L: 'x', R: 'x', F: 'z', B: 'z'}[face.toUpperCase()]] = row;
 
-        const angle = (Math.PI / 2) * -row * ((modifier == "'") ? -1 : 1);
+        const angle = (Math.PI / 2) * -row * ((modifier === "'") ? -1 : 1);
 
         return {position, axis, angle, name: move};
 
@@ -2441,7 +2441,7 @@ class Timer extends Animation {
         this.deltaTime = this.currentTime - this.startTime;
         this.convert();
 
-        if (this.converted != old) {
+        if (this.converted !== old) {
 
             localStorage.setItem('theCube_time', this.deltaTime);
             this.setText();
@@ -2787,7 +2787,7 @@ class Confetti {
 
     stop() {
 
-        if (this.started == 0) return;
+        if (this.started === 0) return;
 
         this.holders.forEach(holder => {
 
@@ -2891,7 +2891,7 @@ class ConfettiStage extends Animation {
         while (i--)
             if (!this.particles[i].completed) this.particles[i].update(delta);
 
-        if (!this.playing && this.completed == this.count) this.reset();
+        if (!this.playing && this.completed === this.count) this.reset();
 
     }
 
