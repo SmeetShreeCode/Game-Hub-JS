@@ -1,13 +1,12 @@
 body {
     background: none repeat scroll 0 0 #7FCA74;
     width: 100%;
-    font-family: "Arial Narrow", Arial;
+    margin: 0;
+    font-family: "Arial Narrow", Arial, serif;
 }
 
 .mainBox {
     background: none repeat scroll 0 0 #EEEEEE;
-    height: 398px;
-    width: 397px;
     margin: 0 auto;
     padding-left: 3px;
     padding-top: 3px;
@@ -15,17 +14,12 @@ body {
     -webkit-box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.75);
     -moz-box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.75);
     box-shadow: 5px 5px 10px 3px rgba(0, 0, 0, 0.75);
-    background: none repeat scroll 0 0 #EEEEEE;
     height: 499px;
     width: 500px;
-    margin: 0 auto;
-    padding-left: 3px;
-    padding-top: 3px;
-    border: 1px solid #dddddd;
 }
 
 .box {
-    background-image: url(https://s3-ap-southeast-1.amazonaws.com/dearsaiftest/cats.jpg) !important;
+    /*background-image: url(https://s3-ap-southeast-1.amazonaws.com/dearsaiftest/cats.jpg) !important;*/
     /*background-image: url(../images/Puzzle-craft/L1.webp) !important;*/
     border-radius: 10px;
     border: 1px solid #72726E;
@@ -65,16 +59,60 @@ body {
     color: #FFF;
 }
 
+#levelScreen {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#levelGrid {
+    width: 90%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.levelItem {
+    width: 120px;
+    height: 120px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    border: 3px solid #34452c;
+    cursor: pointer;
+    position: relative;
+    transition: transform .25s;
+}
+
+.levelItem:hover {
+    transform: scale(1.05);
+}
+
+.levelNumber {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: rgba(0,0,0,0.7);
+    padding: 3px 8px;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.locked {
+    filter: grayscale(100%);
+    cursor: not-allowed;
+}
+
 .note {
     background-color: #C3D4BB;
-    font-family: Arial, Helvetica;
-    font-size: 10pt;
+    font-family: Arial, Helvetica, serif;
     padding: 5px 5px 10px;
     text-align: center;
     width: 39%;
     font-weight: 100;
     font-size: 40px;
-    margin: 40px 0px 20px;
+    margin: 40px 0 20px;
 }
 
 #timeLeft {
@@ -117,7 +155,7 @@ h3, h5 {
 
 #demoPic {
     margin-left: 10px !important;
-    background-image: url(https://s3-ap-southeast-1.amazonaws.com/dearsaiftest/cats.jpg) !important;
+    /*background-image: url(https://s3-ap-southeast-1.amazonaws.com/dearsaiftest/cats.jpg) !important;*/
     background-size: 155px !important;
     background-repeat: no-repeat !important;
     height: 150px;
