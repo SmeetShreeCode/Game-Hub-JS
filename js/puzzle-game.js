@@ -117,7 +117,7 @@ function result(number) {
 
     let number_init = [15];
     let x = 0, y = 0;
-    for (i = 0; i <= 14; i++) {
+    for (let i = 0; i <= 14; i++) {
         number_init[i] = x + "," + y;
         if (i !== 3 && i !== 7 && i !== 11) {
             x = x - 125;
@@ -176,17 +176,33 @@ function updateLevelSelectUI() {
 }
 
 function toggle(ID, active, number) {
-    $('#id_' + ID + '').removeClass('box');
-    $('.activeBox').addClass('box');
-    var pos = number[ID].split(",");
-    //$('.activeBox').css("background-image", "url(imgs/cats.jpg)");
-    $('.activeBox').css("background-position", pos[0] + "px " + pos[1] + "px");
-    $('.activeBox').removeClass('activeBox');
-    $('#id_' + ID + '').addClass('activeBox');
+
+    const $tile = $('#id_' + ID);
+    const $empty = $('.activeBox');
+
+    // Get image position of clicked tile
+    const pos = number[ID];
+
+    // Move image to empty tile
+    $empty
+        .css("background-position", pos.split(",")[0] + "px " + pos.split(",")[1] + "px")
+        .css("background-image", $tile.css("background-image"))
+        .css("background-size", $tile.css("background-size"));
+
+    // Make clicked tile empty
+    $tile.css("background-image", "none");
+
+    // Swap classes
+    $empty.removeClass('activeBox').addClass('box');
+    $tile.removeClass('box').addClass('activeBox');
+
+    // 🔥 FIX: update logical positions correctly
     number[active] = number[ID];
+    number[ID] = undefined; // THIS WAS MISSING
 
     return ID;
 }
+
 
 function putValue() {
 //var numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
