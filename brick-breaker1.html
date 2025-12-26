@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Advanced Brick Breaker</title>
+    <style>
+        body {
+            margin: 0;
+            background: #020617;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            touch-action: none;
+        }
+        canvas {
+            background: #020617;
+            border-radius: 12px;
+            box-shadow: 0 0 25px #38bdf8;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas" width="800" height="500"></canvas>
+
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    /* ---------------- GAME STATE ---------------- */
+    let level = 1;
+    let score = 0;
+    let lives = 3;
+
+    /* ---------------- BALL ---------------- */
+    const ball = {
+        x: canvas.width / 2,
+        y: canvas.height - 60,
+        radius: 8,
+        speed: 4,
+        dx: 4,
+        dy: -4
+    };
+
+    /* ---------------- PADDLE ---------------- */
+    const paddle = {
+        width: 120,
+        height: 14,
+        x: canvas.width / 2 - 60
+    };
+
+    /* ---------------- BRICKS ---------------- */
+    let bricks = [];
+    const brick = {
+        rows: 3,
+        cols: 9,
+        width: 75,
+        height: 20,
+        padding: 10,
+        offsetTop: 60,
+        offsetLeft: 35
+    };
+
+    /* ---------------- POWER UPS ---------------- */
+    let powerUps = [];
+
+    /* ---------------- INPUT ---------------- */
+    let right = false;
+    let left = false;
+
+    /* ---------------- CONTROLS ---------------- */
+    document.addEventListener("keydown", e => {
+        if (e.key === "ArrowRight") right = true;
+        if (e.key === "ArrowLeft") left = true;
+    });
+    document.addEventListener("keyup", e => {
+        if (e.key === "ArrowRight") right = false;
+        if (e.key === "ArrowLeft") left = false;
+    });
+
+    /* ---------------- MOBILE TOUCH ---------------- */
+    canvas.addEventListener("touchmove", e => {
+        const rect = canvas.getBoundingClientRect();
+        paddle.x = e.touches[0].clientX - rect.left - paddle.width / 2;
+    });
+
+    /* ---------------- LEVEL SETUP ---------------- */
+    function createLevel() {
+        bricks = [];
+        brick.rows = 3 + level;
+        ball.speed = 4 + level * 0.5;
+        ball.dx = ball.speed;
+        ball.dy = -ball.speed;
+
+        for (let c = 0; c < brick.cols; c++) {
+            bricks[c] = [];
+            for (let r = 0; r < brick.rows; r++) {
+                bricks[c][r] = { status: 1 };
+            }
+        }
+    }
+    createLevel();
+
+    /* ---------------- DRAW ---------------- */
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#38bdf8";
+        ctx.fill();
+    }
+
+    function drawPaddle() {
+        ctx.fillStyle = "#22c55e";
+        ctx.fillRect(paddle.x, canvas.height - 30, paddle.width, paddle.height);
+    }
+
+    function drawBricks() {
+        for (let c = 0; c < brick.cols; c++) {
+            for (let r = 0; r < brick.rows; r++) {
+                if (bricks[c][r].status) {
+                    const x = c * (brick.width + brick.padding) + brick.offsetLeft;
+                    const y = r * (brick.height + brick.padding) + brick.offsetTop;
+                    bricks[c][r].x = x;
+                    bricks[c][r].y = y;
+                    ctx.fillStyle = "#f97316";
+                    ctx.fillRect(x, y, brick.width, brick.height);
+                }
+            }
+        }
+    }
+
+    function drawHUD() {
+        ctx.fillStyle = "#fff";
+        ctx.font = "16px Arial";
+        ctx.fillText("Score: " + score, 20, 25);
+        ctx.fillText("Lives: " + lives, 120, 25);
+        ctx.fillText("Level: " + level, canvas.width - 100, 25);
+    }
+
+    /* ---------------- POWER UPS ---------------- */
+    function spawnPowerUp(x, y) {
+        const types = ["expand", "life", "slow"];
+        powerUps.push({
+            x, y,
+            type: types[Math.floor(Math.random() * types.length)],
+            size: 12,
+            dy: 2
+        });
+    }
+
+    function drawPowerUps() {
+        powerUps.forEach(p => {
+            ctx.fillStyle = "#a855f7";
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+            p.y += p.dy;
+
+            if (
+                p.y > canvas.height - 30 &&
+                p.x > paddle.x &&
+                p.x < paddle.x + paddle.width
+            ) {
+                applyPowerUp(p.type);
+                p.used = true;
+            }
+        });
+        powerUps = powerUps.filter(p => !p.used && p.y < canvas.height);
+    }
+
+    function applyPowerUp(type) {
+        if (type === "expand") paddle.width += 30;
+        if (type === "life") lives++;
+        if (type === "slow") {
+            ball.dx *= 0.7;
+            ball.dy *= 0.7;
+        }
+    }
+
+    /* ---------------- COLLISION ---------------- */
+    function collision() {
+        for (let c = 0; c < brick.cols; c++) {
+            for (let r = 0; r < brick.rows; r++) {
+                const b = bricks[c][r];
+                if (b.status) {
+                    if (
+                        ball.x > b.x &&
+                        ball.x < b.x + brick.width &&
+                        ball.y > b.y &&
+                        ball.y < b.y + brick.height
+                    ) {
+                        ball.dy = -ball.dy;
+                        b.status = 0;
+                        score++;
+                        if (Math.random() < 0.3) spawnPowerUp(b.x, b.y);
+                    }
+                }
+            }
+        }
+    }
+
+    /* ---------------- GAME LOOP ---------------- */
+    function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        drawBricks();
+        drawBall();
+        drawPaddle();
+        drawHUD();
+        drawPowerUps();
+
+        collision();
+
+        // Smart paddle bounce
+        if (
+            ball.y > canvas.height - 40 &&
+            ball.x > paddle.x &&
+            ball.x < paddle.x + paddle.width
+        ) {
+            const hit = (ball.x - paddle.x) / paddle.width - 0.5;
+            ball.dx = hit * ball.speed * 2;
+            ball.dy = -ball.speed;
+        }
+
+        if (ball.x < 0 || ball.x > canvas.width) ball.dx *= -1;
+        if (ball.y < 0) ball.dy *= -1;
+
+        if (ball.y > canvas.height) {
+            lives--;
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height - 60;
+        }
+
+        if (right && paddle.x < canvas.width - paddle.width) paddle.x += 8;
+        if (left && paddle.x > 0) paddle.x -= 8;
+
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+
+        // Level complete
+        if (bricks.flat().every(b => b.status === 0)) {
+            level++;
+            createLevel();
+        }
+
+        if (lives <= 0) {
+            alert("Game Over!");
+            document.location.reload();
+        }
+
+        requestAnimationFrame(update);
+    }
+
+    update();
+</script>
+
+</body>
+</html>
