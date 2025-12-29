@@ -1,5 +1,5 @@
-const GAME_WIDTH = 800;
-const GAME_HEIGHT = 800;
+const GAME_WIDTH = 1024;
+const GAME_HEIGHT = 576;
 
 const PLAYER_SPEED = 300;
 const BULLET_SPEED = 500;
@@ -9,6 +9,12 @@ const config = {
     type: Phaser.AUTO,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
+    // scale: {
+    //     mode: Phaser.Scale.FIT,          // keep aspect ratio
+    //     autoCenter: Phaser.Scale.CENTER_BOTH,
+    //     width: GAME_WIDTH,
+    //     height: GAME_HEIGHT
+    // },
     physics: {
         default: 'arcade',
         arcade: {debug: false}
@@ -192,11 +198,18 @@ function create() {
                 this.shootPointer = null;
             }
         });
+        this.scale.on('resize', (gameSize) => {
+            const { width, height } = gameSize;
+
+            // Optional: reposition UI if needed later
+            console.log('Resized:', width, height);
+        });
 
         // ================= SHOOT BUTTON =================
+        const margin = 120;
         this.shootButton = this.add.circle(
-            GAME_WIDTH - 120,
-            GAME_HEIGHT - 120,
+            GAME_WIDTH - margin,
+            GAME_HEIGHT - margin,
             55,
             0xff0000,
             0.6
@@ -238,6 +251,9 @@ function create() {
 
     // Health bar fill
     this.healthBar = this.add.rectangle(12, 42, 100, 10, 0x00ff00).setOrigin(0);
+    this.scoreText.setScrollFactor(0);
+    this.healthBarBg.setScrollFactor(0);
+    this.healthBar.setScrollFactor(0);
 }
 
 function update() {
@@ -298,6 +314,11 @@ function update() {
 /* ---------------- FUNCTIONS ---------------- */
 function shootBullet() {
     if (this.isGameOver) return;
+    // const bullet = this.bullets.create(
+    //     this.player.x,
+    //     this.player.y - 20,
+    //     'bullet'
+    // );
     const bullet1 = this.bullets.create(
         this.player.x - 20,
         this.player.y - 20,
