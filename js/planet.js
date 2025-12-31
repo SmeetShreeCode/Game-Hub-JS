@@ -6,7 +6,7 @@ const config = {
     type: Phaser.AUTO,
     width: 1024,
     height: 800,
-    backgroundColor: "#000000",
+    backgroundColor: "#333333",
     physics: {
         default: "arcade",
         arcade: {debug: true}
@@ -26,30 +26,30 @@ function preload() {
     this.load.image("missile", "images/planet/missile.png");
     this.load.image("core", "images/planet/core.png");
     this.load.image("explosion", "images/planet/explosion.png");
-
-    // this.load.spritesheet("explosion", "images/planet/explosion.png", {
-    //     frameWidth: 64,
-    //     frameHeight: 64
-    // });
+    this.load.image("hole", "images/planet/hole.png");
 }
 
 function create() {
-    this.centerX = 550;
+    this.centerX = 512;
     this.centerY = 400;
     this.ORBIT_RADIUS = 320;
 
     // ====================
-    // PLANET (FIXED CENTER)
+    // PLANET (PHYSICS – WORLD SPACE)
     // ====================
     this.planet = this.physics.add.image(this.centerX, this.centerY, "planet");
-    // this.planet.setScale(0.25);
     this.planet.setImmovable(true);
     this.planet.body.setCircle(this.planet.width / 2);
     this.planet.surfaceHealth = 300;
     this.planet.coreExposed = false;
 
     // ====================
-    // CORE (HIDDEN FIRST)
+    // CRATER CONTAINER (VISUAL ONLY)
+    // ====================
+    this.craterLayer = this.add.container(this.centerX, this.centerY);
+
+    // ====================
+    // CORE (PHYSICS – HIDDEN)
     // ====================
     this.core = this.physics.add.image(this.centerX, this.centerY, "core");
     this.core.setScale(0.25);
@@ -63,24 +63,8 @@ function create() {
     this.missiles = this.physics.add.group();
     this.ships = [];
 
-    // ====================
-    // EXPLOSION ANIMATION
-    // ====================
-    // this.anims.create({
-    //     key: "explode",
-    //     frames: this.anims.generateFrameNumbers("explosion"),
-    //     frameRate: 20,
-    //     hideOnComplete: true
-    // });
-
-    // ====================
-    // SPAWN SHIPS
-    // ====================
     spawnShips.call(this);
 
-    // ====================
-    // INPUT (CLICK TO SHOOT)
-    // ====================
     this.input.on("pointerdown", () => fireAllShips.call(this));
 
     // ====================
@@ -104,16 +88,16 @@ function create() {
 }
 
 function update() {
-    // Planet rotation
+    // Rotate planet visually
     this.planet.rotation += 0.002;
+    this.craterLayer.rotation += 0.002;
 
-    // Keep core centered
-    this.core.setPosition(this.centerX, this.centerY);
+    // Keep crater layer centered
+    this.craterLayer.setPosition(this.planet.x, this.planet.y);
 
     // Orbit ships
     this.ships.forEach(ship => {
         ship.orbitAngle += 0.004;
-
         ship.x = this.centerX + Math.cos(ship.orbitAngle) * this.ORBIT_RADIUS;
         ship.y = this.centerY + Math.sin(ship.orbitAngle) * this.ORBIT_RADIUS;
 
@@ -131,22 +115,19 @@ function update() {
 // SPAWN SHIPS
 // ====================
 function spawnShips() {
-    const TOTAL = 2;
+    const TOTAL = 1;
 
     for (let i = 0; i < TOTAL; i++) {
-        let angle = (Math.PI * 2 / TOTAL) * i;
-
         let ship = this.physics.add.image(0, 0, "ship");
         ship.setScale(0.6);
-        ship.orbitAngle = angle;
+        ship.orbitAngle = (Math.PI * 2 / TOTAL) * i;
         ship.setImmovable(true);
-
         this.ships.push(ship);
     }
 }
 
 // ====================
-// FIRE MISSILES (CLICK)
+// FIRE MISSILES
 // ====================
 function fireAllShips() {
     this.ships.forEach(ship => {
@@ -171,12 +152,14 @@ function fireAllShips() {
 // HIT PLANET
 // ====================
 function hitPlanet(missile, planet) {
-    missile.destroy();
+    console.log(missile);
+    console.log(planet);
+    // missile.destroy();
     createExplosion.call(this, missile.x, missile.y);
+    createCrater.call(this, missile.x, missile.y);
 
     if (!planet.coreExposed) {
         planet.surfaceHealth -= 10;
-
         if (planet.surfaceHealth <= 0) {
             planet.coreExposed = true;
             this.core.setVisible(true);
@@ -192,19 +175,30 @@ function hitCore(missile, core) {
     createExplosion.call(this, missile.x, missile.y);
 
     core.health -= 20;
-
     if (core.health <= 0) {
         levelComplete.call(this);
     }
 }
 
 // ====================
+// CREATE CRATER
+// ====================
+function createCrater(worldX, worldY) {
+    let localX = worldX - this.planet.x;
+    let localY = worldY - this.planet.y;
+
+    let crater = this.add.image(localX, localY, "hole");
+    crater.setScale(0.25);
+    crater.setRotation(Phaser.Math.FloatBetween(0, Math.PI * 2));
+    crater.setAlpha(0.9);
+
+    this.craterLayer.add(crater);
+}
+
+// ====================
 // EXPLOSION
 // ====================
 function createExplosion(x, y) {
-    // let explosion = this.add.sprite(x, y, "explosion");
-    // explosion.play("explode");
-
     let exp = this.add.image(x, y, "explosion");
     exp.setScale(0.6);
 
@@ -221,7 +215,7 @@ function createExplosion(x, y) {
 // LEVEL COMPLETE
 // ====================
 function levelComplete() {
-    this.add.text(360, 380, "PLANET DESTROYED", {
+    this.add.text(350, 380, "PLANET DESTROYED", {
         fontSize: "36px",
         color: "#00ff00",
         fontStyle: "bold"
@@ -229,3 +223,116 @@ function levelComplete() {
 
     this.physics.pause();
 }
+
+
+
+// function create() {
+//     this.centerX = 512;
+//     this.centerY = 400;
+//     this.ORBIT_RADIUS = 320;
+//
+//     // ====================
+//     // PLANET RENDER TEXTURE (REAL DESTRUCTION)
+//     // ====================
+//     const img = this.textures.get("planet").getSourceImage();
+//
+//     this.planetRT = this.add.renderTexture(
+//         this.centerX,
+//         this.centerY,
+//         img.width,
+//         img.height
+//     );
+//
+//     this.planetRT.draw("planet", img.width / 2, img.height / 2);
+//     this.planetRT.setOrigin(0.5);
+//
+//     // ====================
+//     // INVISIBLE PHYSICS BODY
+//     // ====================
+//     this.planetHit = this.physics.add.staticImage(
+//         this.centerX,
+//         this.centerY,
+//         null
+//     );
+//     this.planetHit.body.setCircle(img.width / 2);
+//
+//     // ====================
+//     // SHIP
+//     // ====================
+//     this.ship = this.physics.add.image(0, 0, "ship");
+//     this.ship.setScale(0.6);
+//     this.ship.orbitAngle = 0;
+//     this.ship.body.moves = false;
+//
+//     // ====================
+//     // MISSILES
+//     // ====================
+//     this.missiles = this.physics.add.group();
+//
+//     this.input.on("pointerdown", () => fireMissile.call(this));
+//
+//     // ====================
+//     // COLLISION
+//     // ====================
+//     this.physics.add.overlap(
+//         this.missiles,
+//         this.planetHit,
+//         hitPlanet,
+//         null,
+//         this
+//     );
+// }
+//
+// function update() {
+//     // Rotate planet
+//     this.planetRT.rotation += 0.002;
+//
+//     // Orbit ship
+//     this.ship.orbitAngle += 0.004;
+//     this.ship.x = this.centerX + Math.cos(this.ship.orbitAngle) * this.ORBIT_RADIUS;
+//     this.ship.y = this.centerY + Math.sin(this.ship.orbitAngle) * this.ORBIT_RADIUS;
+//
+//     this.ship.rotation =
+//         Phaser.Math.Angle.Between(
+//             this.ship.x,
+//             this.ship.y,
+//             this.centerX,
+//             this.centerY
+//         ) + Math.PI / 2;
+// }
+//
+// // ====================
+// // FIRE MISSILE
+// // ====================
+// function fireMissile() {
+//     let missile = this.missiles.create(this.ship.x, this.ship.y, "missile");
+//     missile.setScale(0.4);
+//     missile.body.setAllowGravity(false);
+//
+//     let angle = Phaser.Math.Angle.Between(
+//         this.ship.x,
+//         this.ship.y,
+//         this.centerX,
+//         this.centerY
+//     );
+//
+//     missile.setVelocity(
+//         Math.cos(angle) * 450,
+//         Math.sin(angle) * 450
+//     );
+// }
+//
+// // ====================
+// // HIT PLANET → ERASE PIXELS
+// // ====================
+// function hitPlanet(missile) {
+//     missile.destroy();
+//     createExplosion.call(this, missile.x, missile.y);
+//
+//     // Convert world → texture space
+//     const tx = missile.x - (this.centerX - this.planetRT.width / 2);
+//     const ty = missile.y - (this.centerY - this.planetRT.height / 2);
+//
+//     // REAL CUT-OUT HOLE
+//     this.planetRT.erase("hole", tx, ty);
+// }
