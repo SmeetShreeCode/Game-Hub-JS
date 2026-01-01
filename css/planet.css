@@ -13,3 +13,25 @@ canvas {
     display: block;
     margin: auto;
 }
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #000000;
+    font-family: Arial, sans-serif;
+}
+#game-container {
+    text-align: center;
+}
+h1 {
+    color: #4a90e2;
+    margin-bottom: 10px;
+}
+p {
+    color: #aaa;
+    margin: 5px;
+}
