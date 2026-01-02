@@ -6,7 +6,7 @@
 const GAME_CONFIG = {
     WIDTH: 1024,
     HEIGHT: 800,
-    BG_COLOR: "#333333",
+    BG_COLOR: "#1a1a2e",
 
     get CENTER_X() {
         return this.WIDTH / 2;
@@ -19,9 +19,8 @@ const GAME_CONFIG = {
 const PLANET_CONFIG = {
     INITIAL_HEALTH: 100,
     CORE_EXPOSE_THRESHOLD: 50,
-    CORE_ALPHA_WHEN_EXPOSED: 0.7,
     ROTATION_SPEED: 0.002,
-    DAMAGE_PER_HIT: 10
+    DAMAGE_PER_HIT: 5
 };
 
 const SHIP_CONFIG = {
@@ -29,7 +28,7 @@ const SHIP_CONFIG = {
     ORBIT_RADIUS: 320,
     ORBIT_SPEED: 0.004,
     SCALE: 0.6,
-    COOLDOWN_FRAMES: 60,
+    COOLDOWN_FRAMES: 40,
     CLICK_RADIUS: 60,
     TINT_COOLING: 0x666666
 };
@@ -40,24 +39,22 @@ const MISSILE_CONFIG = {
 };
 
 const CORE_CONFIG = {
-    INITIAL_HEALTH: 60,
+    INITIAL_HEALTH: 80,
     SCALE: 0.25,
-    DAMAGE_PER_HIT: 20
+    DAMAGE_PER_HIT: 15
 };
 
 const CRATER_CONFIG = {
-    SCALE: 0.5,
-    ALPHA: 0.85,
-    DEPTH: 2
+    RADIUS: 25  // Pixel erase radius
 };
 
 const EXPLOSION_CONFIG = {
     INITIAL_SCALE: 0.6,
     FINAL_SCALE: 1.3,
     DURATION: 300,
-    FINAL_EXPLOSION_COUNT: 15,
-    FINAL_EXPLOSION_DELAY: 100,
-    FINAL_EXPLOSION_RADIUS: 150
+    FINAL_EXPLOSION_COUNT: 20,
+    FINAL_EXPLOSION_DELAY: 80,
+    FINAL_EXPLOSION_RADIUS: 180
 };
 
 const UI_CONFIG = {
@@ -89,7 +86,7 @@ const config = {
     backgroundColor: GAME_CONFIG.BG_COLOR,
     physics: {
         default: "arcade",
-        arcade: {debug: false}
+        arcade: {debug: true}
     },
     scene: {
         preload,
@@ -114,19 +111,49 @@ function create() {
     this.centerY = GAME_CONFIG.CENTER_Y;
     this.ORBIT_RADIUS = SHIP_CONFIG.ORBIT_RADIUS;
 
-    // PLANET (PHYSICS – WORLD SPACE)
+    // GET PLANET IMAGE DIMENSIONS
     // ====================
-    this.planet = this.physics.add.image(this.centerX, this.centerY, "planet");
-    this.planet.setImmovable(true);
-    this.planet.body.setCircle(this.planet.width / 2);
-    this.planet.surfaceHealth = PLANET_CONFIG.INITIAL_HEALTH;
-    this.planet.maxHealth = PLANET_CONFIG.INITIAL_HEALTH;
-    this.planet.coreExposed = false;
+    const planetImg = this.textures.get("planet").getSourceImage();
 
-    // CRATER CONTAINER (VISUAL ONLY)
+    // CREATE RENDER TEXTURE FROM PLANET IMAGE (PIXEL DESTRUCTION)
     // ====================
-    this.craterLayer = this.add.container(this.centerX, this.centerY);
-    this.craterLayer.setDepth(CRATER_CONFIG.DEPTH);
+    this.planetRT = this.add.renderTexture(
+        this.centerX,
+        this.centerY,
+        planetImg.width,
+        planetImg.height
+    );
+
+    // Draw the planet image onto the render texture
+    this.planetRT.draw("planet");
+    this.planetRT.setOrigin(0.5);
+
+    // INVISIBLE PHYSICS BODY FOR COLLISION
+    // ====================
+// INVISIBLE PHYSICS HITBOX (PERFECTLY CENTERED)
+    this.planetHitbox = this.add.circle(
+        this.centerX,
+        this.centerY,
+        planetImg.width / 2
+    );
+
+// Enable physics on the circle
+    this.physics.add.existing(this.planetHitbox, true);
+    this.planetHitbox.body.setCircle(planetImg.width / 2);
+// Optional: make invisible
+    this.planetHitbox.setVisible(false);
+    this.planetHitbox.visible = false;
+
+    // PLANET DATA
+    // ====================
+    this.planet = {
+        x: this.centerX,
+        y: this.centerY,
+        radius: planetImg.width / 2,
+        surfaceHealth: PLANET_CONFIG.INITIAL_HEALTH,
+        maxHealth: PLANET_CONFIG.INITIAL_HEALTH,
+        coreExposed: false
+    };
 
     // CORE (PHYSICS – HIDDEN)
     // ====================
@@ -176,7 +203,7 @@ function create() {
 
     // COLLISIONS
     // ====================
-    this.physics.add.overlap(this.missiles, this.planet, hitPlanet, null, this);
+    this.physics.add.overlap(this.missiles, this.planetHitbox, hitPlanet, null, this);
     this.physics.add.overlap(this.missiles, this.core, hitCore, () => this.planet.coreExposed, this);
 }
 
@@ -184,14 +211,15 @@ function update() {
     if (this.gameOver) return;
 
     // Rotate planet and craters together
-    this.planet.rotation += PLANET_CONFIG.ROTATION_SPEED;
-    this.craterLayer.rotation = this.planet.rotation;
+    this.planetRT.rotation += PLANET_CONFIG.ROTATION_SPEED;
+    this.planetHitbox.x = this.centerX;
+    this.planetHitbox.y = this.centerY;
 
     // Orbit ships (left to right)
     this.ships.forEach(ship => {
         ship.orbitAngle -= SHIP_CONFIG.ORBIT_SPEED;
-        ship.x = this.centerX + Math.cos(ship.orbitAngle) * this.ORBIT_RADIUS;
-        ship.y = this.centerY + Math.sin(ship.orbitAngle) * this.ORBIT_RADIUS;
+        ship.x = this.centerX + Math.cos(ship.orbitAngle) * SHIP_CONFIG.ORBIT_RADIUS;
+        ship.y = this.centerY + Math.sin(ship.orbitAngle) * SHIP_CONFIG.ORBIT_RADIUS;
 
         ship.rotation = Phaser.Math.Angle.Between(
             ship.x,
@@ -206,6 +234,11 @@ function update() {
             ship.setTint(SHIP_CONFIG.TINT_COOLING);
         } else {
             ship.clearTint();
+        }
+    });
+    this.missiles.children.each(m => {
+        if (m.y < -50 || m.y > GAME_CONFIG.HEIGHT + 50) {
+            m.destroy();
         }
     });
 
@@ -245,7 +278,7 @@ function fireNearestShip(pointer) {
         const dist = Phaser.Math.Distance.Between(pointer.x, pointer.y, ship.x, ship.y);
         if (dist < minDist && dist < SHIP_CONFIG.CLICK_RADIUS && ship.cooldown === 0) {
             minDist = dist;
-            nearest = ship;
+                nearest = ship;
         }
     });
 
@@ -275,70 +308,59 @@ function fireShip(ship) {
     ship.cooldown = SHIP_CONFIG.COOLDOWN_FRAMES;
 }
 
-// HIT PLANET
+// HIT PLANET - PIXEL DESTRUCTION
 // ====================
-function hitPlanet(missile, planet) {
-    const worldX = planet.x;
-    const worldY = planet.y;
+function hitPlanet(missile, planetHitbox) {
 
-    planet.destroy();
+    // Save hit position BEFORE destroying missile
+    const hitX = planetHitbox.x;
+    const hitY = planetHitbox.y;
+console.log("Missile", missile)
+    planetHitbox.destroy();
+console.log("PlanetHitBox", planetHitbox)
+console.log("PlanetHitBox  X", planetHitbox.x)
 
-    // Calculate local position
-    // const localX = worldX - missile.x;
-    // const localY = worldY - missile.y;
+    // Explosion at exact hit point
+    createExplosion.call(this, hitX, hitY);
 
-    // ✅ STEP 1: direction from planet center to missile
-    const dx = planet.x - missile.x;
-    const dy = planet.y - missile.y;
+    // ---------------------------------------------------
+    // STEP 1: world → planet-centered coordinates
+    // ---------------------------------------------------
+    const dx = hitX - missile.x;
+    const dy = hitY - missile.y;
 
-    // ✅ STEP 2: normalize direction
-    const length = Math.sqrt(dx * dx + dy * dy);
-    const nx = dx / length;
-    const ny = dy / length;
-
-    // ✅ STEP 3: clamp to planet surface (radius)
-    const radius = missile.width / 2;
-
-    // ✅ STEP 4: surface hit point in WORLD space
-    const surfaceX = missile.x + nx * radius;
-    const surfaceY = missile.y + ny * radius;
-
-    // ✅ STEP 5: convert to LOCAL planet space
-    const localX = surfaceX - missile.x;
-    const localY = surfaceY - missile.y;
-
-    console.log({
-        missileWorld: {x: missile.x, y: missile.y},
-        planetCenter: {x: planet.x, y: planet.y},
-        localHit: {
-            x: missile.x - planet.x,
-            y: missile.y - planet.y
-        },
-        angleDeg: Phaser.Math.RadToDeg(
-            Phaser.Math.Angle.Between(
-                planet.x,
-                planet.y,
-                missile.x,
-                missile.y
-            )
-        )
-    });
-
-    // Rotate coordinates by inverse of missile rotation
+    // ---------------------------------------------------
+    // STEP 2: undo planet rotation
+    // ---------------------------------------------------
     const angle = -missile.rotation;
-    const rotatedX = localX * Math.cos(angle) - localY * Math.sin(angle);
-    const rotatedY = localX * Math.sin(angle) + localY * Math.cos(angle);
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
 
-    createExplosion.call(this, worldX, worldY);
-    createCrater.call(this, rotatedX, rotatedY);
+    const localX = dx * cos - dy * sin;
+    const localY = dx * sin + dy * cos;
 
-    // Apply damage
-    if (!planet.coreExposed) {
-        planet.surfaceHealth -= PLANET_CONFIG.DAMAGE_PER_HIT;
-        if (planet.surfaceHealth <= PLANET_CONFIG.CORE_EXPOSE_THRESHOLD) {
-            planet.coreExposed = true;
+    // ---------------------------------------------------
+    // STEP 3: convert to renderTexture space
+    // ---------------------------------------------------
+    const textureX = localX + this.planetRT.width / 2;
+    const textureY = localY + this.planetRT.height / 2;
+console.log("Planet hole", textureX, textureY);
+    // ---------------------------------------------------
+    // STEP 4: erase pixels EXACTLY where missile hit
+    // ---------------------------------------------------
+    this.planetRT.erase("hole", textureX, textureY);
+    console.log(this.planetRT.erase("hole", textureX, textureY))
+
+    // ---------------------------------------------------
+    // STEP 5: damage logic
+    // ---------------------------------------------------
+    if (!this.planet.coreExposed) {
+        this.planet.surfaceHealth -= PLANET_CONFIG.DAMAGE_PER_HIT;
+
+        if (this.planet.surfaceHealth <= PLANET_CONFIG.CORE_EXPOSE_THRESHOLD) {
+            this.planet.coreExposed = true;
             this.core.setVisible(true);
-            planet.setAlpha(PLANET_CONFIG.CORE_ALPHA_WHEN_EXPOSED);
+            this.planetRT.setAlpha(0.7);
         }
     }
 }
@@ -362,19 +384,6 @@ function hitCore(missile, core) {
     if (core.health <= 0) {
         levelComplete.call(this);
     }
-}
-
-// CREATE CRATER
-// ====================
-function createCrater(localX, localY) {
-    let crater = this.add.image(localX, localY, "hole");
-    crater.setOrigin(0.5);
-    crater.setScale(CRATER_CONFIG.SCALE);
-    crater.setRotation(Phaser.Math.FloatBetween(0, Math.PI * 2));
-    crater.setAlpha(CRATER_CONFIG.ALPHA);
-    console.log(crater);
-
-    this.craterLayer.add(crater);
 }
 
 // EXPLOSION
@@ -411,9 +420,8 @@ function levelComplete() {
 
     // Hide planet and core after explosions
     this.time.delayedCall(GAME_OVER_CONFIG.HIDE_DELAY, () => {
-        this.planet.setVisible(false);
+        this.planetRT.setVisible(false);
         this.core.setVisible(false);
-        this.craterLayer.setVisible(false);
     });
 
     // Show game over screen

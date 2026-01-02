@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Doodle Climb – Powers Added</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at bottom, #141414, #030303);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        canvas {
+            background: linear-gradient(#0b0b0b, #1b1b1b);
+            border-radius: 16px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, .8);
+        }
+
+        .hud {
+            position: absolute;
+            top: 12px;
+            width: 420px;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 12px;
+            pointer-events: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hud">
+        <span id="height">0 m</span>
+        <span id="info">—</span>
+    </div>
+
+    <canvas id="game" width="420" height="700"></canvas>
+
+    <script>
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+
+        // ================= STATE =================
+        let started = false;
+        let gameOver = false;
+        let score = 0;
+
+        // ================= PLAYER =================
+        const player = {
+            x: canvas.width / 2 - 16,
+            y: canvas.height - 120,
+            w: 32,
+            h: 42,
+            vx: 0,
+            vy: -12,
+            jetpack: 0,
+            shield: false
+        };
+
+        // ================= WORLD =================
+        let platforms = [];
+        let powers = [];
+        let lastPowerY = Infinity;
+
+        // ================= INPUT =================
+        let left = false;
+        let right = false;
+
+        const isMobile = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+        let gyroEnabled = false;
+
+        // ================= ANY INPUT START =================
+        function handleGlobalStart() {
+            if (!started) {
+                started = true;
+
+                if (isMobile && !gyroActive) {
+                    requestGyroPermission();
+                }
+            } else if (gameOver) {
+                initGame();
+            }
+        }
+
+
+        document.addEventListener("mousedown", handleGlobalStart);
+        document.addEventListener("touchstart", handleGlobalStart, { passive: true });
+        document.addEventListener("keydown", handleGlobalStart);
+
+        // ================= KEYBOARD (PC) =================
+        document.addEventListener("keydown", e => {
+            if (!started || gameOver || isMobile) return;
+            if (e.code === "ArrowLeft") left = true;
+            if (e.code === "ArrowRight") right = true;
+        });
+        document.addEventListener("keyup", e => {
+            if (isMobile) return;
+            if (e.code === "ArrowLeft") left = false;
+            if (e.code === "ArrowRight") right = false;
+        });
+
+        // ================= TOUCH FALLBACK =================
+        document.addEventListener("touchstart", e => {
+            if (!started || gameOver || !isMobile ) return;
+            const x = e.touches[0].clientX;
+            left = x < window.innerWidth / 2;
+            right = !left;
+        }, { passive: true });
+        document.addEventListener("touchend", () => left = right = false);
+
+        // ================= INIT =================
+        function initGame() {
+            started = false;
+            gameOver = false;
+            score = 0;
+            platforms = [];
+            powers = [];
+            lastPowerY = Infinity;
+
+            Object.assign(player, {
+                x: canvas.width / 2 - 16,
+                y: canvas.height - 120,
+                vx: 0,
+                vy: -12,
+                jetpack: 0,
+                shield: false
+            });
+
+            let y = canvas.height - 40;
+            let lastX = canvas.width / 2;
+
+            for (let i = 0; i < 10; i++) {
+                const x = clamp(lastX + rand(-120, 120), 10, canvas.width - 90);
+                platforms.push({ x, y, w: 80, h: 14 });
+                spawnPower(x, y);
+                lastX = x;
+                y -= 80;
+            }
+        }
+        initGame();
+
+        // ================= POWERS =================
+        function spawnPower(px, py) {
+            if (lastPowerY - py < 160) return;
+
+            const difficulty = Math.min(score / 5000, 1);
+            const chance = 0.25 - difficulty * 0.1;
+            if (Math.random() > chance) return;
+
+            const r = Math.random();
+            const type = r < 0.5 ? "spring" : r < 0.8 ? "shield" : "jetpack";
+
+            powers.push({ type, x: px + 30, y: py - 20, used: false });
+            lastPowerY = py;
+        }
+
+        // ================= GYRO (FIXED) =================
+        let gyroActive = false;
+        let tiltX = 0;
+
+        function requestGyroPermission() {
+            if (!window.DeviceOrientationEvent) {
+                alert("Gyro not supported");
+                return;
+            }
+
+            // iOS 13+
+            if (typeof DeviceOrientationEvent.requestPermission === "function") {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permission => {
+                        if (permission === "granted") {
+                            enableGyro();
+                        } else {
+                            alert("Gyro permission denied");
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Android
+                enableGyro();
+            }
+        }
+
+        function enableGyro() {
+            gyroActive = true;
+            document.getElementById("info").innerText = "Tilt control";
+
+            window.addEventListener("deviceorientation", e => {
+                if (e.gamma === null) return;
+
+                // Clamp + normalize
+                const g = clamp(e.gamma, -30, 30);
+
+                // Dead-zone to stop drift
+                tiltX = Math.abs(g) < 2 ? 0 : g / 30;
+            }, true);
+        }
+
+
+        // ================= UPDATE =================
+        function update() {
+            if (!started || gameOver) return;
+
+            const difficulty = Math.min(score / 4000, 1);
+            const GRAVITY = 0.36 + difficulty * 0.12;
+            const JUMP = -12.5 - difficulty * 2.5;
+            const MOVE_ACCEL = 0.6;
+            const MAX_SPEED = 6 + difficulty * 1.5;
+            const FRICTION = 0.88;
+
+            if (isMobile ) {
+                player.vx += tiltX * MOVE_ACCEL * 3;
+            } else {
+                if (left) player.vx -= MOVE_ACCEL;
+                if (right) player.vx += MOVE_ACCEL;
+            }
+
+            player.vx *= FRICTION;
+            player.vx = clamp(player.vx, -MAX_SPEED, MAX_SPEED);
+            player.x += player.vx;
+
+            if (player.x < -player.w) player.x = canvas.width;
+            if (player.x > canvas.width) player.x = -player.w;
+
+            if (player.jetpack > 0) {
+                player.vy = -6;
+                player.jetpack--;
+            } else {
+                player.vy += GRAVITY;
+            }
+
+            player.y += player.vy;
+
+            if (player.vy > 0 && player.jetpack === 0) {
+                for (const p of platforms) {
+                    if (
+                        player.x + player.w > p.x &&
+                        player.x < p.x + p.w &&
+                        player.y + player.h <= p.y + player.vy &&
+                        player.y + player.h + player.vy >= p.y
+                    ) {
+                        player.vy = JUMP;
+                        break;
+                    }
+                }
+            }
+
+            powers.forEach(p => {
+                if (p.used) return;
+                if (
+                    player.x < p.x + 20 &&
+                    player.x + player.w > p.x &&
+                    player.y < p.y + 20 &&
+                    player.y + player.h > p.y
+                ) {
+                    p.used = true;
+                    if (p.type === "spring") player.vy = -18;
+                    if (p.type === "jetpack") player.jetpack = 120;
+                    if (p.type === "shield") player.shield = true;
+                }
+            });
+
+            if (player.y < canvas.height / 3) {
+                const diff = canvas.height / 3 - player.y;
+                player.y = canvas.height / 3;
+                platforms.forEach(p => p.y += diff);
+                powers.forEach(p => p.y += diff);
+                score += diff;
+            }
+
+            platforms.forEach(p => {
+                if (p.y > canvas.height) {
+                    const highest = Math.min(...platforms.map(pl => pl.y));
+                    p.y = highest - (70 + difficulty * 40);
+                    p.x = clamp(
+                        platforms[Math.floor(Math.random() * platforms.length)].x +
+                        rand(-130, 130),
+                        10,
+                        canvas.width - p.w - 10
+                    );
+                    p.w = 80 - difficulty * 25;
+                    spawnPower(p.x, p.y);
+                }
+            });
+
+            if (player.y > canvas.height) {
+                if (player.shield) {
+                    player.shield = false;
+                    player.vy = JUMP;
+                    player.y = canvas.height / 2;
+                } else gameOver = true;
+            }
+
+            document.getElementById("height").innerText =
+                `${Math.floor(score / 10)} m`;
+            document.getElementById("info").innerText =
+                player.jetpack > 0 ? "Jetpack" : player.shield ? "Shield" : "—";
+        }
+
+        // ================= DRAW =================
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            platforms.forEach(p => {
+                ctx.fillStyle = "#666";
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+            });
+
+            powers.forEach(p => {
+                if (p.used) return;
+                ctx.fillStyle =
+                    p.type === "spring" ? "#00ff99" :
+                        p.type === "jetpack" ? "#00aaff" : "#ffaa00";
+                ctx.fillRect(p.x, p.y, 20, 20);
+            });
+
+            ctx.fillStyle = player.shield ? "#ffd700" : "#00e5ff";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+
+            if (!started) drawText("CLICK / TAP / ANY KEY", 20, canvas.height / 2);
+            if (gameOver) {
+                drawText("GAME OVER", 26, canvas.height / 2 - 10);
+                drawText("Any input to restart", 14, canvas.height / 2 + 22);
+            }
+        }
+
+        function drawText(text, size, y) {
+            ctx.fillStyle = "#fff";
+            ctx.font = `${size}px system-ui`;
+            ctx.textAlign = "center";
+            ctx.fillText(text, canvas.width / 2, y);
+        }
+
+        // ================= LOOP =================
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+        loop();
+
+        // ================= HELPERS =================
+        function rand(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        function clamp(v, min, max) {
+            return Math.max(min, Math.min(max, v));
+        }
+    </script>
+
+</body>
+
+</html>
