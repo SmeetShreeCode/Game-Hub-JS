@@ -268,6 +268,12 @@
         <p>Play Word Search Enjoy It!</p>
     </div>
 
+    <div class="game-card done" onclick="location.href='hangman.html'">
+        <img src="images/Banners/hangman.png" alt="Hangman">
+        <h3>Hangman Game</h3>
+        <p>Solve and complete the level!</p>
+    </div>
+
     <div class="game-card" onclick="location.href='king-and-pigs.html'">
         <img src="images/Banners/king-and-pigs.png" alt="King And Pigs Game">
         <h3>King And Pigs Game</h3>
@@ -284,12 +290,6 @@
         <img src="images/Banners/brick-breaker.png" alt="Brick Breaker Game">
         <h3>Brick Breaker Game</h3>
         <p>Play Brick Breaker Game Enjoy It!</p>
-    </div>
-
-    <div class="game-card" onclick="location.href='hangman.html'">
-        <img src="images/Banners/hangman.png" alt="Hangman">
-        <h3>Hangman Game</h3>
-        <p>Solve and complete the level!</p>
     </div>
 
     <!--    <div class="game-card" onclick="location.href='Crossword.html'">-->
@@ -359,7 +359,7 @@
     </div>
 
     <div class="game-card" onclick="location.href='puzzle-game.html'">
-        <img src="" alt="Sliding Tile Game">
+        <img src="images/Banners/sliding-puzzle.png" alt="Sliding Tile Game">
         <h3>Sliding Tile Game</h3>
         <p>Play Sliding Tile Game Enjoy It!</p>
     </div>
@@ -371,21 +371,27 @@
     </div>
 
     <div class="game-card" onclick="location.href='shooter.html'">
-        <img src="images/Banners/" alt="Shooter Game">
+        <img src="images/Banners/shooter.png" alt="Shooter Game">
         <h3>Shooter Game</h3>
         <p>Play Shooter Game Enjoy It!</p>
     </div>
 
     <div class="game-card" onclick="location.href='planet.html'">
-        <img src="images/Banners/" alt="planet Game">
+        <img src="images/Banners/planet.png" alt="planet Game">
         <h3>planet Game</h3>
         <p>Play planet Game Enjoy It!</p>
     </div>
 
     <div class="game-card" onclick="location.href='defend-sun.html'">
-        <img src="images/Banners/" alt="planet Game">
-        <h3>planet Game</h3>
-        <p>Play planet Game Enjoy It!</p>
+        <img src="images/Banners/defend-sun.png" alt="defend sun Game">
+        <h3>defend sun Game</h3>
+        <p>Play defend sun Game Enjoy It!</p>
+    </div>
+
+    <div class="game-card" onclick="location.href='conveyor-belt-runner.html'">
+        <img src="images/Banners/conveyor-belt-runner.png" alt="Conveyor Belt Game">
+        <h3>Conveyor Belt Game</h3>
+        <p>Play Conveyor Belt Game Enjoy It!</p>
     </div>
 
     <!--        <div class="game-card" onclick="location.href='pokemon-game.html'">-->
@@ -405,12 +411,12 @@
 <script>
     window.addEventListener("load", () => {
         // setTimeout(() => {
-            const loader = document.querySelector(".wing-loader");
-            if (loader) {
-                loader.style.opacity = "0";
-                loader.style.pointerEvents = "none";
-                setTimeout(() => loader.remove(), 500); // smooth fade-out
-            }
+        const loader = document.querySelector(".wing-loader");
+        if (loader) {
+            loader.style.opacity = "0";
+            loader.style.pointerEvents = "none";
+            setTimeout(() => loader.remove(), 500); // smooth fade-out
+        }
         // }, 2000); // 3000ms = 3 seconds
     });
 </script>

@@ -6,9 +6,14 @@
 const GAME_CONFIG = {
     WIDTH: 1024,
     HEIGHT: 800,
-    CENTER_X: 512,
-    CENTER_Y: 400,
-    BG_COLOR: "#333333"
+    BG_COLOR: "#333333",
+
+    get CENTER_X() {
+        return this.WIDTH / 2;
+    },
+    get CENTER_Y() {
+        return this.HEIGHT / 2;
+    }
 };
 
 const PLANET_CONFIG = {
@@ -61,7 +66,7 @@ const UI_CONFIG = {
         color: '#ffffff',
         fontStyle: 'bold',
         backgroundColor: '#00000088',
-        padding: { x: 10, y: 5 }
+        padding: {x: 10, y: 5}
     },
     WARNING_PULSE_SPEED: 0.01,
     WARNING_PULSE_MIN: 0.5
@@ -84,7 +89,7 @@ const config = {
     backgroundColor: GAME_CONFIG.BG_COLOR,
     physics: {
         default: "arcade",
-        arcade: { debug: false }
+        arcade: {debug: false}
     },
     scene: {
         preload,
@@ -259,6 +264,9 @@ function fireShip(ship) {
 
     let angle = Phaser.Math.Angle.Between(ship.x, ship.y, this.centerX, this.centerY);
 
+    // Rotate missile to face the direction it's traveling
+    missile.setRotation(angle);
+
     missile.setVelocity(
         Math.cos(angle) * MISSILE_CONFIG.SPEED,
         Math.sin(angle) * MISSILE_CONFIG.SPEED
@@ -276,11 +284,32 @@ function hitPlanet(missile, planet) {
     planet.destroy();
 
     // Calculate local position
-    const localX = worldX - missile.x;
-    const localY = worldY - missile.y;
+    // const localX = worldX - missile.x;
+    // const localY = worldY - missile.y;
+
+    // ✅ STEP 1: direction from planet center to missile
+    const dx = planet.x - missile.x;
+    const dy = planet.y - missile.y;
+
+    // ✅ STEP 2: normalize direction
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const nx = dx / length;
+    const ny = dy / length;
+
+    // ✅ STEP 3: clamp to planet surface (radius)
+    const radius = missile.width / 2;
+
+    // ✅ STEP 4: surface hit point in WORLD space
+    const surfaceX = missile.x + nx * radius;
+    const surfaceY = missile.y + ny * radius;
+
+    // ✅ STEP 5: convert to LOCAL planet space
+    const localX = surfaceX - missile.x;
+    const localY = surfaceY - missile.y;
+
     console.log({
-        missileWorld: { x: missile.x, y: missile.y },
-        planetCenter: { x: planet.x, y: planet.y },
+        missileWorld: {x: missile.x, y: missile.y},
+        planetCenter: {x: planet.x, y: planet.y},
         localHit: {
             x: missile.x - planet.x,
             y: missile.y - planet.y
@@ -343,7 +372,7 @@ function createCrater(localX, localY) {
     crater.setScale(CRATER_CONFIG.SCALE);
     crater.setRotation(Phaser.Math.FloatBetween(0, Math.PI * 2));
     crater.setAlpha(CRATER_CONFIG.ALPHA);
-console.log(crater);
+    console.log(crater);
 
     this.craterLayer.add(crater);
 }
@@ -353,7 +382,7 @@ console.log(crater);
 function createExplosion(x, y) {
     let exp = this.add.image(x, y, "explosion");
     exp.setScale(EXPLOSION_CONFIG.INITIAL_SCALE);
-console.log("explosion", x, y)
+    console.log("explosion", x, y)
 
     this.tweens.add({
         targets: exp,
