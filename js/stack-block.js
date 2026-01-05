@@ -1,11 +1,10 @@
 // ==============================
-// STACK THE BLOCKS - PHASER 3
-// FULLY WORKING
+// STACK THE BLOCKS - FINAL FIX
 // ==============================
 
 let currentBlock;
 let stack = [];
-let blockSpeed = 200;
+let blockSpeed = 220;
 let direction = 1;
 let score = 0;
 let gameOver = false;
@@ -13,59 +12,55 @@ let gameOver = false;
 const GAME_WIDTH = 480;
 const GAME_HEIGHT = 640;
 const BLOCK_HEIGHT = 40;
+const BASE_Y = GAME_HEIGHT - BLOCK_HEIGHT / 2;
+const MAX_VISIBLE_BLOCKS = 6;
 
 const config = {
     type: Phaser.AUTO,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
     backgroundColor: "#111",
-    scene: { preload, create, update }
+    scene: { create, update }
 };
 
 new Phaser.Game(config);
 
-// ==============================
-// PRELOAD
-// ==============================
-function preload() {}
-
-// ==============================
 // CREATE
 // ==============================
 function create() {
-    this.cameras.main.setBackgroundColor("#1a1a1a");
+    stack = [];
+    score = 0;
+    blockSpeed = 220;
+    direction = 1;
+    gameOver = false;
 
     // Base block
     const base = this.add.rectangle(
         GAME_WIDTH / 2,
-        GAME_HEIGHT - BLOCK_HEIGHT / 2,
+        BASE_Y,
         260,
         BLOCK_HEIGHT,
         0x00ffcc
     );
     stack.push(base);
 
-    // First moving block
-    spawnBlock.call(this);
-
-    // UI
+    // Score UI
     this.scoreText = this.add.text(20, 20, "Score: 0", {
         fontSize: "22px",
         fill: "#ffffff"
     });
 
-    // Input
+    spawnBlock.call(this);
+
     this.input.on("pointerdown", () => {
         if (gameOver) {
             this.scene.restart();
-            resetGame();
         } else {
             dropBlock.call(this);
         }
     });
 }
 
-// ==============================
 // UPDATE
 // ==============================
 function update(time, delta) {
@@ -73,29 +68,25 @@ function update(time, delta) {
 
     currentBlock.x += direction * blockSpeed * (delta / 1000);
 
-    if (currentBlock.x > GAME_WIDTH - currentBlock.width / 2) {
+    if (currentBlock.x >= GAME_WIDTH - currentBlock.width / 2) {
         direction = -1;
-    }
-    if (currentBlock.x < currentBlock.width / 2) {
+    } else if (currentBlock.x <= currentBlock.width / 2) {
         direction = 1;
     }
 }
 
-// ==============================
-// GAME LOGIC
+// LOGIC
 // ==============================
 function spawnBlock() {
     const lastBlock = stack[stack.length - 1];
 
     currentBlock = this.add.rectangle(
-        0,
+        direction === 1 ? 0 : GAME_WIDTH,
         lastBlock.y - BLOCK_HEIGHT,
         lastBlock.width,
         BLOCK_HEIGHT,
         Phaser.Display.Color.RandomRGB().color
     );
-
-    currentBlock.x = direction === 1 ? 0 : GAME_WIDTH;
 }
 
 function dropBlock() {
@@ -116,31 +107,33 @@ function dropBlock() {
         return;
     }
 
-    // Trim block
+    // Trim
     const newWidth = overlap;
-    const newX =
-        currentBlock.x > lastBlock.x
-            ? currentBlock.x - (currentBlock.width - newWidth) / 2
-            : currentBlock.x + (currentBlock.width - newWidth) / 2;
-
+    const offset = (currentBlock.width - newWidth) / 2;
     currentBlock.width = newWidth;
-    currentBlock.x = newX;
+    currentBlock.x += currentBlock.x > lastBlock.x ? -offset : offset;
 
     stack.push(currentBlock);
+
+    // 🔥 KEEP ONLY LAST N BLOCKS VISIBLE
+    if (stack.length > MAX_VISIBLE_BLOCKS) {
+        const removed = stack.shift();
+        removed.destroy();
+
+        // Move remaining blocks down
+        stack.forEach(block => {
+            block.y += BLOCK_HEIGHT;
+        });
+    }
 
     score++;
     this.scoreText.setText("Score: " + score);
 
-    // Increase difficulty
-    blockSpeed += 10;
-
-    // Camera move up
-    this.cameras.main.scrollY -= BLOCK_HEIGHT;
+    blockSpeed += 8;
 
     spawnBlock.call(this);
 }
 
-// ==============================
 // GAME OVER
 // ==============================
 function endGame() {
@@ -155,15 +148,4 @@ function endGame() {
         fontSize: "18px",
         fill: "#ffffff"
     }).setOrigin(0.5);
-}
-
-// ==============================
-// RESET
-// ==============================
-function resetGame() {
-    stack = [];
-    blockSpeed = 200;
-    direction = 1;
-    score = 0;
-    gameOver = false;
 }

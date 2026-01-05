@@ -196,6 +196,25 @@ const MAX_GRAVITY = 1400;
 
 const ITEM_TYPES = [
     { key: "apple", score: 10 },
+    { key: "banana  ", score: 10 },
+    { key: "peach", score: 10 },
+    { key: "black-berry-dark", score: 10 },
+    { key: "black-berry-light", score: 10 },
+    { key: "black-cherry", score: 10 },
+    { key: "green-grape", score: 10 },
+    { key: "green-apple", score: 10 },
+    { key: "red-cherry", score: 10 },
+    { key: "red-grape", score: 10 },
+    { key: "star-fruit", score: 10 },
+    { key: "coconut", score: 10 },
+    { key: "lemon", score: 10 },
+    { key: "lime", score: 10 },
+    { key: "orange", score: 10 },
+    { key: "pear", score: 10 },
+    { key: "plum", score: 10 },
+    { key: "raspberry", score: 10 },
+    { key: "strawberry", score: 10 },
+    { key: "watermelon", score: 10 },
     { key: "star", score: 30, power: "slow" },
     { key: "bomb", score: 0, life: -1 },
     { key: "heart", score: 0, life: +1, power: "magnet" }
@@ -208,7 +227,7 @@ const config = {
     backgroundColor: "#1a1a1a",
     physics: {
         default: "arcade",
-        arcade: { gravity: { y: BASE_GRAVITY } }
+        arcade: {debug: false,gravity: { y: BASE_GRAVITY } }
     },
     scene: { preload, create, update }
 };
@@ -219,20 +238,40 @@ new Phaser.Game(config);
 // PRELOAD
 // ================================
 function preload() {
-    this.load.image("player", "https://labs.phaser.io/assets/sprites/platform.png");
-    this.load.image("apple", "https://labs.phaser.io/assets/sprites/apple.png");
-    this.load.image("bomb", "https://labs.phaser.io/assets/sprites/bomb.png");
-    this.load.image("star", "https://labs.phaser.io/assets/demoscene/star.png");
-    this.load.image("heart", "https://labs.phaser.io/assets/sprites/heart.png");
-    this.load.image("boss", "https://labs.phaser.io/assets/sprites/orb-blue.png");
-    this.load.image("particle", "https://labs.phaser.io/assets/particles/yellow.png");
+    this.load.image("player", "images/fruit-basket/basket1.png");
+    //Fruit
+    this.load.image("apple", "images/fruit-basket/apple.png");
+    this.load.image("banana", "images/fruit-basket/banana.png");
+    this.load.image("peach", "images/fruit-basket/peach.png");
+    this.load.image("black-berry-dark", "images/fruit-basket/black-berry-dark.png");
+    this.load.image("black-berry-light", "images/fruit-basket/black-berry-light.png");
+    this.load.image("black-cherry", "images/fruit-basket/black-cherry.png");
+    this.load.image("green-grape", "images/fruit-basket/green-grape.png");
+    this.load.image("green-apple", "images/fruit-basket/green-apple.png");
+    this.load.image("red-cherry", "images/fruit-basket/red-cherry.png");
+    this.load.image("red-grape", "images/fruit-basket/red-grape.png");
+    this.load.image("star-fruit", "images/fruit-basket/star-fruit.png");
+    this.load.image("coconut", "images/fruit-basket/coconut.png");
+    this.load.image("lemon", "images/fruit-basket/lemon.png");
+    this.load.image("lime", "images/fruit-basket/lime.png");
+    this.load.image("orange", "images/fruit-basket/orange.png");
+    this.load.image("pear", "images/fruit-basket/pear.png");
+    this.load.image("plum", "images/fruit-basket/plum.png");
+    this.load.image("raspberry", "images/fruit-basket/raspberry.png");
+    this.load.image("strawberry", "images/fruit-basket/strawberry.png");
+    this.load.image("watermelon", "images/fruit-basket/watermelon.png");
+    //Power
+    this.load.image("bomb", "images/fruit-basket/bomb.png");
+    this.load.image("star", "images/fruit-basket/star.png");
+    this.load.image("heart", "images/fruit-basket/heart.png");
+    this.load.image("boss", "images/fruit-basket/orb-blue.png");
+    this.load.image("particle", "images/fruit-basket/yellow.png");
 }
 
-// ================================
 // CREATE
 // ================================
 function create() {
-    player = this.physics.add.image(400, 550, "player");
+    player = this.physics.add.image(400, 560, "player");
     player.setImmovable(true).setScale(1.2);
     player.body.allowGravity = false;
 
@@ -266,7 +305,6 @@ function create() {
     });
 }
 
-// ================================
 // UPDATE
 // ================================
 function update() {
@@ -287,7 +325,6 @@ function update() {
     }
 }
 
-// ================================
 // SPAWNING
 // ================================
 function spawnItem() {
@@ -307,7 +344,6 @@ function spawnItem() {
     item.type = data;
 }
 
-// ================================
 // ITEM COLLECT
 // ================================
 function collectItem(player, item) {
@@ -334,7 +370,6 @@ function collectItem(player, item) {
     if (lives <= 0) endGame.call(this);
 }
 
-// ================================
 // LEVEL SYSTEM
 // ================================
 function levelUp() {
@@ -347,7 +382,6 @@ function levelUp() {
     if (level % 5 === 0) spawnBoss.call(this);
 }
 
-// ================================
 // BOSS SYSTEM
 // ================================
 function spawnBoss() {
@@ -393,7 +427,6 @@ function bossMissed() {
     if (lives <= 0) endGame.call(this);
 }
 
-// ================================
 // POWER-UPS
 // ================================
 function activateSlowMotion() {
@@ -414,7 +447,6 @@ function activateMagnet() {
     this.time.delayedCall(4000, () => magnetActive = false);
 }
 
-// ================================
 // UTIL
 // ================================
 function resetCombo() {
@@ -428,7 +460,6 @@ function loseLife() {
     if (lives <= 0) endGame.call(this);
 }
 
-// ================================
 // GAME OVER
 // ================================
 function endGame() {
