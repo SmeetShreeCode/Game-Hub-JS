@@ -1,310 +1,345 @@
+/* ================= CONFIG ================= */
+
+const GRID_SIZE = 4;
+const TILE_COUNT = 16;
+const TILE_SIZE = 125;
+const GAME_TIME_MIN = 5;
+
+/* ================= STATE ================= */
+
 let currentLevel = 0;
+let activeTile = 15;
+let numberMap = [];
+let initPositions = [];
+let deadline = null;
+let timerInterval = null;
 
-let number = [];
-let init_number = [];
-putValue();
-let active = 15;
-init(active);
-let deadline = new Date(Date.parse(new Date()) + 5 * 60 * 1000);
+/* ================= DOM ================= */
 
-//alert(init_number[0]);
-function init(idN) {
-    idN = parseInt(idN)
-    $('.clickable').removeClass('clickable');
-    let click1;
-    if (idN !== 3 && idN !== 7 && idN !== 11) {
-        click1 = idN + 1;
-        click1 = '#id_' + click1;
-        $(click1).addClass('clickable');
-    }
-    let click2;
-    if (idN !== 4 && idN !== 8 && idN !== 12) {
-        click2 = idN - 1;
-        click2 = '#id_' + click2;
-        $(click2).addClass('clickable');
-    }
-    let click3 = idN + 4;
-    click3 = '#id_' + click3;
-    $(click3).addClass('clickable');
-    let click4 = idN - 4;
-    click4 = '#id_' + click4;
-    $(click4).addClass('clickable');
-    //alert(idN);
+const mainBox = document.querySelector('.mainBox');
+const levelScreen = document.getElementById('levelScreen');
+const gameScreen = document.getElementById('gameScreen');
+const levelGrid = document.getElementById('levelGrid');
+const demoPic = document.getElementById('demoPic');
+
+/* ================= INIT ================= */
+
+buildLevelScreen();
+levelScreen.style.display = 'block';
+gameScreen.style.display = 'none';
+
+/* ================= ADJACENT TILES ================= */
+
+function init(active) {
+    document.querySelectorAll('.clickable')
+        .forEach(el => el.classList.remove('clickable'));
+
+    const neighbors = [
+        active + 1,
+        active - 1,
+        active + GRID_SIZE,
+        active - GRID_SIZE
+    ];
+
+    neighbors.forEach(n => {
+        if (n < 0 || n >= TILE_COUNT) return;
+
+        const sameRow =
+            Math.floor(n / GRID_SIZE) === Math.floor(active / GRID_SIZE);
+
+        if (
+            (Math.abs(n - active) === 1 && sameRow) ||
+            Math.abs(n - active) === GRID_SIZE
+        ) {
+            document.getElementById(`id_${n}`)?.classList.add('clickable');
+        }
+    });
 }
 
-$(".mainBox").delegate(".clickable", "click", function () {
-    let idNo = $(this).attr('id');
-    idNo = idNo.split("_");
-    active = toggle(idNo[1], active, number);
-    init(idNo[1]);
-    result(number);
+/* ================= TILE CLICK ================= */
+
+mainBox.addEventListener('click', e => {
+    const tile = e.target.closest('.clickable');
+    if (!tile) return;
+
+    const id = Number(tile.id.split('_')[1]);
+    activeTile = toggle(id, activeTile);
+    init(activeTile);
+    checkResult();
 });
 
-function buildLevelScreen() {
-    $("#levelGrid").html("");
+/* ================= LEVEL SCREEN ================= */
 
-    chapters.levels.forEach((lvl, index) => {
-        $("#levelGrid").append(`
-            <div class="levelItem" data-level="${index}" 
+function buildLevelScreen() {
+    levelGrid.innerHTML = '';
+
+    chapters.levels.forEach((lvl, i) => {
+        levelGrid.insertAdjacentHTML('beforeend', `
+            <div class="levelItem" data-level="${i}"
                  style="background-image:url('${lvl.image}')">
-                <div class="levelNumber">${index+1}</div>
+                <div class="levelNumber">${i + 1}</div>
             </div>
         `);
     });
-
-    // Click level to start
-    $(".levelItem").click(function () {
-        let lvl = $(this).data("level");
-        startLevel(lvl);
-    });
 }
 
-// Call once at page load();
+levelGrid.addEventListener('click', e => {
+    const item = e.target.closest('.levelItem');
+    if (!item) return;
+    startLevel(Number(item.dataset.level));
+});
+
+/* ================= START LEVEL ================= */
+
 function startLevel(levelIndex) {
     currentLevel = levelIndex;
 
-    $("#levelScreen").hide();
-    $("#gameScreen").show();
+    levelScreen.style.display = 'none';
+    gameScreen.style.display = 'block';
 
+    activeTile = 15;
     putValue();
-    init(15);
+    init(activeTile);
 
-    $("#demoPic")
-        .css("background-image", `url(${chapters.levels[currentLevel].image})`)
-        .css("background-size", "155px");
+    demoPic.style.backgroundImage =
+        `url(${chapters.levels[currentLevel].image})`;
+    demoPic.style.backgroundSize = '155px';
+    demoPic.style.backgroundPosition = 'center';
+
+    deadline = new Date(Date.now() + GAME_TIME_MIN * 60000);
+    initializeClock('timeLeft', deadline);
 }
 
-$('body').keyup(function (e) {
-    if (e.keyCode === 37 || e.keyCode === 38 || e.keyCode === 39 || e.keyCode === 40) {
+/* ================= KEYBOARD ================= */
 
-        if (e.keyCode === 37) {
+document.body.addEventListener('keyup', e => {
+    if (gameScreen.style.display !== 'block') return;
 
-            if (active !== 15 && active !== 11 && active !== 7 && active !== 3) {
-                active = active + 1;
-                active = toggle(active, active - 1, number);
-                init(active);
-            }
-        }
-        if (e.keyCode === 39) {
+    const moves = {
+        37: +1,
+        39: -1,
+        38: +GRID_SIZE,
+        40: -GRID_SIZE
+    };
 
-            if (active !== 12 && active !== 8 && active !== 4 && active !== 0) {
-                active = active - 1;
-                active = toggle(active, active + 1, number);
-                init(active);
-            }
-        }
-        if (e.keyCode === 38) {
-            if (active !== 12 && active !== 13 && active !== 14 && active !== 15) {
-                active = active + 4;
-                active = toggle(active, active - 4, number);
-                init(active);
-            }
-        }
-        if (e.keyCode === 40) {
-            if (active !== 0 && active !== 1 && active !== 2 && active !== 3) {
-                active = active - 4;
-                active = toggle(active, active + 4, number);
-                init(active);
-            }
-        }
+    if (!(e.keyCode in moves)) return;
 
-        result(number);
-    }
+    const next = activeTile + moves[e.keyCode];
+    if (next < 0 || next >= TILE_COUNT) return;
+
+    const sameRow =
+        Math.floor(next / GRID_SIZE) === Math.floor(activeTile / GRID_SIZE);
+
+    if (
+        Math.abs(next - activeTile) === 1 && !sameRow ||
+        Math.abs(next - activeTile) > GRID_SIZE
+    ) return;
+
+    activeTile = toggle(next, activeTile);
+    init(activeTile);
+    checkResult();
 });
 
+/* ================= CHECK RESULT ================= */
 
-function result(number) {
-
-    let number_init = [15];
-    let x = 0, y = 0;
-    for (let i = 0; i <= 14; i++) {
-        number_init[i] = x + "," + y;
-        if (i !== 3 && i !== 7 && i !== 11) {
-            x = x - 125;
-        } else {
-            x = 0;
-            y = y - 125;
-        }
-    }
-    if (number.length === 16) {
-        //number.splice(15, 1);//number.pop();
-        number_init[15] = number[15];
-    }
-    //alert(number);
-    let number1 = number.toString();
-    let number_init1 = number_init.toString();
-    if (number1 === number_init1) {
-        alert("🎉 Level Completed!");
-
-        $("#gameScreen").hide();
-        $("#levelScreen").show();
-
-        // currentLevel++;
-        // if (currentLevel >= chapters.levels.length) {
-        //     alert("🏁 You finished all levels!");
-        //     currentLevel = 0;
-        // }
-        //
-        // updateLevelSelectUI();
-        // putValue();
-        // init(15);
-
-        // alert("CONGRATULATIONS! You won. Start a New Game.");
-        // alert("🎉 Level Completed!");
-        //
-        // currentLevel++;
-        // if(currentLevel >= chapters.levels.length){
-        //     alert("🏁 You finished all levels!");
-        //     currentLevel = 0; // restart if needed
-        // }
-        //
-        // putValue();
-        // init(15);
-        // initializeClock('timeLeft', deadline);
-
-        //location.reload();
-        let deadline = new Date(Date.parse(new Date()) + 5 * 60 * 1000);
-        initializeClock('timeLeft', deadline);
-        putValue();
-        let active = 15;
-        init(active);
+function checkResult() {
+    for (let i = 0; i < 15; i++) {
+        const tile = document.getElementById(`id_${i}`);
+        if (Number(tile.dataset.num) !== i + 1) return;
     }
 
-}
-function updateLevelSelectUI() {
-    $("#levelSelect").val(currentLevel);
-}
+    clearInterval(timerInterval);
+    alert('🎉 Level Completed!');
 
-function toggle(ID, active, number) {
-
-    const $tile = $('#id_' + ID);
-    const $empty = $('.activeBox');
-
-    // Get image position of clicked tile
-    const pos = number[ID];
-
-    // Move image to empty tile
-    $empty
-        .css("background-position", pos.split(",")[0] + "px " + pos.split(",")[1] + "px")
-        .css("background-image", $tile.css("background-image"))
-        .css("background-size", $tile.css("background-size"));
-
-    // Make clicked tile empty
-    $tile.css("background-image", "none");
-
-    // Swap classes
-    $empty.removeClass('activeBox').addClass('box');
-    $tile.removeClass('box').addClass('activeBox');
-
-    // 🔥 FIX: update logical positions correctly
-    number[active] = number[ID];
-    number[ID] = undefined; // THIS WAS MISSING
-
-    return ID;
+    gameScreen.style.display = 'none';
+    levelScreen.style.display = 'block';
 }
 
+/* ================= TOGGLE ================= */
+
+function toggle(id, active) {
+    const tile = document.getElementById(`id_${id}`);
+    const empty = document.querySelector('.activeBox');
+
+    [tile.dataset.num, empty.dataset.num] = [empty.dataset.num, tile.dataset.num];
+
+    empty.style.backgroundImage = tile.style.backgroundImage;
+    empty.style.backgroundPosition = tile.style.backgroundPosition;
+    empty.style.backgroundSize = tile.style.backgroundSize;
+    mainBox.style.pointerEvents = 'none';
+
+    setTimeout(() => {
+        mainBox.style.pointerEvents = '';
+    }, 180);
+
+    tile.style.backgroundImage = 'none';
+
+    empty.classList.replace('activeBox', 'box');
+    tile.classList.replace('box', 'activeBox');
+
+    numberMap[active] = numberMap[id];
+    numberMap[id] = undefined;
+
+    tile.style.transform = 'scale(0.96)';
+    empty.style.transform = 'scale(1.02)';
+
+    requestAnimationFrame(() => {
+        tile.style.transform = '';
+        empty.style.transform = '';
+    });
+
+    return id;
+}
+
+/* ================= SHUFFLE & SET ================= */
 
 function putValue() {
-//var numbers = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
-    function shuffle(o) {
-        for (let j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-        return o;
-    }
+    initPositions = [];
 
-//var numbers = shuffle(numbers);
-    let x = 0;
-    let y = 0;
-
-    for (i = 0; i <= 14; i++) {
-
-        //document.getElementById("id_"+i).innerHTML  = numbers[i];
-        //$("#id_"+i).css("background-position", x+"px "+y+"px");
-        init_number[i] = x + "," + y;
-
-        if (i !== 3 && i !== 7 && i !== 11) {
-            x = x - 125;
+    let x = 0, y = 0;
+    for (let i = 0; i < 15; i++) {
+        initPositions[i] = `${x},${y}`;
+        if (i % 4 !== 3) {
+            x -= TILE_SIZE;
         } else {
             x = 0;
-            y = y - 125;
+            y -= TILE_SIZE;
         }
     }
-    number = shuffle(init_number);
-    //num_y = shuffle(num_y);
 
-    for (let i = 0; i <= 14; i++) {
-        let pos = number[i].split(",");
-        //alert("Hi");
-        //if(number[i]!="1,1")
-        $("#id_" + i)
-            .css("background-image", `url(${chapters.levels[currentLevel].image})`)
-            .css("background-size", "500px 500px")
-            .css("background-position", pos[0] + "px " + pos[1] + "px");
-
-        // $("#id_" + i).css("background-position", pos[0] + "px " + pos[1] + "px");
-        // $("#id_" + i)
-        //     .css("background-image", `url(${chapters.levels[currentLevel].image})`)
-        //     .css("background-position", pos[0] + "px " + pos[1] + "px");
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
     }
+
+    function isSolvable(nums) {
+        let inversions = 0;
+
+        for (let i = 0; i < nums.length; i++) {
+            for (let j = i + 1; j < nums.length; j++) {
+                if (nums[i] && nums[j] && nums[i] > nums[j]) {
+                    inversions++;
+                }
+            }
+        }
+
+        const blankIndex = nums.indexOf(0);
+        const blankRowFromBottom = GRID_SIZE - Math.floor(blankIndex / GRID_SIZE);
+
+        return blankRowFromBottom % 2 === 0
+            ? inversions % 2 === 1
+            : inversions % 2 === 0;
+    }
+
+    let tileNums;
+    do {
+        tileNums = shuffle([...Array(15).keys()].map(n => n + 1));
+        tileNums.push(0);
+    } while (!isSolvable(tileNums));
+
+    numberMap = [];
+
+    for (let i = 0; i < TILE_COUNT; i++) {
+        numberMap[i] = tileNums[i] === 0
+            ? undefined
+            : initPositions[tileNums[i] - 1];
+    }
+
+    for (let i = 0; i < 15; i++) {
+        const el = document.getElementById(`id_${i}`);
+        const [px, py] = numberMap[i].split(',');
+
+        el.style.backgroundImage =
+            `url(${chapters.levels[currentLevel].image})`;
+        el.style.backgroundSize = '500px 500px';
+        el.style.backgroundPosition = `${px}px ${py}px`;
+
+        // ✅ number follows actual tile content
+        el.dataset.num = initPositions.indexOf(numberMap[i]) + 1;
+    }
+
+    const empty = document.getElementById('id_15');
+    empty.style.backgroundImage = 'none';
+    empty.style.backgroundPosition = '';
+    empty.style.backgroundSize = '';
+    empty.dataset.num = '';
 }
 
-/*----------TIME--------*/
-function getTimeRemaining(endtime) {
-    let t = Date.parse(endtime) - Date.parse(new Date());
-    let seconds = Math.floor((t / 1000) % 60);
-    let minutes = Math.floor((t / 1000 / 60) % 60);
+/* ================= TIMER ================= */
+
+function getTimeRemaining(end) {
+    const t = end - Date.now();
     return {
-        'total': t,
-        'minutes': minutes,
-        'seconds': seconds
+        total: t,
+        minutes: Math.floor(t / 60000),
+        seconds: Math.floor((t / 1000) % 60)
     };
 }
 
 function initializeClock(id, endtime) {
-    let clock = document.getElementById(id);
-    let minutesSpan = clock.querySelector('.minutes');
-    let secondsSpan = clock.querySelector('.seconds');
+    if (timerInterval) clearInterval(timerInterval);
 
-    function updateClock() {
-        let t = getTimeRemaining(endtime);
-        minutesSpan.innerHTML = ('0' + t.minutes).slice(-2);
-        secondsSpan.innerHTML = ('0' + t.seconds).slice(-2);
+    const clock = document.getElementById(id);
+    const min = clock.querySelector('.minutes');
+    const sec = clock.querySelector('.seconds');
+
+    timerInterval = setInterval(() => {
+        const t = getTimeRemaining(endtime);
+
+        min.textContent = String(t.minutes).padStart(2, '0');
+        sec.textContent = String(t.seconds).padStart(2, '0');
 
         if (t.total <= 0) {
-            clearInterval(timeinterval);
-            // alert("SORRY!!! You lost the game :( Please try again.");
-            var deadline = new Date(Date.parse(new Date()) + 5 * 60 * 1000);
-            initializeClock('timeLeft', deadline);
-            putValue();
-            var active = 15;
-            init(active);
+            clearInterval(timerInterval);
+            startLevel(currentLevel);
         }
-    }
-    updateClock();
-    var timeinterval = setInterval(updateClock, 1000);
+    }, 1000);
 }
 
-chapters.levels.forEach((lvl, index) => {
-    $("#levelSelect").append(`<option value="${index}">Level ${index + 1}</option>`);
+let touchStartX = 0;
+let touchStartY = 0;
+
+mainBox.addEventListener('touchstart', e => {
+    if (gameScreen.style.display !== 'block') return;
+
+    const t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+}, { passive: true });
+
+mainBox.addEventListener('touchend', e => {
+    if (gameScreen.style.display !== 'block') return;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+
+    if (Math.abs(dx) < 30 && Math.abs(dy) < 30) return;
+
+    let next = null;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        // horizontal
+        next = dx > 0 ? activeTile + 1 : activeTile - 1;
+    } else {
+        // vertical
+        next = dy > 0 ? activeTile - GRID_SIZE : activeTile + GRID_SIZE;
+    }
+
+    if (next < 0 || next >= TILE_COUNT) return;
+
+    const sameRow =
+        Math.floor(next / GRID_SIZE) === Math.floor(activeTile / GRID_SIZE);
+
+    if (
+        Math.abs(next - activeTile) === 1 && !sameRow ||
+        Math.abs(next - activeTile) > GRID_SIZE
+    ) return;
+
+    activeTile = toggle(next, activeTile);
+    init(activeTile);
+    checkResult();
 });
-
-$("#levelSelect").change(function () {
-    currentLevel = parseInt($(this).val());
-    putValue();
-    init(15);
-});
-$("#demoPic")
-    .css("background-image", `url(${chapters.levels[currentLevel].image})`)
-    .css("background-size", "155px")
-    .css("background-position", "center");
-
-// chapters.levels.forEach((lvl, index) => {
-//     $("#levelSelect").append(`<option value="${index}">Level ${index+1}</option>`);
-// });
-//
-// $("#levelSelect").change(function(){
-//     currentLevel = parseInt($(this).val());
-//     putValue();
-//     init(15);
-// });
-
-initializeClock('timeLeft', deadline);

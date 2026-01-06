@@ -1,4 +1,4 @@
-let puzzle, autoStart;
+let puzzle;
 let rotEnableElement, playing, restartElement;
 let useMouse = true;
 let currentLevel = 0;
@@ -13,20 +13,12 @@ const mhypot = Math.hypot,
     msqrt = Math.sqrt,
     mabs = Math.abs;
 
-function isMiniature() {
-    return location.pathname.includes('/fullcpgrid/'); // special for Codepen
-}
-
 function alea(min, max) {
-    // random number [min..max[ . If no max is provided, [0..min[
-
     if (typeof max == 'undefined') return min * mrandom();
     return min + (max - min) * mrandom();
 }
 
 function intAlea(min, max) {
-    // random integer number [min..max[ . If no max is provided, [0..min[
-
     if (typeof max == 'undefined') {
         max = min;
         min = 0;
@@ -35,26 +27,18 @@ function intAlea(min, max) {
 }
 
 function arrayShuffle(array) {
-    /* randomly changes the order of items in an array
-    only the order is modified, not the elements
-    */
     let k1, temp;
     for (let k = array.length - 1; k >= 1; --k) {
         k1 = intAlea(0, k + 1);
         temp = array[k];
         array[k] = array[k1];
         array[k1] = temp;
-    } // for k
+    }
     return array
 }
 
 class Modal {
     constructor(properties) {
-
-        // properties : {lines, buttons}
-        // lines : [strings] will be displayed in separate <p> tags
-        // buttons :[{text:string, callback(optional):function}]
-
         let modal = document.createElement("dialog");
         modal.style.borderRadius = "5px";
         if (properties.lines) {
@@ -91,14 +75,14 @@ class Modal {
         }
         document.body.append(modal);
         modal.showModal();
-    } // constructor
+    }
 }
 
 class Point {
     constructor(x, y) {
         this.x = Number(x);
         this.y = Number(y);
-    } // constructor
+    }
     copy() {
         return new Point(this.x, this.y);
     }
@@ -108,70 +92,44 @@ class Point {
     }
 }
 
-// Segment
-// those segments are oriented
 class Segment {
     constructor(p1, p2) {
         this.p1 = new Point(p1.x, p1.y);
         this.p2 = new Point(p2.x, p2.y);
     }
-
     dx() {
         return this.p2.x - this.p1.x;
     }
-
     dy() {
         return this.p2.y - this.p1.y;
     }
-
     length() {
         return mhypot(this.dx(), this.dy());
     }
-
-    // returns a point at a given distance of p1, positive direction beeing towards p2
     pointOnRelative(coeff) {
-        // attention if segment length can be 0
         let dx = this.dx();
         let dy = this.dy();
         return new Point(this.p1.x + coeff * dx, this.p1.y + coeff * dy);
     }
 }
 
-// one side of a piece
 class Side {
     constructor() {
-        this.type = ""; // "d" pour straight line or "z" pour classic
-        this.points = []; // real points or Bezier curve points
-        // this.scaledPoints will be added when we know the scale
-    } // Side
-
+        this.type = "";
+        this.points = [];
+    }
     reversed() {
-        // returns a new Side, copy of current one but reversed
         const ns = new Side();
         ns.type = this.type;
         ns.points = this.points.slice().reverse();
         return ns;
-    } // Side.reversed
-
+    }
     scale(puzzle) {
-        /* uses actual dimensions of puzzle to compute actual side points
-        these points are not shifted by the piece position : the top left corner is at (0,0)
-        */
         const coefx = puzzle.scalex;
         const coefy = puzzle.scaley;
         this.scaledPoints = this.points.map(p => new Point(p.x * coefx, p.y * coefy));
 
-    } //
-
-    /*
-    draws the path corresponding to a side
-    Parameters :
-      ctx : canvas context
-      shiftx, shifty : position shift (used to create emboss effect)
-      withoutMoveTo : to decide whether to do a moveTo to the first point. Without MoveTo
-      must be done only for the first side of a piece, not for the following ones
-    */
-
+    }
     drawPath(ctx, shiftx, shifty, withoutMoveTo) {
 
         if (!withoutMoveTo) {
@@ -184,15 +142,11 @@ class Side {
                 ctx.bezierCurveTo(this.scaledPoints[k].x + shiftx, this.scaledPoints[k].y + shifty,
                     this.scaledPoints[k + 1].x + shiftx, this.scaledPoints[k + 1].y + shifty,
                     this.scaledPoints[k + 2].x + shiftx, this.scaledPoints[k + 2].y + shifty);
-            } // for k
-        } // if jigsaw side
+            }
+        }
     }
 }
 
-/* modifies a side
-  changes it from a straight line (type "d") to a complex one (type "z")
-  The change is done towards the opposite side (side between corners ca and cb)
-*/
 function twist0(side, ca, cb) {
 
     const seg0 = new Segment(side.points[0], side.points[1]);
@@ -258,10 +212,6 @@ function twist0(side, ca, cb) {
 
 }
 
-/* modifies a side
-  changes it from a straight line (type "d") to a complex one (type "z")
-  The change is done towards the opposite side (side between corners ca and cb)
-*/
 function twist1(side, ca, cb) {
 
     const seg0 = new Segment(side.points[0], side.points[1]);
@@ -293,10 +243,6 @@ function twist1(side, ca, cb) {
     }
 }
 
-/* modifies a side
-  changes it from a straight line (type "d") to a complex one (type "z")
-  The change is done towards the opposite side (side between corners ca and cb)
-*/
 function twist2(side, ca, cb) {
 
     const seg0 = new Segment(side.points[0], side.points[1]);
@@ -329,10 +275,6 @@ function twist2(side, ca, cb) {
     }
 }
 
-/* modifies a side
-  changes it from a straight line (type "d") to a complex one (type "z")
-  The change is done towards the opposite side (side between corners ca and cb)
-*/
 function twist3(side, ca, cb) {
 
     side.points = [side.points[0], side.points[1]];
@@ -340,11 +282,11 @@ function twist3(side, ca, cb) {
 }
 
 class Piece {
-    constructor(kx, ky) { // object with 4 sides
-        this.ts = new Side(); // top side
-        this.rs = new Side(); // right side
-        this.bs = new Side(); // bottom side
-        this.ls = new Side(); // left side
+    constructor(kx, ky) {
+        this.ts = new Side();
+        this.rs = new Side();
+        this.bs = new Side();
+        this.ls = new Side();
         this.kx = kx;
         this.ky = ky;
     }
@@ -358,9 +300,6 @@ class Piece {
 }
 
 class PolyPiece {
-    // represents a group of pieces well positionned with respect  to each other.
-    // pckxmin, pckxmax, pckymin and pckymax record the lowest and highest kx and ky
-    // creates a canvas to draw polypiece on, and appends this canvas to puzzle.container
     constructor(initialPiece, puzzle) {
         this.pckxmin = initialPiece.kx;
         this.pckxmax = initialPiece.kx + 1;
@@ -372,20 +311,11 @@ class PolyPiece {
         this.listLoops();
 
         this.canvas = document.createElement('CANVAS');
-        // size and z-index will be defined later
         puzzle.container.appendChild(this.canvas);
         this.canvas.classList.add('polypiece');
         this.ctx = this.canvas.getContext("2d");
-        this.rot = 0; // PolyPiece is in "normal" position - 1 for 90 deg.cw, 2 and 3 for 180 and 270 deg
+        this.rot = 0;
     }
-
-    /*
-      this method
-        - adds pieces of otherPoly to this PolyPiece
-        - reorders the pieces inside the polypiece
-        - adjusts coordinates of new pieces to make them consistent with this polyPiece
-        - re-evaluates the z - index of the polyPieces
-    */
 
     merge(otherPoly) {
 
@@ -393,40 +323,29 @@ class PolyPiece {
         const orgpckymin = this.pckymin;
         const pbefore = getTransformed(0, 0, this.nx * puzzle.scalex, this.ny * puzzle.scaley, this.rot);
 
-        // remove otherPoly from list of polypieces
         const kOther = this.puzzle.polyPieces.indexOf(otherPoly);
         this.puzzle.polyPieces.splice(kOther, 1);
 
-        // remove other canvas from container
         this.puzzle.container.removeChild(otherPoly.canvas);
 
         for (let k = 0; k < otherPoly.pieces.length; ++k) {
             this.pieces.push(otherPoly.pieces[k]);
-            // watch leftmost, topmost... pieces
             if (otherPoly.pieces[k].kx < this.pckxmin) this.pckxmin = otherPoly.pieces[k].kx;
             if (otherPoly.pieces[k].kx + 1 > this.pckxmax) this.pckxmax = otherPoly.pieces[k].kx + 1;
             if (otherPoly.pieces[k].ky < this.pckymin) this.pckymin = otherPoly.pieces[k].ky;
             if (otherPoly.pieces[k].ky + 1 > this.pckymax) this.pckymax = otherPoly.pieces[k].ky + 1;
-        } // for k
-
-        // sort the pieces by increasing kx, ky
+        }
 
         this.pieces.sort(function (p1, p2) {
             if (p1.ky < p2.ky) return -1;
             if (p1.ky > p2.ky) return 1;
             if (p1.kx < p2.kx) return -1;
             if (p1.kx > p2.kx) return 1;
-            return 0; // should not occur
+            return 0;
         });
 
-        // redefine consecutive edges
         this.listLoops();
         this.drawImage();
-        /* evaluate translation required to keep the original pieces of this PolyPiece in their position
-        assuming no translation, we compute the actual position of a given point before and after merging.
-         Then we translate accordingly
-         We take the top left point of the original (before merging / rotating) point as a reference
-         */
         const pafter = getTransformed(this.puzzle.scalex * (orgpckxmin - this.pckxmin),
             this.puzzle.scaley * (orgpckymin - this.pckymin),
             this.puzzle.scalex * (this.pckxmax - this.pckxmin + 1),
@@ -438,64 +357,38 @@ class PolyPiece {
         this.puzzle.evaluateZIndex();
 
         function getTransformed(orgx, orgy, width, height, rot) {
-            /* returns the coordinates of a point in a transformed element
-            orgx,orgy are the coordinates of the point, relative to the top left corner of untransformed element
-            width and height refer to the untransformed element too
-            the transformation is a rotation of angle rot * 90deg. around the center of the rectangle
-            */
             const dx = orgx - width / 2;
             const dy = orgy - height / 2;
             return {
                 x: width / 2 + [1, 0, -1, 0][rot] * dx + [0, -1, 0, 1][rot] * dy,
                 y: height / 2 + [0, 1, 0, -1][rot] * dx + [1, 0, -1, 0][rot] * dy
             }
-
         }
     }
 
     ifNear(otherPoly) {
-
-        if (this.rot !== otherPoly.rot) return false; // different orientations, can't collapse!
+        if (this.rot !== otherPoly.rot) return false;
 
         let p1, p2;
         let puzzle = this.puzzle;
 
-        // coordinates of origin of full picture for this PolyPiece and otherPiece
         let org = this.getOrgP();
         let orgOther = otherPoly.getOrgP();
 
-        if (mhypot(org.x - orgOther.x, org.y - orgOther.y) >= puzzle.dConnect) return false; // not close enough
+        if (mhypot(org.x - orgOther.x, org.y - orgOther.y) >= puzzle.dConnect) return false;
 
-        // this and otherPoly are in good relative position, have they a common side ?
         for (let k = this.pieces.length - 1; k >= 0; --k) {
             p1 = this.pieces[k];
             for (let ko = otherPoly.pieces.length - 1; ko >= 0; --ko) {
                 p2 = otherPoly.pieces[ko];
-                if (p1.kx === p2.kx && mabs(p1.ky - p2.ky) === 1) return true; // true neighbors found
-                if (p1.ky === p2.ky && mabs(p1.kx - p2.kx) === 1) return true; // true neighbors found
-            } // for k
-        } // for k
-
+                if (p1.kx === p2.kx && mabs(p1.ky - p2.ky) === 1) return true;
+                if (p1.ky === p2.ky && mabs(p1.kx - p2.kx) === 1) return true;
+            }
+        }
         return false;
     }
 
-    /* algorithm to determine the boundary of a PolyPiece
-      input : a table of cells, hopefully defining a 'good' PolyPiece, i.e. all connected together
-      every cell is given as an object {kx: indice, ky: indice} representing an element of a 2D array.
-
-      returned value : table of Loops, because the boundary may be made of several
-    simple loops : there may be a 'hole' in a PolyPiece
-    every loop is a list of consecutive edges,
-    every edge if an object {kp: index, edge: b} where kp is the index of the cell in
-    the input array, and edge the side (0(top), 1(right), 2(bottom), 3(left))
-    every edge contains kx and ky too, normally not used here
-
-    This method does not depend on the fact that pieces have been scaled or not.
-    */
-
     listLoops() {
-        // internal : checks if an edge given by kx, ky is common with another cell
-        // returns true or false
         const that = this;
 
         function edgeIsCommon(kx, ky, edge) {
@@ -503,65 +396,57 @@ class PolyPiece {
             switch (edge) {
                 case 0:
                     ky--;
-                    break; // top edge
+                    break;
                 case 1:
                     kx++;
-                    break; // right edge
+                    break;
                 case 2:
                     ky++;
-                    break; // bottom edge
+                    break;
                 case 3:
                     kx--;
-                    break; // left edge
+                    break;
             } // switch
             for (k = 0; k < that.pieces.length; k++) {
                 if (kx === that.pieces[k].kx && ky === that.pieces[k].ky) return true; // we found the neighbor
             }
-            return false; // not a common edge
+            return false;
         }
-
-        // internal : checks if an edge given by kx, ky is in tbEdges
-        // return index in tbEdges, or false
 
         function edgeIsInTbEdges(kx, ky, edge) {
             let k;
             for (k = 0; k < tbEdges.length; k++) {
                 if (kx === tbEdges[k].kx && ky === tbEdges[k].ky && edge === tbEdges[k].edge) return k; // found it
             }
-            return false; // not found
+            return false;
         }
 
-        let tbLoops = []; // for the result
-        let tbEdges = []; // set of edges which are not shared by 2 pieces of input
+        let tbLoops = [];
+        let tbEdges = [];
         let k;
-        let kEdge; // to count 4 edges
-        let lp; // for loop during its creation
-        let currEdge; // current edge
-        let tries; // tries counter
-        let edgeNumber; // number of edge found during research
+        let kEdge;
+        let lp;
+        let currEdge;
+        let tries;
+        let edgeNumber;
         let potNext;
 
-        // table of tries
         let tbTries = [
-            // if we are on edge 0 (top)
             [
-                {dkx: 0, dky: 0, edge: 1}, // try # 0
-                {dkx: 1, dky: 0, edge: 0}, // try # 1
-                {dkx: 1, dky: -1, edge: 3} // try # 2
+                {dkx: 0, dky: 0, edge: 1},
+                {dkx: 1, dky: 0, edge: 0},
+                {dkx: 1, dky: -1, edge: 3}
             ],
-            // if we are on edge 1 (right)
             [
                 {dkx: 0, dky: 0, edge: 2},
                 {dkx: 0, dky: 1, edge: 1},
                 {dkx: 1, dky: 1, edge: 0}
             ],
-            // if we are on edge 2 (bottom)
             [
                 {dkx: 0, dky: 0, edge: 3},
                 {dkx: -1, dky: 0, edge: 2},
                 {dkx: -1, dky: 1, edge: 1}
             ],
-            // if we are on edge 3 (left)
             [
                 {dkx: 0, dky: 0, edge: 0},
                 {dkx: 0, dky: -1, edge: 3},
@@ -569,36 +454,32 @@ class PolyPiece {
             ],
         ];
 
-        // create list of not shared edges (=> belong to boundary)
         for (k = 0; k < this.pieces.length; k++) {
             for (kEdge = 0; kEdge < 4; kEdge++) {
                 if (!edgeIsCommon(this.pieces[k].kx, this.pieces[k].ky, kEdge))
                     tbEdges.push({kx: this.pieces[k].kx, ky: this.pieces[k].ky, edge: kEdge, kp: k})
-            } // for kEdge
-        } // for k
+            }
+        }
 
         while (tbEdges.length > 0) {
-            lp = []; // new loop
-            currEdge = tbEdges[0];   // we begin with first available edge
-            lp.push(currEdge);       // add it to loop
-            tbEdges.splice(0, 1);    // remove from list of available sides
+            lp = [];
+            currEdge = tbEdges[0];
+            lp.push(currEdge);
+            tbEdges.splice(0, 1);
             do {
                 for (tries = 0; tries < 3; tries++) {
                     potNext = tbTries[currEdge.edge][tries];
                     edgeNumber = edgeIsInTbEdges(currEdge.kx + potNext.dkx, currEdge.ky + potNext.dky, potNext.edge);
-                    if (edgeNumber === false) continue; // can't here
-                    // new element in loop
-                    currEdge = tbEdges[edgeNumber];     // new current edge
-                    lp.push(currEdge);              // add it to loop
-                    tbEdges.splice(edgeNumber, 1);  // remove from list of available sides
-                    break; // stop tries !
-                } // for tries
-                if (edgeNumber === false) break; // loop is closed
-            } while (1); // do-while exited by break
-            tbLoops.push(lp); // add this loop to loops list
-        } // while tbEdges...
-
-        // replace components of loops by actual pieces sides
+                    if (edgeNumber === false) continue;
+                    currEdge = tbEdges[edgeNumber];
+                    lp.push(currEdge);
+                    tbEdges.splice(edgeNumber, 1);
+                    break;
+                }
+                if (edgeNumber === false) break;
+            } while (1);
+            tbLoops.push(lp);
+        }
         this.tbLoops = tbLoops.map(loop => loop.map(edge => {
             let cell = this.pieces[edge.kp];
             if (edge.edge === 0) return cell.ts;
@@ -610,8 +491,6 @@ class PolyPiece {
     }
 
     getRect() {
-        // like getBoundingClientRect, but returned coordinates are relative to container rather than viewport
-
         let rect0 = this.puzzle.container.getBoundingClientRect();
         let rect = this.canvas.getBoundingClientRect();
         return {
@@ -652,18 +531,11 @@ class PolyPiece {
     }
 
     drawImage(special) {
-        /* resizes canvas to be bigger than if pieces were perfect rectangles
-        so that their shapes actually fit in the canvas
-        copies the relevant part of gamePicture clipped by path
-        adds shadow and emboss
-        */
         puzzle = this.puzzle;
         this.nx = this.pckxmax - this.pckxmin + 1;
         this.ny = this.pckymax - this.pckymin + 1;
         this.canvas.width = this.nx * puzzle.scalex;
         this.canvas.height = this.ny * puzzle.scaley;
-
-        // difference between position in this canvas and position in gameImage (unrotated)
 
         this.offsx = (this.pckxmin - 0.5) * puzzle.scalex;
         this.offsy = (this.pckymin - 0.5) * puzzle.scaley;
@@ -671,20 +543,19 @@ class PolyPiece {
         this.path = new Path2D();
         this.drawPath(this.path, -this.offsx, -this.offsy);
 
-        // make shadow
         this.ctx.fillStyle = 'none';
         this.ctx.shadowColor = this.selected ? (special ? 'red' : 'gold') : 'rgba(0, 0, 0, 0.5)';
         this.ctx.shadowBlur = this.selected ? mmin(8, puzzle.scalex / 10) : 4;
         this.ctx.shadowOffsetX = this.selected ? 0 : -4;
         this.ctx.shadowOffsetY = this.selected ? 0 : 4;
         this.ctx.fill(this.path);
-        if (this.selected) this.ctx.fill(this.path); // to make selection blur more visible
-        if (this.selected) this.ctx.fill(this.path); // ugly, but effective
         if (this.selected) this.ctx.fill(this.path);
         if (this.selected) this.ctx.fill(this.path);
         if (this.selected) this.ctx.fill(this.path);
         if (this.selected) this.ctx.fill(this.path);
-        this.ctx.shadowColor = 'rgba(0, 0, 0, 0)'; // stop shadow effect
+        if (this.selected) this.ctx.fill(this.path);
+        if (this.selected) this.ctx.fill(this.path);
+        this.ctx.shadowColor = 'rgba(0, 0, 0, 0)';
 
         this.pieces.forEach((pp, kk) => {
 
@@ -700,7 +571,6 @@ class PolyPiece {
             path.closePath();
 
             this.ctx.clip(path);
-            // do not copy from negative coordinates, does not work for all browsers
             const srcx = pp.kx ? ((pp.kx - 0.5) * puzzle.scalex) : 0;
             const srcy = pp.ky ? ((pp.ky - 0.5) * puzzle.scaley) : 0;
 
@@ -729,7 +599,6 @@ class PolyPiece {
     }
 
     moveTo(x, y) {
-        // sets the left, top properties (relative to container) of this.canvas
         this.x = x;
         this.y = y;
         this.canvas.style.left = x + 'px';
@@ -743,7 +612,6 @@ class PolyPiece {
     }
 
     rotate(angle) {
-        /* angle = orientation : 0 to 3 by 90 deg steps clockwise  */
         this.canvas.style.transform = `rotate(${90 * angle}deg)`;
         this.rot = angle;
     }
@@ -760,15 +628,9 @@ class PolyPiece {
         let mposy = [0, -1, 0, 1][this.rot] * (p.x - pRefx) + [1, 0, -1, 0][this.rot] * (p.y - pRefy);
 
         return (this.ctx.isPointInPath(this.path, mposx, mposy))
-
     }
 
     coerceToContainer() {
-        // make sure that at least a visible part of the piece is inside the container
-        /* a polypiece can extend beyond the edges of the container by the size of one piece, due to the 1/2 piece margin left around
-        the pieces themselves + 1/2 piece hidden
-        A bit tricky because of the rotation of the pieces
-        */
         let dimx = [puzzle.scalex, puzzle.scaley, puzzle.scalex, puzzle.scaley][this.rot];
         let dimy = [puzzle.scaley, puzzle.scalex, puzzle.scaley, puzzle.scalex][this.rot];
         const rect = this.getRect();
@@ -784,7 +646,6 @@ class PolyPiece {
             }
             return;
         }
-        // if both left and right edges are visible, only coerce y coordinates
         if (rect.x > -dimx && rect.right < puzzle.contHeight + dimy) {
             if (rect.bottom < dimy) {
                 this.moveTo(this.x, this.y + dimy - rect.bottom);
@@ -796,7 +657,6 @@ class PolyPiece {
             }
             return;
         }
-        // coerce vertical completely between bounds, the horizontally just on the window edge
         if (rect.y < -dimy) {
             this.moveTo(this.x, this.y - rect.y - dimy);
             this.getRect();
@@ -818,31 +678,13 @@ class PolyPiece {
 }
 
 class Puzzle {
-    /*
-        params contains :
-
-    container : mandatory - given by id (string) or element
-                it will not be resized in this script
-
-    ONLY ONE Puzzle object should be instanced.
-        only "container is mandatory, nbPieces and pictures may be provided to get
-        initial default values.
-        When a puzzle is solved (and even if not solved) another game can be played
-        by changing the image file or the number of pieces, NOT by invoking new Puzzle
-    */
 
     constructor(params) {
-
-        this.autoStart = false;
 
         this.container = (typeof params.container == "string") ?
             document.getElementById(params.container) :
             params.container;
 
-        /* the following code will add the event Handlers several times if
-          new Puzzle objects are created with same container.
-          the presence of previous event listeners is NOT detectable
-        */
         this.container.addEventListener("mousedown", event => {
             useMouse = true;
             event.preventDefault();
@@ -860,7 +702,7 @@ class Puzzle {
         this.container.addEventListener("mouseup", event => {
             useMouse = true;
             event.preventDefault();
-            if (event.button != 0) return; // ignore if releasing right click
+            if (event.button != 0) return;
             handleLeave();
         });
         this.container.addEventListener("touchend", handleLeave);
@@ -870,7 +712,6 @@ class Puzzle {
         this.container.addEventListener("mousemove", event => {
             useMouse = true;
             event.preventDefault();
-            // do not accumulate move events in events queue - keep only current one
             if (events.length && events[events.length - 1].event === "move") events.pop();
             events.push({event: 'move', position: this.relativeMouseCoordinates(event)})
         });
@@ -879,12 +720,10 @@ class Puzzle {
             event.preventDefault();
             if (event.touches.length !== 1) return;
             let ev = event.touches[0];
-            // do not accumulate move events in events queue - keep only current one
             if (events.length && events[events.length - 1].event === "move") events.pop();
             events.push({event: 'move', position: this.relativeMouseCoordinates(ev)});
         }, {passive: false});
 
-        /* create canvas to contain picture - will be styled later */
         this.gameCanvas = document.createElement('CANVAS');
         this.container.appendChild(this.gameCanvas)
 
@@ -893,30 +732,22 @@ class Puzzle {
         this.srcImage.addEventListener("load", () => imageLoaded(this));
 
         function handleLeave() {
-            events.push({event: 'leave'}); //
+            events.push({event: 'leave'});
         }
     }
-
     getContainerSize() {
         let styl = window.getComputedStyle(this.container);
 
-        /* dimensions of container */
         this.contWidth = parseFloat(styl.width);
         this.contHeight = parseFloat(styl.height);
     }
 
     create() {
 
-        this.container.innerHTML = ""; // forget contents
-
-        /* define the number of rows / columns to have almost square pieces
-          and a total number as close as possible to the requested number
-        */
+        this.container.innerHTML = "";
         this.getContainerSize();
         this.computenxAndny();
-        /* assuming the width of pieces is 1, computes their height
-             (computenxAndny aims at making relativeHeight as close as possible to 1)
-        */
+
         this.relativeHeight = (this.srcImage.naturalHeight / this.ny) / (this.srcImage.naturalWidth / this.nx);
 
         this.defineShapes({
@@ -932,13 +763,6 @@ class Puzzle {
         arrayShuffle(this.polyPieces);
         this.evaluateZIndex();
     }
-
-    /* computes the number of lines and columns of the puzzle,
-      finding the best compromise between the requested number of pieces
-      and a square shap for pieces
-      result in this.nx and this.ny;
-    */
-
     computenxAndny() {
 
         let kx, ky, width = this.srcImage.naturalWidth, height = this.srcImage.naturalHeight, npieces = this.nbPieces;
@@ -948,19 +772,15 @@ class Puzzle {
         let nHPieces = mround(msqrt(npieces * width / height));
         let nVPieces = mround(npieces / nHPieces);
 
-        /* based on the above estimation, we will try up to + / - 2 values
-           and evaluate (arbitrary) quality criterion to keep best result
-        */
-
         for (ky = 0; ky < 5; ky++) {
             ncv = nVPieces + ky - 2;
             for (kx = 0; kx < 5; kx++) {
                 nch = nHPieces + kx - 2;
                 err = nch * height / ncv / width;
-                err = (err + 1 / err) - 2; // error on pieces dimensions ratio)
-                err += mabs(1 - nch * ncv / npieces); // adds error on number of pieces
+                err = (err + 1 / err) - 2;
+                err += mabs(1 - nch * ncv / npieces);
 
-                if (err < errmin) { // keep smallest error
+                if (err < errmin) {
                     errmin = err;
                     this.nx = nch;
                     this.ny = ncv;
@@ -968,14 +788,7 @@ class Puzzle {
             }
         }
     }
-
     defineShapes(shapeDesc) {
-        // define shapes as if the width and height of a piece were 1
-
-        /* first, place the corners of the pieces
-          at some distance from their theoretical position, except for edges
-        */
-
         let {coeffDecentr, twistf} = shapeDesc;
 
         const corners = [];
@@ -993,25 +806,21 @@ class Puzzle {
                 if (ky === ny) corners[ky][kx].y = ny;
             }
         }
-
-        // Array of pieces
         this.pieces = [];
         for (let ky = 0; ky < ny; ++ky) {
             this.pieces[ky] = [];
             for (let kx = 0; kx < nx; ++kx) {
                 this.pieces[ky][kx] = np = new Piece(kx, ky);
-                // top side
                 if (ky === 0) {
                     np.ts.points = [corners[ky][kx], corners[ky][kx + 1]];
                     np.ts.type = "d";
                 } else {
                     np.ts = this.pieces[ky - 1][kx].bs.reversed();
                 }
-                // right side
                 np.rs.points = [corners[ky][kx + 1], corners[ky + 1][kx + 1]];
                 np.rs.type = "d";
                 if (kx < nx - 1) {
-                    if (intAlea(2)) // randomly twisted on one side of the side
+                    if (intAlea(2))
                         twistf(np.rs, corners[ky][kx], corners[ky + 1][kx]);
                     else
                         twistf(np.rs, corners[ky][kx + 2], corners[ky + 1][kx + 2]);
@@ -1027,7 +836,7 @@ class Puzzle {
                 np.bs.points = [corners[ky + 1][kx + 1], corners[ky + 1][kx]];
                 np.bs.type = "d";
                 if (ky < ny - 1) {
-                    if (intAlea(2)) // randomly twisted on one side of the side
+                    if (intAlea(2))
                         twistf(np.bs, corners[ky][kx + 1], corners[ky][kx]);
                     else
                         twistf(np.bs, corners[ky + 2][kx + 1], corners[ky + 2][kx]);
@@ -1035,19 +844,13 @@ class Puzzle {
             }
         }
     }
-
     scale() {
-
-        // we suppose we want the picture to fill 95% of width or height and less or same on other dimension
         const maxWidth = 0.95 * this.contWidth;
         const maxHeight = 0.95 * this.contHeight;
         let gameInfo = {};
         {
-            // let's leave some space to store the pending pieces
-            // it will be a number of rows / columns
-            // the extra space must be at least 20% of the image surface
             let memoHeight = 0;
-            let xtra = mceil(this.nx * this.ny * 0.2); // number of extra cells
+            let xtra = mceil(this.nx * this.ny * 0.2);
             for (let extrax = 0; extrax <= mceil(xtra / this.ny); ++extrax) {
                 let reqx = this.srcImage.naturalWidth * (this.nx + extrax) / this.nx;
                 let availx = (extrax === 0) ? maxWidth : this.contWidth;
@@ -1060,8 +863,8 @@ class Puzzle {
                         resulty = availy;
                         resultx = resulty * reqx / reqy;
                     }
-                    let gameHeight = resulty / (this.ny + extray) * this.ny; // height of game image with this option
-                    let gameWidth = resultx / (this.nx + extrax) * this.nx; // width of game image with this option
+                    let gameHeight = resulty / (this.ny + extray) * this.ny;
+                    let gameWidth = resultx / (this.nx + extrax) * this.nx;
                     if (gameHeight > memoHeight) {
                         memoHeight = gameHeight;
                         gameInfo = {gameWidth, gameHeight, extrax, extray};
@@ -1069,12 +872,9 @@ class Puzzle {
                 }
             }
         }
-
         this.gameHeight = gameInfo.gameHeight;
         this.gameWidth = gameInfo.gameWidth;
 
-        /* get a scaled copy of the source picture into a canvas */
-        //    this.gameCanvas = document.createElement('CANVAS');
         this.gameCanvas.width = this.gameWidth;
         this.gameCanvas.height = this.gameHeight;
         this.gameCtx = this.gameCanvas.getContext("2d");
@@ -1082,34 +882,23 @@ class Puzzle {
 
         this.gameCanvas.classList.add("gameCanvas");
         this.gameCanvas.style.zIndex = 500;
-        //    this.container.appendChild(this.gameCanvas)
 
         /* scale pieces */
-        this.scalex = this.gameWidth / this.nx;    // average width of pieces
-        this.scaley = this.gameHeight / this.ny;   // average height of pieces
+        this.scalex = this.gameWidth / this.nx;
+        this.scaley = this.gameHeight / this.ny;
 
         this.pieces.forEach(row => {
             row.forEach(piece => piece.scale(this));
-        }); // this.pieces.forEach
-
-        /* calculate offset for centering image in container */
+        });
         this.offsx = (this.contWidth - this.gameWidth) / 2;
         this.offsy = (this.contHeight - this.gameHeight) / 2;
 
-        /* computes the distance below which two pieces connect
-          depends on the actual size of pieces, with lower limit */
         this.dConnect = mmax(10, mmin(this.scalex, this.scaley) / 10);
 
-        /* computes the thickness used for emboss effect */
-        // from 2 (scalex = 0)  to 5 (scalex = 200), not more than 5
         this.embossThickness = mmin(2 + this.scalex / 200 * (5 - 2), 5);
     }
 
     relativeMouseCoordinates(event) {
-
-        /* takes mouse coordinates from mouse event
-          returns coordinates relative to container, even if page is scrolled or zoommed */
-
         const br = this.container.getBoundingClientRect();
         return {
             x: event.clientX - br.x,
@@ -1118,10 +907,6 @@ class Puzzle {
     }
 
     limitRectangle(rect) {
-        /* limits the possible position for the coordinates of a piece, to prevent it from beeing out of the
-        container
-        assumes pieces may be rotated
-        */
         let minscale = mmin(this.scalex, this.scaley);
 
         rect.x0 = mmin(mmax(rect.x0, -minscale / 2), this.contWidth - 1.5 * minscale);
@@ -1145,27 +930,17 @@ class Puzzle {
     }
 
     optimInitial() {
-        /* based on :
-        - container dimensions
-        - picture dimensions
-        - piece dimensions
-
-        moves the pieces at the beginning of the game along one to four sides of the container
-        */
-        // extreme values for 1 piece
         const minx = -this.scalex / 2;
         const miny = -this.scaley / 2;
         const maxx = this.contWidth - 1.5 * this.scalex;
         const maxy = this.contHeight - 1.5 * this.scaley;
-        // how much space left around image ?
         let freex = this.contWidth - this.gameWidth;
         let freey = this.contHeight - this.gameHeight;
 
-        let where = [0, 0, 0, 0]; // to record on which sides pieces will be moved
+        let where = [0, 0, 0, 0];
         let rects = [];
-        // first evaluation
         if (freex > 1.5 * this.scalex) {
-            where[1] = 1; // right
+            where[1] = 1;
             rects[1] = {
                 x0: this.gameWidth - 0.5 * this.scalex,
                 x1: maxx,
@@ -1173,7 +948,7 @@ class Puzzle {
             };
         }
         if (freex > 3 * this.scalex) {
-            where[3] = 1; // left
+            where[3] = 1;
             rects[3] = {
                 x0: minx,
                 x1: freex / 2 - 1.5 * this.scalex,
@@ -1182,7 +957,7 @@ class Puzzle {
             rects[1].x0 = this.contWidth - freex / 2 - 0.5 * this.scalex;
         }
         if (freey > 1.5 * this.scaley) {
-            where[2] = 1; // bottom
+            where[2] = 1;
             rects[2] = {
                 x0: minx, x1: maxx,
                 y0: this.gameHeight - 0.5 * this.scaley,
@@ -1190,7 +965,7 @@ class Puzzle {
             };
         }
         if (freey > 3 * this.scaley) {
-            where[0] = 1; // top
+            where[0] = 1;
             rects[0] = {
                 x0: minx, x1: maxx,
                 y0: miny,
@@ -1199,9 +974,7 @@ class Puzzle {
             rects[2].y0 = this.contHeight - freey / 2 - 0.5 * this.scaley;
         }
         if (where.reduce((sum, a) => sum + a) < 2) {
-            // if no place defined yet, or only one place
             if (freex - freey > 0.2 * this.scalex || where[1]) {
-                // significantly more place horizontally : to right
                 this.spreadInRectangle({
                     x0: this.gameWidth - this.scalex / 2,
                     x1: maxx,
@@ -1209,7 +982,6 @@ class Puzzle {
                     y1: maxy
                 });
             } else if (freey - freex > 0.2 * this.scalex || where[2]) {
-                // significantly more place vertically : to bottom
                 this.spreadInRectangle({
                     x0: minx,
                     x1: maxx,
@@ -1218,15 +990,13 @@ class Puzzle {
                 });
             } else {
                 if (this.gameWidth > this.gameHeight) {
-                    // more wide than high : to bottom
                     this.spreadInRectangle({
                         x0: minx,
                         x1: maxx,
                         y0: this.gameHeight - this.scaley / 2,
                         y1: maxy
                     });
-
-                } else { // to right
+                } else {
                     this.spreadInRectangle({
                         x0: this.gameWidth - this.scalex / 2,
                         x1: maxx,
@@ -1237,8 +1007,6 @@ class Puzzle {
             }
             return;
         }
-        /* more than one area to put the pieces
-        */
         let nrects = [];
         rects.forEach(rect => {
             nrects.push(rect);
@@ -1256,22 +1024,16 @@ class Puzzle {
     }
 
     evaluateZIndex() {
-
-        /* re-evaluates order of polypieces in puzzle after a merge
-          the polypieces must be in decreasing order of size(number of pieces),
-          preserving the previous order as much as possible
-        */
         for (let k = this.polyPieces.length - 1; k > 0; --k) {
             if (this.polyPieces[k].pieces.length > this.polyPieces[k - 1].pieces.length) {
                 // swap pieces if not in right order
                 [this.polyPieces[k], this.polyPieces[k - 1]] = [this.polyPieces[k - 1], this.polyPieces[k]];
             }
         }
-        // re-assign zIndex
         this.polyPieces.forEach((pp, k) => {
             pp.canvas.style.zIndex = k + 10;
         });
-        this.zIndexSup = this.polyPieces.length + 10; // higher than 'normal' zIndices
+        this.zIndexSup = this.polyPieces.length + 10;
     }
 }
 
@@ -1287,7 +1049,6 @@ let loadFile;
     function getFile() {
 
         if (this.files.length === 0) {
-            //      returnLoadFile ({fail: 'no file'});
             return;
         }
         let file = this.files[0];
@@ -1298,13 +1059,12 @@ let loadFile;
         });
         reader.readAsDataURL(this.files[0]);
 
-    } // getFile
+    }
 
     loadFile = function (ooptions) {
         elFile.setAttribute("accept", "image/*");
-        elFile.value = null; // else, re-selecting the same file does not trigger "change"
+        elFile.value = null;
         elFile.click();
-
     }
 }
 
@@ -1320,11 +1080,6 @@ function imageLoaded(puzzle) {
 }
 
 function fitImage(img, width, height) {
-    /* The image is a child of puzzle.container. It will be styled to be as big as possible, not wider than width,
-    not higher than height, centered in puzzle.container
-    (width and height must be less than or equal to the container dimensions)
-    */
-
     let wn = img.naturalWidth;
     let hn = img.naturalHeight;
     let w = width;
@@ -1342,71 +1097,61 @@ function fitImage(img, width, height) {
 }
 
 function enableRotMenu(enabled) {
-    /* is not about enabling the rotation or not, but enabling the control which enables rotation or not! */
     rotEnableElement.disabled = !enabled;
     document.getElementById("enablerotlabel").classList[enabled ? "remove" : "add"]("dimmed");
 }
 
 let animate;
-let events = []; // queue for events
+let events = [];
 
 {
     let state = 0;
-    let moving = {}; // for information about moved piece
+    let moving = {};
     let tmpImage;
 
     animate = function (tStamp) {
         requestAnimationFrame(animate);
 
         let event;
-        if (events.length) event = events.shift(); // read event from queue
+        if (events.length) event = events.shift();
         if (event && event.event === "reset") state = 0;
         if (event && event.event === "srcImageLoaded") state = 0;
 
-        // resize event
         if (event && event.event === "resize") {
-
-            // remember dimensions of container before resize
             puzzle.prevWidth = puzzle.contWidth;
             puzzle.prevHeight = puzzle.contHeight;
             puzzle.getContainerSize();
-            if (state === 15 || state > 60) { // resize initial or final picture
+            if (state === 15 || state > 60) {
                 fitImage(tmpImage, puzzle.contWidth * 0.95, puzzle.contHeight * 0.95);
-            } else if (state >= 25) { // resize pieces
+            } else if (state >= 25) {
                 puzzle.prevGameWidth = puzzle.gameWidth;
                 puzzle.prevGameHeight = puzzle.gameHeight;
                 puzzle.scale();
                 let reScale = puzzle.contWidth / puzzle.prevWidth;
                 puzzle.polyPieces.forEach(pp => {
-                    // compute new position : game centered homothety
                     let nx = puzzle.contWidth / 2 - (puzzle.prevWidth / 2 - pp.x) * reScale;
                     let ny = puzzle.contHeight / 2 - (puzzle.prevHeight / 2 - pp.y) * reScale;
-                    // enforce pieces to stay in game area
                     nx = mmin(mmax(nx, -puzzle.scalex / 2), puzzle.contWidth - 1.5 * puzzle.scalex);
                     ny = mmin(mmax(ny, -puzzle.scaley / 2), puzzle.contHeight - 1.5 * puzzle.scaley);
 
                     pp.moveTo(nx, ny);
                     pp.drawImage();
 
-                }); // puzzle.polypieces.forEach
+                });
             }
-
             return;
         }
 
         switch (state) {
-            /* initialisation */
             case 0:
                 state = 10;
 
-            /* wait for image loaded and other required parameters*/
             case 10:
                 playing = false;
                 restartElement.classList.add("dimmed");
                 if (!puzzle.imageLoaded) return;
 
-                // display centered initial image
-                puzzle.container.innerHTML = ""; // forget contents
+                puzzle.container.innerHTML = "";
                 tmpImage = document.createElement("img");
                 tmpImage.src = puzzle.srcImage.src;
                 puzzle.getContainerSize();
@@ -1416,13 +1161,10 @@ let events = []; // queue for events
                 state = 15;
                 break;
 
-            /* wait for choice of number of pieces */
             case 15:
                 playing = false;
                 restartElement.classList.add("dimmed");
-                enableRotMenu(true); // allows user to enable/disbale rotation
-                if (autoStart) event = {event: "nbpieces", nbpieces: 12}; // auto start
-                autoStart = false; // not twice
+                enableRotMenu(true);
                 if (!event) return;
                 if (event.event === "nbpieces") {
                     puzzle.nbPieces = event.nbpieces;
@@ -1436,39 +1178,36 @@ let events = []; // queue for events
                 menu.close();
                 playing = true;
                 restartElement.classList.remove("dimmed");
-                /* prepare puzzle */
                 puzzle.rotationAllowed = rotEnableElement.checked;
-                if (!puzzle.rotationAllowed) enableRotMenu(false); // can't enable rotation any more
-                puzzle.create(); // create shape of pieces, independant of size
+                if (!puzzle.rotationAllowed) enableRotMenu(false);
+                puzzle.create();
                 puzzle.scale();
                 if (puzzle.rotationAllowed) puzzle.polyPieces.forEach(pp => pp.rot = intAlea(4));
                 puzzle.polyPieces.forEach(pp => {
                     pp.drawImage();
                     pp.moveToInitialPlace();
-                }); // puzzle.polypieces.forEach
+                });
                 puzzle.gameCanvas.style.top = puzzle.offsy + "px";
                 puzzle.gameCanvas.style.left = puzzle.offsx + "px";
                 puzzle.gameCanvas.style.display = "block";
                 state = 25;
                 break;
 
-            case 25: // spread pieces
-                puzzle.gameCanvas.style.display = "none"; // hide reference image
+            case 25:
+                puzzle.gameCanvas.style.display = "none";
                 puzzle.polyPieces.forEach(pp => {
                     pp.canvas.classList.add("moving");
                 });
                 state = 30;
                 break;
 
-            case 30: // launch movement
-                puzzle.optimInitial(); // initial "optimal" spread position
-
-                /* this time out must be a bit longer than the css .moving transition-duration */
+            case 30:
+                puzzle.optimInitial();
                 setTimeout(() => events.push({event: "finished"}), 1200);
                 state = 35;
                 break;
 
-            case 35: // wait for end of movement
+            case 35:
                 if (!event || event.event !== "finished") return;
                 puzzle.polyPieces.forEach(pp => {
                     pp.canvas.classList.remove("moving");
@@ -1478,7 +1217,6 @@ let events = []; // queue for events
 
                 break;
 
-            /* wait for user grabbing a piece or other action */
             case 50:
                 if (!event) return;
                 if (event.event === "restart") {
@@ -1494,7 +1232,6 @@ let events = []; // queue for events
                         yMouseInit: event.position.y
                     }
 
-                    /* evaluates if contact inside a PolyPiece, by decreasing z-index */
                     for (let k = puzzle.polyPieces.length - 1; k >= 0; --k) {
                         let pp = puzzle.polyPieces[k];
 
@@ -1505,10 +1242,9 @@ let events = []; // queue for events
                             moving.ppXInit = pp.x;
                             moving.ppYInit = pp.y;
                             moving.tInit = tStamp;
-                            // move selected piece to top of polypieces stack
                             puzzle.polyPieces.splice(k, 1);
                             puzzle.polyPieces.push(pp);
-                            pp.canvas.style.zIndex = puzzle.zIndexSup; // to foreground
+                            pp.canvas.style.zIndex = puzzle.zIndexSup;
                             state = 55;
                             return;
                         }
@@ -1516,7 +1252,7 @@ let events = []; // queue for events
                 }
                 break;
 
-            case 55:  // moving piece
+            case 55:
                 if (!event) return;
                 if (event.event === "restart") {
                     state = 10;
@@ -1528,12 +1264,10 @@ let events = []; // queue for events
                             event.position.y - moving.yMouseInit + moving.ppYInit);
                         break;
                     case "leave":
-                        if (puzzle.rotationAllowed && tStamp < moving.tInit + 250) { // short click/touch: rotate
+                        if (puzzle.rotationAllowed && tStamp < moving.tInit + 250) {
                             moving.pp.rotate((moving.pp.rot + 1) % 4);
                             moving.pp.coerceToContainer();
                         }
-                        // check if moved polypiece is close to a matching other polypiece
-                        // check repeatedly since polypieces moved by merging may come close to other polypieces
                         let doneSomething;
                         moving.pp.selected = false;
                         moving.pp.drawImage();
@@ -1542,13 +1276,12 @@ let events = []; // queue for events
                             doneSomething = false;
                             for (let k = puzzle.polyPieces.length - 1; k >= 0; --k) {
                                 let pp = puzzle.polyPieces[k];
-                                if (pp === moving.pp) continue; // don't match with myself
-                                if (moving.pp.ifNear(pp)) { // a match !
+                                if (pp === moving.pp) continue;
+                                if (moving.pp.ifNear(pp)) {
                                     merged = true;
-                                    // compare polypieces sizes to move smallest one
                                     if (pp.pieces.length > moving.pp.pieces.length) {
                                         pp.merge(moving.pp);
-                                        moving.pp = pp; // memorize piece to follow
+                                        moving.pp = pp;
                                     } else {
                                         moving.pp.merge(pp);
                                     }
@@ -1558,37 +1291,34 @@ let events = []; // queue for events
                             }
 
                         } while (doneSomething);
-                        // not at its right place
                         puzzle.evaluateZIndex();
                         if (merged) {
                             moving.pp.selected = true;
                             moving.pp.drawImage(true);
-                            moving.tInit = tStamp + 500; // final t in fact
+                            moving.tInit = tStamp + 500;
                             state = 56;
                             break;
                         }
                         state = 50; // just go back waiting
                         if (puzzle.polyPieces.length === 1 && puzzle.polyPieces[0].rot === 0) state = 60; // won!
-                } // switch (event.event)
+                }
 
                 break;
             case 56:
-                if (tStamp < moving.tInit) return; // merged piece enlighted
+                if (tStamp < moving.tInit) return;
                 moving.pp.selected = false;
                 moving.pp.drawImage();
-                if (puzzle.polyPieces.length === 1 && puzzle.polyPieces[0].rot === 0) state = 60; // won!
+                if (puzzle.polyPieces.length === 1 && puzzle.polyPieces[0].rot === 0) state = 60;
                 else state = 50;
                 break;
 
-            case 60: // winning
+            case 60:
                 playing = false;
                 restartElement.classList.add("dimmed");
                 puzzle.container.innerHTML = "";
                 puzzle.getContainerSize();
                 fitImage(tmpImage, puzzle.contWidth * 0.95, puzzle.contHeight * 0.95);
                 tmpImage.style.boxShadow = "-4px 4px 4px rgba(0, 0, 0, 0.5)";
-                //              tmpImage.style.top=(puzzle.polyPieces[0].y + puzzle.scaley / 2) / puzzle.contHeight * 100 + 50 + "%" ;
-                //              tmpImage.style.left=(puzzle.polyPieces[0].x + puzzle.scalex / 2) / puzzle.contWidth * 100 + 50 + "%" ;
                 tmpImage.style.left = (puzzle.polyPieces[0].x + puzzle.scalex / 2 + puzzle.gameWidth / 2) / puzzle.contWidth * 100 + "%";
                 tmpImage.style.top = (puzzle.polyPieces[0].y + puzzle.scaley / 2 + puzzle.gameHeight / 2) / puzzle.contHeight * 100 + "%";
 
@@ -1598,8 +1328,8 @@ let events = []; // queue for events
                 state = 65;
                 menu.open();
 
-            case 65: // wait for new number of pieces - of new picture
-                enableRotMenu(true); // allows user to enable/disable rotation
+            case 65:
+                enableRotMenu(true);
                 if (event && event.event === "nbpieces") {
                     puzzle.nbPieces = event.nbpieces;
                     state = 20;
@@ -1611,7 +1341,7 @@ let events = []; // queue for events
                 break;
             default:
                 let st = state;
-                state = 9999;  // to display message beyond only once
+                state = 9999;
                 throw ("oops, unknown state " + st);
         }
     }
@@ -1625,7 +1355,6 @@ let menu;
         let kItem = menu.items.length;
         let item = {element: menuEl, kItem: kItem};
         menu.items[kItem] = item;
-
     });
 
     menu.open = function () {
@@ -1634,7 +1363,7 @@ let menu;
     }
     menu.close = function () {
         menu.items.forEach((item, k) => {
-            if (k > 0) item.element.style.display = "none"; // never hide element 0
+            if (k > 0) item.element.style.display = "none";
         });
         menu.opened = false;
     }
@@ -1656,10 +1385,8 @@ let menu;
     }
 
     function toggleRotate(event) {
-        // enable / disable rotation
 
         if (!playing) {
-            // always allowed to toggle if no game in progress
             return;
         }
         new Modal({
@@ -1700,7 +1427,101 @@ window.addEventListener("resize", event => {
 });
 
 puzzle = new Puzzle({container: "forPuzzle"});
-autoStart = isMiniature(); // used for nice miniature in CodePen
 
 loadInitialFile();
 requestAnimationFrame(animate);
+
+function showLevelScreen() {
+    const list = document.getElementById("levelList");
+    list.innerHTML = "";
+
+    chapters.levels.forEach((lvl, index) => {
+        const card = document.createElement("div");
+        card.className = "level-card";
+
+        if (!isLevelUnlocked(index)) {
+            card.classList.add("locked");
+        }
+
+        card.innerHTML = `
+            <img src="${lvl.image}">
+            <p>${lvl.name}</p>
+        `;
+
+        card.onclick = () => startLevel(index);
+        list.appendChild(card);
+    });
+
+    document.getElementById("levelScreen").style.display = "flex";
+}
+function startLevel(levelIndex) {
+    currentLevel = levelIndex;
+    saveProgress();
+    document.getElementById("levelScreen").style.display = "none";
+
+    puzzle.srcImage.src = chapters.levels[levelIndex].image;
+    events.push({ event: "reset" });
+}
+
+
+function startPuzzle() {
+    document.getElementById("selectLevelScreen").style.display = "none";
+
+    currentLevel = selectedLevel.id;
+
+    puzzle.nbPieces = selectedMode.pieces;
+    document.getElementById("enablerot").checked = selectedMode.rotation;
+
+    puzzle.srcImage.src = selectedLevel.image;
+
+    events.push({ event: "reset" });
+}
+puzzle = new Puzzle({
+    container: "container"
+});
+const SAVE_KEY = "puzzle_progress";
+
+function saveProgress() {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+        unlocked: unlockedLevels,
+        lastLevel: currentLevel
+    }));
+}
+
+function loadProgress() {
+    const data = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (!data) return;
+
+    unlockedLevels = data.unlocked || [true];
+    currentLevel = data.lastLevel || 0;
+}
+let unlockedLevels = [true];
+
+function unlockNextLevel() {
+    unlockedLevels[currentLevel + 1] = true;
+    saveProgress();
+}
+
+function isLevelUnlocked(index) {
+    return unlockedLevels[index];
+}
+unlockNextLevel();
+showLevelScreen();
+
+requestAnimationFrame(animate);
+
+document.getElementById("fullscreenBtn").onclick = () => {
+    const el = document.documentElement;
+    if (!document.fullscreenElement) {
+        el.requestFullscreen().catch(() => {});
+    } else {
+        document.exitFullscreen();
+    }
+};
+window.addEventListener("load", () => {
+    puzzle = new Puzzle({ container: "container" });
+
+    loadProgress();
+    showLevelScreen();
+    requestAnimationFrame(animate);
+});

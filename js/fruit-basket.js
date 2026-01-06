@@ -196,7 +196,7 @@ const MAX_GRAVITY = 1400;
 
 const ITEM_TYPES = [
     { key: "apple", score: 10 },
-    { key: "banana  ", score: 10 },
+    { key: "banana", score: 10 },
     { key: "peach", score: 10 },
     { key: "black-berry-dark", score: 10 },
     { key: "black-berry-light", score: 10 },

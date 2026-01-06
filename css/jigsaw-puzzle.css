@@ -60,3 +60,60 @@ body {
 .dimmed {
     color: #888888;
 }
+
+#selectLevelScreen {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.level-card {
+    width: 200px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.level-card img {
+    width: 100%;
+    border-radius: 10px;
+}
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: #111;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+#levelList {
+    display: flex;
+    gap: 20px;
+}
+
+.level-card {
+    width: 160px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.level-card img {
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid #444;
+}
+
+.level-card.locked {
+    opacity: 0.4;
+    pointer-events: none;
+}
+.fs-btn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+    font-size: 20px;
+}
