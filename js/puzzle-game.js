@@ -4,6 +4,7 @@ const GRID_SIZE = 4;
 const TILE_COUNT = 16;
 const TILE_SIZE = 125;
 const GAME_TIME_MIN = 5;
+const NUMBER_PREVIEW_TIME = 7000; // 7 seconds
 
 /* ================= STATE ================= */
 
@@ -13,6 +14,8 @@ let numberMap = [];
 let initPositions = [];
 let deadline = null;
 let timerInterval = null;
+let numberPreviewTimer = null;
+let numbersVisible = false;
 
 /* ================= DOM ================= */
 
@@ -100,6 +103,7 @@ function startLevel(levelIndex) {
     activeTile = 15;
     putValue();
     init(activeTile);
+    showNumbers();
 
     demoPic.style.backgroundImage =
         `url(${chapters.levels[currentLevel].image})`;
@@ -308,7 +312,7 @@ mainBox.addEventListener('touchstart', e => {
     const t = e.touches[0];
     touchStartX = t.clientX;
     touchStartY = t.clientY;
-}, { passive: true });
+}, {passive: true});
 
 mainBox.addEventListener('touchend', e => {
     if (gameScreen.style.display !== 'block') return;
@@ -343,3 +347,21 @@ mainBox.addEventListener('touchend', e => {
     init(activeTile);
     checkResult();
 });
+
+document.getElementById('eyeBtn').addEventListener('click', () => {
+    if (numbersVisible) return; // prevent spam
+    showNumbers();
+});
+
+function showNumbers() {
+    clearTimeout(numberPreviewTimer);
+    numbersVisible = true;
+    mainBox.classList.add('show-numbers');
+    numberPreviewTimer = setTimeout(hideNumbers, NUMBER_PREVIEW_TIME);
+}
+
+function hideNumbers() {
+    numbersVisible = false;
+    mainBox.classList.remove('show-numbers');
+}
+
