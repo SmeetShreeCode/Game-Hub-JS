@@ -1,12 +1,23 @@
+/* ================= BASE ================= */
 body {
     font-family: Arial, Helvetica, "Liberation Sans", FreeSans, sans-serif;
     background-color: #fff;
     margin: 0;
     padding: 0;
-    border-width: 0;
     cursor: pointer;
 }
 
+#container {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffdd;
+    overflow: hidden;
+}
+
+/* ================= MENU ================= */
 #menu {
     position: relative;
     list-style-type: none;
@@ -25,15 +36,15 @@ body {
 }
 
 #menu li:hover {
-    background-color: #ffDD60;
+    background-color: #ffdd60;
 }
 
+/* ================= GAME ================= */
 #forPuzzle {
     position: absolute;
     width: 100vw;
     height: 100vh;
-    top: 50%;
-    left: 50%;
+    inset: 50% auto auto 50%;
     transform: translate(-50%, -50%);
     background-color: #ffffdd;
     overflow: hidden;
@@ -46,9 +57,7 @@ body {
 }
 
 .moving {
-    transition-property: top, left;
-    transition-duration: 1s;
-    transition-timing-function: linear;
+    transition: top 1s linear, left 1s linear;
 }
 
 .gameCanvas {
@@ -58,29 +67,14 @@ body {
 }
 
 .dimmed {
-    color: #888888;
+    color: #888;
 }
 
-#selectLevelScreen {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-}
-
-.level-card {
-    width: 200px;
-    cursor: pointer;
-    text-align: center;
-}
-
-.level-card img {
-    width: 100%;
-    border-radius: 10px;
-}
+/* ================= LEVEL SCREEN ================= */
 .overlay {
     position: fixed;
     inset: 0;
-    background: #111;
+    background: #c68585;
     color: white;
     display: flex;
     flex-direction: column;
@@ -91,26 +85,113 @@ body {
 
 #levelList {
     display: flex;
-    gap: 80px;
+    gap: 70px;
+    padding: 40px;
+    max-width: 100vw;
+    overflow-x: auto;
 }
 
+#levelList::-webkit-scrollbar {
+    height: 8px;
+}
+
+/* ================= LEVEL CARD ================= */
 .level-card {
-    width: 160px;
-    cursor: pointer;
+    width: 220px;
+    background: rgba(255, 255, 255, 0.18);
+    padding: 16px;
+    border-radius: 26px;
     text-align: center;
+
+    backdrop-filter: blur(6px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+
+    transition: transform 0.2s ease;
 }
 
-.level-card img {
-    width: 200px;
-    height: 250px;
-    border-radius: 30px;
-    border: 5px solid #ff0000;
+
+.level-card:hover {
+    transform: translateY(-4px);
 }
 
 .level-card.locked {
     opacity: 0.4;
     pointer-events: none;
 }
+
+.level-card img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 22px;
+    border: 3px solid #ff4d4d;
+}
+
+
+/* ================= DIFFICULTY BAR ================= */
+/* ================= DIFFICULTY BAR ================= */
+.difficulty-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+
+    margin-top: 16px;
+    padding: 12px 14px;
+
+    background: #ffffff;
+    border-radius: 18px;
+    border: 2px solid #ff4d4d;
+
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18);
+    position: relative;
+    z-index: 5;
+}
+
+/* icon base */
+.difficulty-icon {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+
+    opacity: 0.45;
+    cursor: pointer;
+
+    border-radius: 10px;
+    padding: 4px;
+
+    background: #fff;
+    transition:
+            transform 0.15s ease,
+            opacity 0.15s ease,
+            box-shadow 0.15s ease;
+}
+
+/* hover */
+.difficulty-icon:hover {
+    opacity: 0.85;
+    transform: scale(1.08);
+}
+
+/* selected */
+.difficulty-icon.selected {
+    opacity: 1;
+    transform: scale(1.2);
+    box-shadow: 0 0 0 3px #ff4d4d, 0 6px 14px rgba(0,0,0,0.25);
+}
+
+/* completed */
+.difficulty-icon.completed {
+    opacity: 1;
+    box-shadow: 0 0 0 3px gold, 0 6px 14px rgba(0,0,0,0.25);
+}
+
+
+
+
+
+
+/* ================= FULLSCREEN ================= */
 .fs-btn {
     position: fixed;
     top: 10px;

@@ -1,0 +1,65 @@
+.icons {
+    background-image: url(../images/jigsaw-puzzle/icons/icons.png);
+    background-repeat: no-repeat;
+    display: block;
+}
+
+.icons-easy {
+    width: 128px;
+    height: 128px;
+    background-position: -15px -15px;
+}
+
+.icons-easy-f {
+    width: 128px;
+    height: 128px;
+    background-position: -173px -15px;
+}
+
+.icons-hard {
+    width: 128px;
+    height: 128px;
+    background-position: -331px -15px;
+}
+
+.icons-hard-f {
+    width: 128px;
+    height: 128px;
+    background-position: -489px -15px;
+}
+
+.icons-impossible {
+    width: 128px;
+    height: 128px;
+    background-position: -647px -15px;
+}
+
+.icons-impossible-f {
+    width: 128px;
+    height: 128px;
+    background-position: -805px -15px;
+}
+
+.icons-medium {
+    width: 128px;
+    height: 128px;
+    background-position: -963px -15px;
+}
+
+.icons-medium-f {
+    width: 128px;
+    height: 128px;
+    background-position: -1121px -15px;
+}
+
+.icons-never-happen {
+    width: 128px;
+    height: 128px;
+    background-position: -1279px -15px;
+}
+
+.icons-never-happen-f {
+    width: 128px;
+    height: 128px;
+    background-position: -1437px -15px;
+}

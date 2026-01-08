@@ -2,7 +2,11 @@
   <dictionary name="project">
     <words>
       <w>abcdefghijklmnopqrstuvwxyz</w>
+      <w>alea</w>
+      <w>andny</w>
       <w>attackbox</w>
+      <w>availx</w>
+      <w>availy</w>
       <w>bdef</w>
       <w>bombanimations</w>
       <w>bottompipe</w>
@@ -10,26 +14,85 @@
       <w>btns</w>
       <w>cannonanimations</w>
       <w>cherrys</w>
+      <w>coeff</w>
+      <w>coeffh</w>
+      <w>coeffv</w>
+      <w>coefx</w>
+      <w>coefy</w>
       <w>coinanimations</w>
+      <w>computenx</w>
       <w>cropbox</w>
+      <w>decentr</w>
+      <w>destx</w>
+      <w>desty</w>
       <w>dificulty</w>
+      <w>dimx</w>
+      <w>dimy</w>
+      <w>enablerot</w>
+      <w>enablerotlabel</w>
       <w>enemyanimations</w>
+      <w>errmin</w>
+      <w>extrax</w>
+      <w>extray</w>
       <w>flappybird</w>
+      <w>freex</w>
+      <w>freey</w>
       <w>gamesert</w>
       <w>hexanaut</w>
+      <w>hmid</w>
       <w>hypercalcium</w>
       <w>ihalf</w>
       <w>incress</w>
       <w>liveanimations</w>
+      <w>mabs</w>
+      <w>maxx</w>
+      <w>mceil</w>
+      <w>mfloor</w>
+      <w>mhypot</w>
+      <w>minscale</w>
+      <w>mmax</w>
+      <w>mmin</w>
+      <w>mposx</w>
+      <w>mposy</w>
+      <w>mrandom</w>
+      <w>mround</w>
+      <w>msqrt</w>
+      <w>nbpieces</w>
+      <w>npath</w>
+      <w>npieces</w>
+      <w>nrects</w>
+      <w>ooptions</w>
+      <w>optim</w>
+      <w>orgpckxmin</w>
+      <w>orgpckymin</w>
+      <w>orgx</w>
+      <w>pafter</w>
+      <w>pbefore</w>
       <w>pigbox</w>
       <w>playeranimations</w>
+      <w>polypiece</w>
+      <w>refx</w>
+      <w>refy</w>
+      <w>reqx</w>
+      <w>reqy</w>
+      <w>resultx</w>
+      <w>resulty</w>
       <w>rollercoast</w>
+      <w>scalex</w>
+      <w>scaley</w>
+      <w>shiftx</w>
       <w>smalltext</w>
+      <w>srcx</w>
+      <w>srcy</w>
       <w>tileman</w>
       <w>toppipe</w>
+      <w>touchleave</w>
+      <w>twistf</w>
       <w>udlrfb</w>
       <w>verts</w>
       <w>viewbox</w>
+      <w>vmid</w>
+      <w>xtra</w>
     </words>
   </dictionary>
 </component>

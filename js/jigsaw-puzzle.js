@@ -13,6 +13,24 @@ const mhypot = Math.hypot,
     msqrt = Math.sqrt,
     mabs = Math.abs;
 
+const DIFFICULTY_PIECES = {
+    easy: 12,
+    medium: 25,
+    hard: 50,
+    impossible: 100,
+    "never-happened": 200
+};
+let selectedDifficulty = "easy";
+
+const DIFFICULTIES = [
+    "easy",
+    "medium",
+    "hard",
+    "impossible",
+    "never-happened"
+];
+const SAVE_KEY = "jigsaw_puzzle_progress";
+
 function alea(min, max) {
     if (typeof max == 'undefined') return min * mrandom();
     return min + (max - min) * mrandom();
@@ -66,7 +84,6 @@ class Modal {
                     if (buttonObj.callback) buttonObj.callback();
                 });
             })
-
         } else {
             modal.addEventListener("click", () => {
                 modal.remove();
@@ -86,7 +103,6 @@ class Point {
     copy() {
         return new Point(this.x, this.y);
     }
-
     distance(otherPoint) {
         return mhypot(this.x - otherPoint.x, this.y - otherPoint.y);
     }
@@ -209,7 +225,6 @@ function twist0(side, ca, cb) {
         return new Point(seg0.p1.x + coeffh * dxh + coeffv * dxv,
             seg0.p1.y + coeffh * dyh + coeffv * dyv)
     }
-
 }
 
 function twist1(side, ca, cb) {
@@ -276,9 +291,7 @@ function twist2(side, ca, cb) {
 }
 
 function twist3(side, ca, cb) {
-
     side.points = [side.points[0], side.points[1]];
-
 }
 
 class Piece {
@@ -290,7 +303,6 @@ class Piece {
         this.kx = kx;
         this.ky = ky;
     }
-
     scale(puzzle) {
         this.ts.scale(puzzle);
         this.rs.scale(puzzle);
@@ -487,7 +499,6 @@ class PolyPiece {
             if (edge.edge === 2) return cell.bs;
             return cell.ls;
         }));
-
     }
 
     getRect() {
@@ -515,7 +526,6 @@ class PolyPiece {
             case 3:
                 return {x: rect.x - puzzle.scaley * this.pckymin, y: rect.bottom + puzzle.scalex * this.pckxmin};
         }
-
     }
 
     drawPath(ctx, shiftx, shifty) {
@@ -527,7 +537,6 @@ class PolyPiece {
             });
             ctx.closePath();
         });
-
     }
 
     drawImage(special) {
@@ -702,7 +711,7 @@ class Puzzle {
         this.container.addEventListener("mouseup", event => {
             useMouse = true;
             event.preventDefault();
-            if (event.button != 0) return;
+            if (event.button !== 0) return;
             handleLeave();
         });
         this.container.addEventListener("touchend", handleLeave);
@@ -1020,7 +1029,6 @@ class Puzzle {
         }
         arrayShuffle(this.polyPieces);
         this.evaluateZIndex();
-
     }
 
     evaluateZIndex() {
@@ -1058,7 +1066,6 @@ let loadFile;
             puzzle.srcImage.src = reader.result;
         });
         reader.readAsDataURL(this.files[0]);
-
     }
 
     loadFile = function (ooptions) {
@@ -1313,6 +1320,7 @@ let events = [];
                 break;
 
             case 60:
+                markDifficultyCompleted(currentLevel, selectedDifficulty);
                 playing = false;
                 restartElement.classList.add("dimmed");
                 puzzle.container.innerHTML = "";
@@ -1426,75 +1434,80 @@ window.addEventListener("resize", event => {
     events.push({event: "resize"});
 });
 
-puzzle = new Puzzle({container: "forPuzzle"});
+// puzzle = new Puzzle({container: "forPuzzle"});
 
-loadInitialFile();
+// loadInitialFile();
 requestAnimationFrame(animate);
 
 function showLevelScreen() {
     const list = document.getElementById("levelList");
     list.innerHTML = "";
 
-    chapters.levels.forEach((lvl, index) => {
+    const progress = loadProgress(); // { levelIndex: { easy:true } }
+
+    chapters.levels.forEach((lvl, levelIndex) => {
         const card = document.createElement("div");
         card.className = "level-card";
 
-        if (!isLevelUnlocked(index)) {
+        if (!isLevelUnlocked(levelIndex)) {
             card.classList.add("locked");
         }
 
-        card.innerHTML = `
-            <img src="${lvl.image}">
-            <p>${lvl.name}</p>
-        `;
+        // --- IMAGE ---
+        const img = document.createElement("img");
+        img.src = lvl.image;
+        card.appendChild(img);
 
-        card.onclick = () => startLevel(index);
+        // --- DIFFICULTY BAR ---
+        const diffRow = document.createElement("div");
+        diffRow.className = "difficulty-row";
+
+        let selectedDifficulty = "easy"; // default
+
+        DIFFICULTIES.forEach(diff => {
+            const icon = document.createElement("img");
+
+            const completed =
+                progress[levelIndex] && progress[levelIndex][diff];
+
+            const key = completed ? `${diff}_f` : diff;
+            icon.src = ICONS[key];
+
+            icon.className = "difficulty-icon";
+
+            if (diff === "easy") icon.classList.add("selected");
+            if (completed) icon.classList.add("completed");
+
+            icon.onclick = (e) => {
+                e.stopPropagation();
+
+                diffRow.querySelectorAll(".difficulty-icon").forEach(i =>
+                    i.classList.remove("selected")
+                );
+
+                icon.classList.add("selected");
+                selectedDifficulty = diff;
+            };
+
+            diffRow.appendChild(icon);
+        });
+
+        card.appendChild(diffRow);
+
+        // --- START LEVEL ---
+        card.onclick = () => {
+            startLevel(levelIndex, selectedDifficulty);
+        };
         list.appendChild(card);
     });
-
     document.getElementById("levelScreen").style.display = "flex";
 }
-function startLevel(levelIndex) {
-    currentLevel = levelIndex;
-    saveProgress();
-    document.getElementById("levelScreen").style.display = "none";
-
-    puzzle.srcImage.src = chapters.levels[levelIndex].image;
-    events.push({ event: "reset" });
-}
 
 
-function startPuzzle() {
-    document.getElementById("selectLevelScreen").style.display = "none";
-
-    currentLevel = selectedLevel.id;
-
-    puzzle.nbPieces = selectedMode.pieces;
-    document.getElementById("enablerot").checked = selectedMode.rotation;
-
-    puzzle.srcImage.src = selectedLevel.image;
-
-    events.push({ event: "reset" });
-}
 puzzle = new Puzzle({
     container: "container"
 });
-const SAVE_KEY = "puzzle_progress";
 
-function saveProgress() {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({
-        unlocked: unlockedLevels,
-        lastLevel: currentLevel
-    }));
-}
-
-function loadProgress() {
-    const data = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (!data) return;
-
-    unlockedLevels = data.unlocked || [true];
-    currentLevel = data.lastLevel || 0;
-}
 let unlockedLevels = [true];
 
 function unlockNextLevel() {
@@ -1507,8 +1520,17 @@ function isLevelUnlocked(index) {
 }
 unlockNextLevel();
 showLevelScreen();
+// requestAnimationFrame(animate);
 
-requestAnimationFrame(animate);
+function startLevel(levelIndex, difficulty) {
+    currentLevel = levelIndex;
+
+    puzzle.nbPieces = DIFFICULTY_PIECES[difficulty];
+    puzzle.srcImage.src = chapters.levels[levelIndex].image;
+
+    selectedDifficulty = difficulty; // store globally
+    document.getElementById("levelScreen").style.display = "none";
+}
 
 document.getElementById("fullscreenBtn").onclick = () => {
     const el = document.documentElement;
@@ -1520,8 +1542,60 @@ document.getElementById("fullscreenBtn").onclick = () => {
 };
 window.addEventListener("load", () => {
     puzzle = new Puzzle({ container: "container" });
+    console.log("Puzzle created:", puzzle);
 
     loadProgress();
+    loadInitialFile();
     showLevelScreen();
     requestAnimationFrame(animate);
+});
+
+function loadProgress() {
+    const raw = localStorage.getItem(SAVE_KEY);
+
+    if (!raw || raw === "undefined" || raw === "null") {
+        return {};
+    }
+
+    try {
+        return JSON.parse(raw);
+    } catch (e) {
+        console.warn("Corrupted progress data, resetting:", raw);
+        localStorage.removeItem(SAVE_KEY);
+        return {};
+    }
+}
+
+function saveProgress(progress) {
+    if (!progress || typeof progress !== "object") return;
+    localStorage.setItem(SAVE_KEY, JSON.stringify(progress));
+}
+
+function markDifficultyCompleted(level, difficulty) {
+    const progress = loadProgress();
+    if (!progress[level]) progress[level] = {};
+    progress[level][difficulty] = true;
+    saveProgress(progress);
+    updateDifficultyIcons(level);
+}
+function updateDifficultyIcons(level) {
+    const progress = loadProgress();
+    const levelProgress = progress[level] || {};
+
+    DIFFICULTY_ORDER.forEach(diff => {
+        const icon = document.querySelector(
+            `.difficulty-icon[data-level="${level}"][data-difficulty="${diff}"]`
+        );
+        if (!icon) return;
+
+        icon.classList.toggle("completed", !!levelProgress[diff]);
+        icon.classList.toggle("selected", diff === selectedDifficulty);
+    });
+}
+document.querySelectorAll(".difficulty-icon").forEach(icon => {
+    icon.addEventListener("click", () => {
+        selectedDifficulty = icon.dataset.difficulty;
+        puzzle.nbPieces = DIFFICULTY_PIECES[selectedDifficulty];
+        updateDifficultyIcons(currentLevel);
+    });
 });

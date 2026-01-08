@@ -14,28 +14,17 @@ const chapters = {
     ],
 };
 
-const LEVELS = [
-    {
-        id: 0,
-        name: "Level 1",
-        image: `${IMAGE_PATH}L1.jpg`,
-        modes: [
-            { name: "Easy", pieces: 12, rotation: false },
-            { name: "Medium", pieces: 25, rotation: false },
-            { name: "Hard", pieces: 50, rotation: true }
-        ]
-    },
-    {
-        id: 1,
-        name: "Level 2",
-        image: `${IMAGE_PATH}L2.jpg`,
-        modes: [
-            { name: "Easy", pieces: 25, rotation: false },
-            { name: "Hard", pieces: 50, rotation: true },
-            { name: "Extreme", pieces: 100, rotation: true }
-        ]
-    }
-];
+const ICONS_PATH = "images/Jigsaw-puzzle/icons/";
 
-let selectedLevel = null;
-let selectedMode = null;
+const ICONS = {
+    easy: `${ICONS_PATH}easy.png`,
+    easy_f: `${ICONS_PATH}easy-f.png`,
+    medium: `${ICONS_PATH}medium.png`,
+    medium_f: `${ICONS_PATH}medium-f.png`,
+    hard: `${ICONS_PATH}hard.png`,
+    hard_f: `${ICONS_PATH}hard-f.png`,
+    impossible: `${ICONS_PATH}impossible.png`,
+    impossible_f: `${ICONS_PATH}impossible-f.png`,
+    never_happened: `${ICONS_PATH}never-happened.png`,
+    never_happened_f: `${ICONS_PATH}never-happened-f.png`,
+};
