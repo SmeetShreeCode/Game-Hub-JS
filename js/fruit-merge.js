@@ -1,41 +1,37 @@
-// =====================
-// GAME CONSTANTS
-// =====================
+/* =====================
+      CONSTANTS
+   ===================== */
 const GAME = {
     W: 450,
     H: 800,
-    SPAWN_Y: 110,
-    DANGER_Y: 180
+    SPAWN_Y: 150,
+    DANGER_Y: 210,
+    BOX_X: 30,
+    BOX_Y: 110,
+    BOX_W: 390,
+    BOX_H: 620
 };
 
 const FRUITS = [
-    { r: 18, c: 0xff4d4d, s: 1 },
-    { r: 22, c: 0xff1493, s: 3 },
-    { r: 26, c: 0x9370db, s: 6 },
-    { r: 30, c: 0xffa500, s: 10 },
-    { r: 35, c: 0xff4500, s: 15 },
-    { r: 40, c: 0x90ee90, s: 21 },
-    { r: 45, c: 0xffb6c1, s: 28 },
-    { r: 50, c: 0xffd700, s: 36 },
-    { r: 55, c: 0x7cfc00, s: 45 },
-    { r: 65, c: 0x00ff7f, s: 55 }
+    { key: 'apple', r: 22, score: 1 },
+    { key: 'orange', r: 26, score: 3 },
+    { key: 'lemon', r: 30, score: 6 },
+    { key: 'lime', r: 34, score: 10 },
+    { key: 'peach', r: 38, score: 15 },
+    { key: 'plum', r: 44, score: 21 },
+    { key: 'strawberry', r: 50, score: 28 },
+    { key: 'watermelon', r: 60, score: 36 }
 ];
 
-// =====================
-// PRELOAD SCENE
-// =====================
+/* =====================
+   PRELOAD
+===================== */
 class PreloadScene extends Phaser.Scene {
     constructor() { super('Preload'); }
 
     preload() {
-        FRUITS.forEach((f, i) => {
-            const g = this.make.graphics({ add: false });
-            g.fillStyle(f.c, 1);
-            g.fillCircle(f.r, f.r, f.r);
-            g.lineStyle(3, 0xffffff);
-            g.strokeCircle(f.r, f.r, f.r);
-            g.generateTexture(`fruit_${i}`, f.r * 2, f.r * 2);
-            g.destroy();
+        FRUITS.forEach(f => {
+            this.load.image(f.key, `images/fruit-basket/${f.key}.png`);
         });
     }
 
@@ -44,252 +40,344 @@ class PreloadScene extends Phaser.Scene {
     }
 }
 
-// =====================
-// GAME SCENE
-// =====================
+/* =====================
+   GAME SCENE
+===================== */
 class GameScene extends Phaser.Scene {
     constructor() { super('Game'); }
 
     create() {
         this.score = 0;
-        this.gameOver = false;
         this.canDrop = true;
-        this.mergeLock = new Set();
+        this.current = null;
+        this.gameOver = false;
+        this.merging = new Set(); // Track fruits currently merging
 
         this.matter.world.setGravity(0, 1.2);
 
-        this.drawContainer();
+        this.drawContainerFrame();
+
+        this.queue = [
+            Phaser.Math.Between(0, 2),
+            Phaser.Math.Between(0, 2),
+            Phaser.Math.Between(0, 2)
+        ];
+
         this.createUI();
         this.createGuide();
         this.setupInput();
 
         this.matter.world.on('collisionstart', this.handleMerge, this);
 
-        this.nextType = Phaser.Math.Between(0, 3);
         this.spawnFruit();
     }
 
-    // =====================
-    // CONTAINER
-    // =====================
-    drawContainer() {
-        const box = this.add.graphics();
-        box.fillStyle(0xffffff, 1);
-        box.fillRoundedRect(25, 90, GAME.W - 50, GAME.H - 140, 20);
-        box.lineStyle(4, 0xdddddd);
-        box.strokeRoundedRect(25, 90, GAME.W - 50, GAME.H - 140, 20);
-        box.setDepth(0);
+    safeDestroy(obj) {
+        if (!obj || !obj.body) return;
 
-        const left = 40;
-        const right = GAME.W - 40;
-        const bottom = GAME.H - 40;
+        // Remove body safely from Matter
+        this.matter.world.remove(obj.body);
+        obj.body = null;
+
+        // Destroy on next frame
+        this.time.delayedCall(0, () => {
+            if (obj && obj.destroy) obj.destroy();
+        });
+    }
+
+    /* =====================
+       CONTAINER FRAME
+    ===================== */
+    drawContainerFrame() {
+        const bg = this.add.graphics();
+        bg.fillStyle(0x2a2a2a, 1);
+        bg.fillRoundedRect(GAME.BOX_X + 4, GAME.BOX_Y + 4, GAME.BOX_W - 8, GAME.BOX_H - 8, 18);
+        bg.setDepth(0);
+
+        const frame = this.add.graphics();
+        frame.lineStyle(4, 0xffffff);
+        frame.strokeRoundedRect(GAME.BOX_X, GAME.BOX_Y, GAME.BOX_W, GAME.BOX_H, 22);
+        frame.setDepth(20);
+
+        const left = GAME.BOX_X + 10;
+        const right = GAME.BOX_X + GAME.BOX_W - 10;
+        const bottom = GAME.BOX_Y + GAME.BOX_H;
 
         this.bounds = { left, right };
 
-        this.matter.add.rectangle(left, 450, 20, 700, { isStatic: true });
-        this.matter.add.rectangle(right, 450, 20, 700, { isStatic: true });
-        this.matter.add.rectangle(GAME.W / 2, bottom, GAME.W, 20, { isStatic: true });
+        this.matter.add.rectangle(left, 450, 20, 900, { isStatic: true, label: 'wall' });
+        this.matter.add.rectangle(right, 450, 20, 900, { isStatic: true, label: 'wall' });
+        this.matter.add.rectangle(GAME.W / 2, bottom, GAME.W, 20, { isStatic: true, label: 'floor' });
+        this.matter.add.rectangle(left - 10, 450, 40, 900, { isStatic: true });
+        this.matter.add.rectangle(right + 10, 450, 40, 900, { isStatic: true });
 
-        // Danger line
         const g = this.add.graphics();
-        g.lineStyle(2, 0xff4444, 1);
-        for (let x = left; x < right; x += 20) {
+        g.lineStyle(2, 0xff4444);
+        for (let x = left; x < right; x += 18) {
             g.lineBetween(x, GAME.DANGER_Y, x + 10, GAME.DANGER_Y);
         }
+        g.setDepth(15);
     }
 
-    // =====================
-    // UI
-    // =====================
+    /* =====================
+       UI
+    ===================== */
     createUI() {
-        this.scoreText = this.add.text(25, 30, 'Score: 0', {
+        this.scoreText = this.add.text(20, 25, 'Score: 0', {
             fontSize: '26px',
             color: '#ffffff',
             fontStyle: 'bold'
-        }).setDepth(10);
+        }).setDepth(30);
 
-        this.nextPreview = this.add.image(
-            GAME.W / 2,
-            GAME.H - 35,
-            `fruit_${this.nextType}`
-        ).setScale(0.6).setDepth(10);
+        this.nextIcons = [];
+        const startX = GAME.W - 130;
+
+        for (let i = 0; i < 3; i++) {
+            const img = this.add.image(
+                startX + i * 45,
+                55,
+                FRUITS[this.queue[i]].key
+            ).setScale(0.35).setDepth(30);
+
+            this.nextIcons.push(img);
+        }
     }
 
-    // =====================
-    // DROP GUIDE
-    // =====================
     createGuide() {
-        this.guide = this.add.graphics();
-        this.guide.setDepth(5);
+        this.guide = this.add.graphics().setDepth(10);
     }
 
-    // =====================
-    // INPUT
-    // =====================
+    /* =====================
+       INPUT
+    ===================== */
     setupInput() {
         this.input.on('pointermove', p => {
-            if (!this.current || !this.canDrop) return;
+            if (!this.current || !this.canDrop || this.gameOver) return;
 
             const r = FRUITS[this.current.type].r;
             const x = Phaser.Math.Clamp(p.x, this.bounds.left + r, this.bounds.right - r);
-
             this.current.setPosition(x, GAME.SPAWN_Y);
 
             this.guide.clear();
-            this.guide.lineStyle(2, 0xffffff, 0.5);
-            for (let y = GAME.SPAWN_Y; y < GAME.H - 80; y += 15) {
-                this.guide.lineBetween(x, y, x, y + 8);
+            this.guide.lineStyle(2, 0xffffff, 0.35);
+            for (let y = GAME.SPAWN_Y; y < GAME.H - 120; y += 14) {
+                this.guide.lineBetween(x, y + r, x, y + r + 7);
             }
         });
 
         this.input.on('pointerdown', () => {
-            if (!this.current || !this.canDrop) return;
+            if (!this.current || !this.canDrop || this.gameOver) return;
 
-            this.current.setStatic(false);
+            this.current.setIgnoreGravity(false);
+            this.current.setDepth(5);
             this.canDrop = false;
             this.guide.clear();
 
-            this.time.delayedCall(600, () => this.spawnFruit());
+            this.time.delayedCall(450, () => this.spawnFruit());
         });
     }
 
-    // =====================
-    // SPAWN FRUIT
-    // =====================
+    /* =====================
+       SPAWN FRUIT
+    ===================== */
     spawnFruit() {
         if (this.gameOver) return;
 
-        const type = this.nextType;
-        const r = FRUITS[type].r;
+        const type = this.queue.shift();
+        this.queue.push(Phaser.Math.Between(0, 2));
+
+        const f = FRUITS[type];
 
         this.current = this.matter.add.image(
             GAME.W / 2,
             GAME.SPAWN_Y,
-            `fruit_${type}`,
+            f.key,
             null,
             {
-                shape: { type: 'circle', radius: r },
-                isStatic: true,
+                shape: { type: 'circle', radius: f.r },
                 restitution: 0.25,
-                friction: 0.4
+                friction: 0.4,
+                density: 0.001
             }
         );
 
+        // 🔑 AUTO SCALE IMAGE TO PHYSICS SIZE
+        const scale = (f.r * 2) / this.current.width;
+        this.current.setScale(scale);
+
         this.current.type = type;
+        this.current.setData('fruit', true);
         this.current.setDepth(10);
 
+        this.current.setIgnoreGravity(true);
+        this.current.setVelocity(0, 0);
+
         this.canDrop = true;
-        this.nextType = Phaser.Math.Between(0, 3);
-        this.nextPreview.setTexture(`fruit_${this.nextType}`);
+
+        this.nextIcons.forEach((img, i) =>
+            img.setTexture(FRUITS[this.queue[i]].key)
+        );
     }
 
-    // =====================
-    // MERGE LOGIC
-    // =====================
+    /* =====================
+       MERGE LOGIC
+    ===================== */
     handleMerge(e) {
+        if (this.gameOver) return;
+
         e.pairs.forEach(p => {
             const a = p.bodyA.gameObject;
             const b = p.bodyB.gameObject;
 
             if (!a || !b) return;
+            if (!a.scene || !b.scene) return;
             if (a.type === undefined || b.type === undefined) return;
             if (a.type !== b.type) return;
-            if (this.mergeLock.has(a) || this.mergeLock.has(b)) return;
-            if (a.type >= FRUITS.length - 1) return;
+            if (a._merged || b._merged) return;
 
-            this.mergeLock.add(a);
-            this.mergeLock.add(b);
-
-            const nx = (a.x + b.x) / 2;
-            const ny = (a.y + b.y) / 2;
             const nt = a.type + 1;
+            if (!FRUITS[nt]) return;
 
-            a.destroy();
-            b.destroy();
+            a._merged = true;
+            b._merged = true;
 
-            const merged = this.matter.add.image(
-                nx, ny,
-                `fruit_${nt}`,
-                null,
-                { shape: { type: 'circle', radius: FRUITS[nt].r }, restitution: 0.25 }
-            );
-            merged.type = nt;
-            merged.setDepth(10);
+            const x = (a.x + b.x) / 2;
+            const y = (a.y + b.y) / 2;
 
-            this.score += FRUITS[nt].s;
-            this.scoreText.setText(`Score: ${this.score}`);
+            this.tweens.add({
+                targets: [a, b],
+                scale: 0,
+                alpha: 0,
+                duration: 150,
+                onComplete: () => {
+                    this.safeDestroy(a);
+                    this.safeDestroy(b);
+                }
+            });
 
             this.time.delayedCall(100, () => {
-                this.mergeLock.delete(a);
-                this.mergeLock.delete(b);
+                const f = FRUITS[nt];
+                const m = this.matter.add.image(x, y, f.key, null, {
+                    shape: { type: 'circle', radius: f.r },
+                    restitution: 0.3,
+                    friction: 0.5,
+                    density: 0.001
+                });
+
+                const scale = (f.r * 2) / m.width;
+                m.setScale(scale * 0.5); // start small
+                m.type = nt;
+                m.setDepth(5);
+
+                this.tweens.add({
+                    targets: m,
+                    scale: scale,
+                    duration: 200,
+                    ease: 'Back.easeOut'
+                });
+
+                this.score += f.score;
+                this.scoreText.setText(`Score: ${this.score}`);
             });
         });
     }
 
-    // =====================
-    // GAME OVER CHECK
-    // =====================
+
     update() {
         if (this.gameOver) return;
 
+        // Check all settled fruits
         this.matter.world.getAllBodies().forEach(b => {
             const o = b.gameObject;
-            if (!o || o.type === undefined) return;
+            if (!o || !o.getData('fruit')) return;
             if (b.isStatic) return;
-            if (Math.abs(b.velocity.y) > 0.5) return;
+            if (o === this.current) return;
+            if (this.merging.has(o)) return; // Don't check merging fruits
+
+            // Check if fruit has settled (low velocity)
+            if (Math.abs(b.velocity.y) > 0.3 || Math.abs(b.velocity.x) > 0.3) return;
 
             const top = b.position.y - FRUITS[o.type].r;
-            if (top <= GAME.DANGER_Y) {
-                this.gameOver = true;
-                this.scene.start('GameOver', { score: this.score });
+            if (top < GAME.DANGER_Y) {
+                this.endGame();
             }
+        });
+    }
+
+    endGame() {
+        if (this.gameOver) return;
+        this.gameOver = true;
+        this.canDrop = false;
+
+        // Save high score
+        const highScore = localStorage.getItem('fruitMergeHighScore') || 0;
+        if (this.score > highScore) {
+            localStorage.setItem('fruitMergeHighScore', this.score);
+        }
+
+        // Dark overlay
+        this.add.rectangle(0, 0, GAME.W, GAME.H, 0x000000, 0.8).setOrigin(0).setDepth(40);
+
+        // Game Over panel
+        this.add.rectangle(GAME.W / 2, GAME.H / 2, 360, 340, 0xffffff).setOrigin(0.5).setDepth(41);
+
+        this.add.text(GAME.W / 2, GAME.H / 2 - 100, 'GAME OVER', {
+            fontSize: '48px',
+            color: '#ff4444',
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(42);
+
+        this.add.text(GAME.W / 2, GAME.H / 2 - 20, 'Score', {
+            fontSize: '22px',
+            color: '#666'
+        }).setOrigin(0.5).setDepth(42);
+
+        this.add.text(GAME.W / 2, GAME.H / 2 + 25, `${this.score}`, {
+            fontSize: '48px',
+            color: '#000',
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(42);
+
+        this.add.text(GAME.W / 2, GAME.H / 2 + 80, `Best: ${Math.max(this.score, highScore)}`, {
+            fontSize: '20px',
+            color: '#FFD700'
+        }).setOrigin(0.5).setDepth(42);
+
+        // Restart button
+        const btn = this.add.rectangle(GAME.W / 2, GAME.H / 2 + 140, 220, 60, 0x4CAF50)
+            .setInteractive({ useHandCursor: true })
+            .setDepth(42);
+
+        this.add.text(GAME.W / 2, GAME.H / 2 + 140, 'Play Again', {
+            fontSize: '26px',
+            color: '#fff',
+            fontStyle: 'bold'
+        }).setOrigin(0.5).setDepth(42);
+
+        btn.on('pointerover', () => btn.setFillStyle(0x66BB6A));
+        btn.on('pointerout', () => btn.setFillStyle(0x4CAF50));
+        btn.on('pointerdown', () => {
+            this.scene.restart();
         });
     }
 }
 
-// =====================
-// GAME OVER SCENE
-// =====================
-class GameOverScene extends Phaser.Scene {
-    constructor() { super('GameOver'); }
-
-    init(d) { this.score = d.score; }
-
-    create() {
-        this.add.rectangle(225, 400, 340, 280, 0xffffff);
-        this.add.text(225, 330, 'Game Over', {
-            fontSize: '42px',
-            color: '#ff4444'
-        }).setOrigin(0.5);
-
-        this.add.text(225, 390, `Score: ${this.score}`, {
-            fontSize: '28px',
-            color: '#000'
-        }).setOrigin(0.5);
-
-        const btn = this.add.text(225, 460, 'Restart', {
-            fontSize: '26px',
-            backgroundColor: '#4CAF50',
-            padding: 12,
-            color: '#fff'
-        }).setOrigin(0.5).setInteractive();
-
-        btn.on('pointerdown', () => this.scene.start('Game'));
-    }
-}
-
-// =====================
-// PHASER CONFIG
-// =====================
+/* =====================
+   CONFIG
+===================== */
 new Phaser.Game({
     type: Phaser.AUTO,
     width: GAME.W,
     height: GAME.H,
-    backgroundColor: '#1c1c1c',
     parent: 'game-container',
+    backgroundColor: '#1c1c1c',
     physics: {
         default: 'matter',
-        matter: { gravity: { y: 1.2 }, debug: false }
+        matter: {
+            gravity: { y: 1.2 },
+            enableSleep: true,   // ✅ FIXED
+            debug: false
+        }
     },
-    scene: [PreloadScene, GameScene, GameOverScene]
+    scene: [PreloadScene, GameScene]
 });
