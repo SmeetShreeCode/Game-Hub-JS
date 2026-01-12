@@ -25,18 +25,18 @@ const GAME = {
 };
 
 const FRUITS = [
-    {key: 'berry', scale: 0.5, radius: 34, score: 1},
-    {key: 'lemon', scale: 0.7, radius: 30, score: 3},
-    {key: 'lime', scale: 0.9, radius: 34, score: 6},
-    {key: 'plum', scale: 1.1, radius: 28, score: 10},
-    {key: 'strawberry', scale: 1.3, radius: 28, score: 15},
-    {key: 'orange', scale: 1.5, radius: 37, score: 21},
-    {key: 'apple', scale: 1.9, radius: 29, score: 28},
-    {key: 'apple-green', scale: 2.1, radius: 28, score: 36},
-    {key: 'coconut', scale: 2.3, radius: 27, score: 45},
-    {key: 'peach', scale: 1.7, radius: 38, score: 55},
-    {key: 'melon', scale: 2.5, radius: 30, score: 66},
-    {key: 'watermelon', scale: 2.7, radius: 34, score: 78},
+    {key: 'garlic', scale: 0.6, radius: 30, score: 1},
+    {key: 'onion', scale: 0.85, radius: 24, score: 3},
+    {key: 'tomato', scale: 0.9, radius: 30, score: 6},
+    {key: 'potato', scale: 0.95, radius: 28, score: 10},
+    {key: 'beetroot', scale: 1.2, radius: 25, score: 15},
+    {key: 'mushroom', scale: 1.35, radius: 30, score: 21},
+    {key: 'artichoke', scale: 1.5, radius: 31, score: 28},
+    {key: 'broccoli', scale: 1.65, radius: 30, score: 36},
+    {key: 'cauliflower', scale: 1.8, radius: 29, score: 45},
+    {key: 'lettuce', scale: 1.95, radius: 31, score: 55},
+    {key: 'pumpkin', scale: 2.1, radius: 31, score: 66},
+    {key: 'salad', scale: 2.25, radius: 31, score: 78},
 ];
 
 const EFFECTS = {
@@ -49,12 +49,12 @@ const EFFECTS = {
     PARTICLE_QUANTITY: 5,
     PARTICLE_SPEED_MIN: 80,
     PARTICLE_SPEED_MAX: 100,
-    PARTICLE_DEPTH: 25,          // Background=0, Fruits (falling)=5-10, Danger line=15, Pop particles=25, UI/Score=30+, Game over=40+
+    PARTICLE_DEPTH: 25,     // Background=0, Fruits (falling)=5-10, Danger line=15, Pop particles=25, UI/Score=30+, Game over=40+
     PARTICLE_CLEANUP_DELAY: 300,
 };
 
 const COLORS = {
-    containerBg: 0x2a2a2a,
+    containerBg: 0x3b82f6,
     containerBorder: 0xffffff,
     dangerLine: 0xff4444
 };
@@ -69,7 +69,7 @@ class PreloadScene extends Phaser.Scene {
 
     preload() {
         FRUITS.forEach(f => {
-            this.load.image(f.key, `images/fruit-merge/${f.key}.png`);
+            this.load.image(f.key, `images/vegetable-merge/${f.key}.webp`);
         });
     }
 
@@ -641,17 +641,6 @@ new Phaser.Game({
             gravity: {y: 1.2},
             enableSleep: true,   // ✅ FIXED
             debug: false,
-            // debug: {
-            //     showAxes: false,
-            //     showAngleIndicator: false,
-            //     showVelocity: false,
-            //     showBounds: false,
-            //     showBroadphase: false,
-            //     showCollisions: false,
-            //     showSeparations: false,
-            //     showMousePosition: false,
-            //     wireframes: true
-            // }
         }
     },
     scene: [PreloadScene, GameScene]

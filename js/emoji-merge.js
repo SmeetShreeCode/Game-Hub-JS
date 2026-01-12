@@ -25,18 +25,18 @@ const GAME = {
 };
 
 const FRUITS = [
-    {key: 'berry', scale: 0.5, radius: 34, score: 1},
-    {key: 'lemon', scale: 0.7, radius: 30, score: 3},
-    {key: 'lime', scale: 0.9, radius: 34, score: 6},
-    {key: 'plum', scale: 1.1, radius: 28, score: 10},
-    {key: 'strawberry', scale: 1.3, radius: 28, score: 15},
-    {key: 'orange', scale: 1.5, radius: 37, score: 21},
-    {key: 'apple', scale: 1.9, radius: 29, score: 28},
-    {key: 'apple-green', scale: 2.1, radius: 28, score: 36},
-    {key: 'coconut', scale: 2.3, radius: 27, score: 45},
-    {key: 'peach', scale: 1.7, radius: 38, score: 55},
-    {key: 'melon', scale: 2.5, radius: 30, score: 66},
-    {key: 'watermelon', scale: 2.7, radius: 34, score: 78},
+    {key: 'happiness', scale: 0.6, radius: 31, score: 1},
+    {key: 'happy', scale: 0.7, radius: 31, score: 3},
+    {key: 'laughing', scale: 0.8, radius: 31, score: 6},
+    {key: 'surprised', scale: 0.9, radius: 31, score: 10},
+    {key: 'crazy', scale: 1.0, radius: 31, score: 15},
+    {key: 'disgusted', scale: 1.1, radius: 31, score: 21},
+    {key: 'annoyed', scale: 1.2, radius: 31, score: 28},
+    {key: 'hurted', scale: 1.3, radius: 31, score: 36},
+    {key: 'crying', scale: 1.4, radius: 31, score: 45},
+    {key: 'mute', scale: 1.5, radius: 31, score: 55},
+    {key: 'angry-face', scale: 1.6, radius: 31, score: 66},
+    {key: 'cool', scale: 1.7, radius: 31, score: 78},
 ];
 
 const EFFECTS = {
@@ -49,12 +49,12 @@ const EFFECTS = {
     PARTICLE_QUANTITY: 5,
     PARTICLE_SPEED_MIN: 80,
     PARTICLE_SPEED_MAX: 100,
-    PARTICLE_DEPTH: 25,          // Background=0, Fruits (falling)=5-10, Danger line=15, Pop particles=25, UI/Score=30+, Game over=40+
+    PARTICLE_DEPTH: 25,     // Background=0, Fruits (falling)=5-10, Danger line=15, Pop particles=25, UI/Score=30+, Game over=40+
     PARTICLE_CLEANUP_DELAY: 300,
 };
 
 const COLORS = {
-    containerBg: 0x2a2a2a,
+    containerBg: 0x22c55e,
     containerBorder: 0xffffff,
     dangerLine: 0xff4444
 };
@@ -69,7 +69,7 @@ class PreloadScene extends Phaser.Scene {
 
     preload() {
         FRUITS.forEach(f => {
-            this.load.image(f.key, `images/fruit-merge/${f.key}.png`);
+            this.load.image(f.key, `images/emoji-merge/${f.key}.webp`);
         });
     }
 
@@ -106,10 +106,11 @@ class GameScene extends Phaser.Scene {
         this.createContainerMask();
         this.createParticleTexture();
 
-        this.queue = [];
-        for (let i = 0; i < 3; i++) {
-            this.queue.push(Phaser.Math.Between(0, this.getSpawnRange()));
-        }
+        this.queue = [
+            Phaser.Math.Between(0, 2),
+            Phaser.Math.Between(0, 2),
+            Phaser.Math.Between(0, 2)
+        ];
 
         this.createUI();
         this.createGuide();
@@ -641,17 +642,6 @@ new Phaser.Game({
             gravity: {y: 1.2},
             enableSleep: true,   // ✅ FIXED
             debug: false,
-            // debug: {
-            //     showAxes: false,
-            //     showAngleIndicator: false,
-            //     showVelocity: false,
-            //     showBounds: false,
-            //     showBroadphase: false,
-            //     showCollisions: false,
-            //     showSeparations: false,
-            //     showMousePosition: false,
-            //     wireframes: true
-            // }
         }
     },
     scene: [PreloadScene, GameScene]
