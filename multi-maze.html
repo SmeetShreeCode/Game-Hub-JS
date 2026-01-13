@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emoji Merge</title>
+    <title>Multi Ball</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
     <style>
         * {
@@ -17,9 +17,9 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 10%, #0047dc 100%);
             font-family: 'Arial', sans-serif;
-            cursor: url("images/emoji-merge/cursor.webp") 12 12, auto;
+            cursor: url("images/fruit-merge/cursor.webp") 12 12, auto;
         }
 
         #game-container {
@@ -27,29 +27,11 @@
             border-radius: 20px;
             overflow: hidden;
         }
-
-        @media (max-width: 768px) {
-            canvas {
-                height: 800px;
-            }
-        }
-
-        @media (max-width: 450px) {
-            canvas {
-                height: 700px;
-            }
-        }
-
-        @media (max-width: 350px) {
-            canvas {
-                height: 500px;
-            }
-        }
     </style>
 </head>
 <body>
 <div id="game-container"></div>
 
-<script src="js/emoji-merge.js"></script>
+<script src="js/multi-maze.js"></script>
 </body>
 </html>

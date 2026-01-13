@@ -1,5 +1,6 @@
 # TODO List – Vertical Platform
-https://itch.io/
+https://itch.io/  
+https://prismic.io/blog/css-scroll-effects
 
 ## 🎮 Gameplay Features
 - [ ] Add **multiple levels** with unique backgrounds

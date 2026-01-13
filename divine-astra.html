@@ -1,0 +1,761 @@
+<!-- GAME DESCRIPTION-->
+<!--Game Title (Working):
+“Divine Astra: Cosmic Destruction”
+Core Concept
+Create a 2D action-physics game using Phaser 3 + Matter.js where a single divine weapon—a fusion of Mahadev’s Trishula, Vishnu’s Sudarshan Chakra, and Brahma’s Brahmastra—exists as a living cosmic force, not held by any character.
+The weapon floats in space, rotates, emits energy, and interacts with the environment through physics, collisions, and destruction mechanics.
+Visual Style
+Dark, powerful, mythological, mysterious
+No human characters
+Glowing gold, fire-orange, electric-blue energy
+Cosmic background (nebula, lightning, particles)
+Weapon always visible and central
+Clean enough to later convert into a logo-style icon
+Weapon Design Logic
+The weapon is a single entity, but visually split into 3 powers:
+Trishula (Top)
+Emits electric/blue energy
+Controls rotation and balance
+Can strike enemies with thrust or lightning
+Sudarshan Chakra (Middle – Rotating Ring)
+Constantly spinning (Matter.js angular velocity)
+Can detach and slice enemies
+Used for area damage
+Brahmastra (Bottom Core)
+Glowing energy core
+Shoots concentrated energy beams or blasts
+Causes massive destruction
+Gameplay Mechanics
+Physics-based movement using Matter.js
+Weapon floats and reacts to forces
+Player controls:
+Rotation
+Power switching (Trishula / Chakra / Brahmastra)
+Energy attacks
+Enemies or objects spawn from edges
+Collisions cause:
+Sparks
+Explosions
+Screen shake
+Destructible objects (asteroids, dark entities, planets)
+Core Features to Implement
+Phaser 3 Scene system
+Matter.js physics bodies
+Continuous rotation using angular velocity
+Particle effects for fire, lightning, energy
+Camera shake on impact
+Progressive difficulty
+Score based on destruction
+Smooth animations (tweens)
+Controls (Example)
+Arrow keys / A-D → Rotate weapon
+Space → Chakra attack
+Mouse click → Brahmastra energy blast
+Shift → Trishula lightning strike
+Technical Stack
+HTML5 (Canvas)
+CSS (UI, HUD)
+JavaScript (ES6)
+Phaser 3
+Matter.js physics engine
+End Goal
+A visually stunning, physics-driven mythological cosmic weapon game that:
+Feels powerful
+Looks divine
+Is expandable (bosses, levels, upgrades)
+Can later be turned into mobile or WebGL game-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Astra: Cosmic Destruction</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 18px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .hud-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 5px;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            text-align: center;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .control-key {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-align: center;
+            font-size: 32px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #ffd700;
+            display: none;
+            z-index: 2000;
+        }
+
+        .game-over button {
+            margin-top: 20px;
+            padding: 15px 30px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .game-over button:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+<div id="game-container"></div>
+
+<div class="hud">
+    <div class="hud-item">Score: <span id="score">0</span></div>
+    <div class="hud-item">Energy: <span id="energy">100</span></div>
+    <div class="hud-item">Power: <span id="power">Trishula</span></div>
+</div>
+
+<div class="controls">
+    <div><span class="control-key">A/D</span> Rotate | <span class="control-key">SPACE</span> Chakra Spin | <span
+            class="control-key">CLICK</span> Brahmastra Blast | <span class="control-key">SHIFT</span> Trishula Strike
+    </div>
+</div>
+
+<div class="game-over" id="gameOver">
+    <h1>DIVINE DESTRUCTION COMPLETE</h1>
+    <p>Final Score: <span id="finalScore">0</span></p>
+    <button onclick="location.reload()">RESTART</button>
+</div>
+
+<script>
+    const config = {
+        type: Phaser.AUTO,
+        width: 1200,
+        height: 800,
+        parent: 'game-container',
+        backgroundColor: '#000000',
+        physics: {
+            default: 'matter',
+            matter: {
+                gravity: {y: 0},
+                debug: false
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
+
+    const game = new Phaser.Game(config);
+    let weapon, weaponGraphics;
+    let cursors, spaceKey, shiftKey;
+    let score = 0, energy = 100;
+    let enemies = [];
+    let particles, lightningParticles, fireParticles;
+    let currentPower = 'Trishula';
+    let chakraDetached = false;
+    let chakraSprite = null;
+    let stars = [];
+
+    function preload() {
+        // No external assets needed
+    }
+
+    function create() {
+        const scene = this;
+
+        // Create starfield background
+        for (let i = 0; i < 200; i++) {
+            const x = Phaser.Math.Between(0, 1200);
+            const y = Phaser.Math.Between(0, 800);
+            const size = Phaser.Math.FloatBetween(0.5, 2);
+            const star = scene.add.circle(x, y, size, 0xffffff, Phaser.Math.FloatBetween(0.3, 0.8));
+            stars.push({sprite: star, speed: size * 0.5});
+        }
+
+        // Create nebula effect with layered circles
+        for (let i = 0; i < 5; i++) {
+            const x = Phaser.Math.Between(0, 1200);
+            const y = Phaser.Math.Between(0, 800);
+            const radius = Phaser.Math.Between(100, 300);
+
+            // Create gradient effect with multiple circles
+            scene.add.circle(x, y, radius, 0x8a2be2, 0.05);
+            scene.add.circle(x, y, radius * 0.7, 0x4b0082, 0.08);
+            scene.add.circle(x, y, radius * 0.4, 0x9400d3, 0.1);
+        }
+
+        // Create particle emitters
+        particles = scene.add.particles(0, 0);
+
+        lightningParticles = particles.createEmitter({
+            speed: {min: 100, max: 200},
+            angle: {min: 0, max: 360},
+            scale: {start: 0.5, end: 0},
+            blendMode: 'ADD',
+            lifespan: 500,
+            gravityY: 0,
+            tint: [0x00ffff, 0x0080ff, 0xffffff],
+            on: false
+        });
+
+        fireParticles = particles.createEmitter({
+            speed: {min: 50, max: 150},
+            angle: {min: 0, max: 360},
+            scale: {start: 0.8, end: 0},
+            blendMode: 'ADD',
+            lifespan: 800,
+            gravityY: 0,
+            tint: [0xffd700, 0xff8c00, 0xff0000],
+            on: false
+        });
+
+        // Create the Divine Weapon
+        createWeapon.call(this);
+
+        // Input
+        cursors = scene.input.keyboard.createCursorKeys();
+        spaceKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+        shiftKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
+
+        const aKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        const dKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+
+        scene.input.keyboard.on('keydown-A', () => {
+            if (weapon) {
+                scene.matter.body.setAngularVelocity(weapon, -0.05);
+            }
+        });
+
+        scene.input.keyboard.on('keydown-D', () => {
+            if (weapon) {
+                scene.matter.body.setAngularVelocity(weapon, 0.05);
+            }
+        });
+        this.matter.world.on('collisionstart', (event) => {
+            event.pairs.forEach(pair => {
+                const a = pair.bodyA;
+                const b = pair.bodyB;
+
+                // Weapon hits enemy
+                if (
+                    (a === weapon && b.enemy) ||
+                    (b === weapon && a.enemy)
+                ) {
+                    const enemy = a.enemy ? a : b;
+                    enemyHit.call(this, enemy, 20);
+                }
+
+                // Chakra hits enemy
+                if (
+                    chakraSprite &&
+                    (
+                        (a === chakraSprite && b.enemy) ||
+                        (b === chakraSprite && a.enemy)
+                    )
+                ) {
+                    const enemy = a.enemy ? a : b;
+                    enemyHit.call(this, enemy, 40);
+                }
+
+                // Blast hits enemy
+                if (
+                    a.isBlast && b.enemy ||
+                    b.isBlast && a.enemy
+                ) {
+                    const enemy = a.enemy ? a : b;
+                    enemyHit.call(this, enemy, 50);
+                }
+            });
+        });
+
+
+        scene.input.on('pointerdown', (pointer) => {
+            brahmastraBlast.call(scene, pointer);
+        });
+
+        scene.input.keyboard.on('keydown-SPACE', () => {
+            chakraAttack.call(scene);
+        });
+
+        scene.input.keyboard.on('keydown-SHIFT', () => {
+            trishulaStrike.call(scene);
+        });
+
+        // Spawn enemies periodically
+        scene.time.addEvent({
+            delay: 2000,
+            callback: spawnEnemy,
+            callbackScope: scene,
+            loop: true
+        });
+
+        // Spawn initial enemies
+        for (let i = 0; i < 3; i++) {
+            spawnEnemy.call(scene);
+        }
+    }
+
+    function createWeapon() {
+        const scene = this;
+
+        // Create weapon physics body
+        weapon = scene.matter.add.circle(600, 400, 40, {
+            restitution: 0.8,
+            friction: 0.01,
+            frictionAir: 0.001,
+            density: 0.1
+        });
+
+        scene.matter.body.setAngularVelocity(weapon, 0.02);
+
+        // Create weapon graphics
+        weaponGraphics = scene.add.graphics();
+
+        // Glow effect
+        const glow = scene.add.circle(600, 400, 60, 0xffd700, 0.2);
+        scene.tweens.add({
+            targets: glow,
+            scale: {from: 1, to: 1.3},
+            alpha: {from: 0.2, to: 0.05},
+            duration: 1000,
+            yoyo: true,
+            repeat: -1
+        });
+
+        weapon.glow = glow;
+        weapon.graphics = weaponGraphics;
+    }
+
+    function drawWeapon() {
+        if (!weapon || !weaponGraphics) return;
+
+        weaponGraphics.clear();
+
+        const x = weapon.position.x;
+        const y = weapon.position.y;
+        const angle = weapon.angle;
+
+        // Update glow position
+        if (weapon.glow) {
+            weapon.glow.setPosition(x, y);
+        }
+
+        // Core (Brahmastra) - glowing center
+        weaponGraphics.fillStyle(0xff8c00, 1);
+        weaponGraphics.fillCircle(x, y, 15);
+        weaponGraphics.fillStyle(0xffd700, 0.8);
+        weaponGraphics.fillCircle(x, y, 10);
+        weaponGraphics.fillStyle(0xffffff, 0.6);
+        weaponGraphics.fillCircle(x, y, 5);
+
+        // Rotating Chakra ring
+        weaponGraphics.lineStyle(4, 0x00ffff, 1);
+        for (let i = 0; i < 8; i++) {
+            const ringAngle = (angle * Math.PI / 180) + (i * Math.PI / 4);
+            const rx1 = x + Math.cos(ringAngle) * 30;
+            const ry1 = y + Math.sin(ringAngle) * 30;
+            const rx2 = x + Math.cos(ringAngle) * 35;
+            const ry2 = y + Math.sin(ringAngle) * 35;
+            weaponGraphics.lineBetween(rx1, ry1, rx2, ry2);
+        }
+
+        // Trishula (Trident) - top prongs
+        weaponGraphics.lineStyle(3, 0x0080ff, 1);
+        const trishAngle = angle * Math.PI / 180;
+
+        // Center prong
+        const cx = x + Math.cos(trishAngle - Math.PI / 2) * 50;
+        const cy = y + Math.sin(trishAngle - Math.PI / 2) * 50;
+        weaponGraphics.lineBetween(x, y, cx, cy);
+
+        // Left prong
+        const lx = cx + Math.cos(trishAngle - Math.PI / 2 - 0.3) * 15;
+        const ly = cy + Math.sin(trishAngle - Math.PI / 2 - 0.3) * 15;
+        weaponGraphics.lineBetween(cx, cy, lx, ly);
+
+        // Right prong
+        const rx = cx + Math.cos(trishAngle - Math.PI / 2 + 0.3) * 15;
+        const ry = cy + Math.sin(trishAngle - Math.PI / 2 + 0.3) * 15;
+        weaponGraphics.lineBetween(cx, cy, rx, ry);
+
+        // Energy trails
+        if (Math.random() > 0.7) {
+            fireParticles.explode(3, x, y);
+        }
+    }
+
+    function spawnEnemy() {
+        const scene = this;
+        const side = Phaser.Math.Between(0, 3);
+        let x, y;
+
+        switch (side) {
+            case 0:
+                x = Phaser.Math.Between(0, 1200);
+                y = -50;
+                break;
+            case 1:
+                x = 1250;
+                y = Phaser.Math.Between(0, 800);
+                break;
+            case 2:
+                x = Phaser.Math.Between(0, 1200);
+                y = 850;
+                break;
+            case 3:
+                x = -50;
+                y = Phaser.Math.Between(0, 800);
+                break;
+        }
+
+        const size = Phaser.Math.Between(20, 40);
+        const enemy = scene.matter.add.circle(x, y, size, {
+            restitution: 0.6,
+            friction: 0.1,
+            frictionAir: 0.01
+        });
+
+        enemy.enemy = true;
+        enemy.health = size;
+
+
+        // Create enemy graphics
+        const enemyGraphics = scene.add.graphics();
+        enemy.graphics = enemyGraphics;
+
+        // Add velocity towards center
+        const angle = Math.atan2(400 - y, 600 - x);
+        scene.matter.body.setVelocity(enemy, {
+            x: Math.cos(angle) * 2,
+            y: Math.sin(angle) * 2
+        });
+
+        enemies.push(enemy);
+
+        // Collision with weapon
+        // scene.matterCollision.addOnCollideStart({
+        //     objectA: enemy,
+        //     objectB: weapon,
+        //     callback: (data) => {
+        //         enemyHit.call(scene, enemy, 20);
+        //     }
+        // });
+    }
+
+    function enemyHit(enemy, damage) {
+        if (!enemy || !enemy.graphics) return;
+
+        enemy.health -= damage;
+
+        // Screen shake
+        this.cameras.main.shake(100, 0.005);
+
+        // Explosion effect
+        fireParticles.explode(10, enemy.position.x, enemy.position.y);
+        lightningParticles.explode(5, enemy.position.x, enemy.position.y);
+
+        if (enemy.health <= 0) {
+            // Destroy enemy
+            score += 100;
+            updateHUD();
+
+            // Big explosion
+            fireParticles.explode(30, enemy.position.x, enemy.position.y);
+            this.cameras.main.shake(200, 0.01);
+
+            enemy.graphics.destroy();
+            this.matter.world.remove(enemy);
+            enemies = enemies.filter(e => e !== enemy);
+        }
+    }
+
+    function chakraAttack() {
+        if (chakraDetached || energy < 30) return;
+
+        energy -= 30;
+        updateHUD();
+        chakraDetached = true;
+        currentPower = 'Chakra';
+
+        const scene = this;
+        const x = weapon.position.x;
+        const y = weapon.position.y;
+
+        // Create spinning chakra projectile
+        chakraSprite = scene.matter.add.circle(x, y, 25, {
+            restitution: 1,
+            friction: 0,
+            frictionAir: 0
+        });
+
+        chakraSprite.graphics = scene.add.graphics();
+        scene.matter.body.setAngularVelocity(chakraSprite, 0.3);
+
+
+        const angle = weapon.angle * Math.PI / 180;
+        scene.matter.body.setVelocity(chakraSprite, {
+            x: Math.cos(angle - Math.PI / 2) * 8,
+            y: Math.sin(angle - Math.PI / 2) * 8
+        });
+
+        // Collision detection
+        enemies.forEach(enemy => {
+            // scene.matterCollision.addOnCollideStart({
+            //     objectA: chakraSprite,
+            //     objectB: enemy,
+            //     callback: () => {
+            //         enemyHit.call(scene, enemy, 40);
+            //     }
+            // });
+        });
+
+        // Return after 2 seconds
+        scene.time.delayedCall(2000, () => {
+            if (chakraSprite) {
+                chakraSprite.graphics.destroy();
+                scene.matter.world.remove(chakraSprite);
+                chakraSprite = null;
+                chakraDetached = false;
+                currentPower = 'Trishula';
+                updateHUD();
+            }
+        });
+    }
+
+    function brahmastraBlast(pointer) {
+        if (energy < 20) return;
+
+        energy -= 20;
+        updateHUD();
+        currentPower = 'Brahmastra';
+
+        const scene = this;
+        const x = weapon.position.x;
+        const y = weapon.position.y;
+
+        const angle = Math.atan2(pointer.y - y, pointer.x - x);
+
+        // Create energy blast
+        const blast = scene.matter.add.circle(x, y, 15, {
+            isSensor: true
+        });
+        blast.isBlast = true;
+        blast.graphics = scene.add.graphics();
+
+        scene.matter.body.setVelocity(blast, {
+            x: Math.cos(angle) * 10,
+            y: Math.sin(angle) * 10
+        });
+
+        // Collision
+        enemies.forEach(enemy => {
+            // scene.matterCollision.addOnCollideStart({
+            //     objectA: blast,
+            //     objectB: enemy,
+            //     callback: () => {
+            //         enemyHit.call(scene, enemy, 50);
+            //         blast.graphics.destroy();
+            //         scene.matter.world.remove(blast);
+            //     }
+            // });
+        });
+
+        // Trail effect
+        scene.time.addEvent({
+            delay: 50,
+            callback: () => {
+                if (blast.position) {
+                    fireParticles.explode(2, blast.position.x, blast.position.y);
+                }
+            },
+            repeat: 20
+        });
+
+        // Auto-destroy after 2s
+        scene.time.delayedCall(2000, () => {
+            if (blast && blast.graphics) {
+                blast.graphics.destroy();
+                scene.matter.world.remove(blast);
+            }
+            currentPower = 'Trishula';
+            updateHUD();
+        });
+    }
+
+    function trishulaStrike() {
+        if (energy < 25) return;
+
+        energy -= 25;
+        updateHUD();
+        currentPower = 'Trishula';
+
+        const scene = this;
+
+        // Lightning effect
+        lightningParticles.explode(50, weapon.position.x, weapon.position.y);
+        scene.cameras.main.shake(150, 0.008);
+
+        // Damage all nearby enemies
+        enemies.forEach(enemy => {
+            const dist = Phaser.Math.Distance.Between(
+                weapon.position.x, weapon.position.y,
+                enemy.position.x, enemy.position.y
+            );
+
+            if (dist < 200) {
+                enemyHit.call(scene, enemy, 30);
+            }
+        });
+    }
+
+    function update(time, delta) {
+        // Update starfield
+        stars.forEach(star => {
+            star.sprite.y += star.speed;
+            if (star.sprite.y > 800) {
+                star.sprite.y = 0;
+                star.sprite.x = Phaser.Math.Between(0, 1200);
+            }
+        });
+
+        // Draw weapon
+        drawWeapon();
+
+        // Draw chakra if detached
+        if (chakraSprite && chakraSprite.graphics) {
+            const g = chakraSprite.graphics;
+            g.clear();
+            g.lineStyle(3, 0x00ffff, 1);
+            const x = chakraSprite.position.x;
+            const y = chakraSprite.position.y;
+            const angle = chakraSprite.angle;
+
+            for (let i = 0; i < 8; i++) {
+                const a = (angle * Math.PI / 180) + (i * Math.PI / 4);
+                g.lineBetween(
+                    x + Math.cos(a) * 20,
+                    y + Math.sin(a) * 20,
+                    x + Math.cos(a) * 25,
+                    y + Math.sin(a) * 25
+                );
+            }
+        }
+
+        // Draw enemies
+        enemies.forEach(enemy => {
+            if (enemy.graphics) {
+                const g = enemy.graphics;
+                g.clear();
+
+                const x = enemy.position.x;
+                const y = enemy.position.y;
+                const size = enemy.circleRadius || 20;
+
+                // Dark energy sphere
+                g.fillStyle(0x8b0000, 0.8);
+                g.fillCircle(x, y, size);
+                g.lineStyle(2, 0xff0000, 1);
+                g.strokeCircle(x, y, size);
+
+                // Pulsing effect
+                if (Math.random() > 0.9) {
+                    g.fillStyle(0xff0000, 0.3);
+                    g.fillCircle(x, y, size + 5);
+                }
+            }
+        });
+
+        // Energy regeneration
+        if (energy < 100) {
+            energy = Math.min(100, energy + 0.05);
+            updateHUD();
+        }
+
+        // Keep weapon in bounds
+        if (weapon) {
+            this.matter.body.setPosition(weapon, {
+                x: Phaser.Math.Clamp(weapon.position.x, 50, 1150),
+                y: Phaser.Math.Clamp(weapon.position.y, 50, 750)
+            });
+        }
+
+        // Game over check (if weapon destroyed or overrun)
+        if (enemies.length > 20) {
+            gameOver();
+        }
+    }
+
+    function updateHUD() {
+        document.getElementById('score').textContent = Math.floor(score);
+        document.getElementById('energy').textContent = Math.floor(energy);
+        document.getElementById('power').textContent = currentPower;
+    }
+
+    function gameOver() {
+        document.getElementById('finalScore').textContent = Math.floor(score);
+        document.getElementById('gameOver').style.display = 'block';
+    }
+</script>
+</body>
+</html>

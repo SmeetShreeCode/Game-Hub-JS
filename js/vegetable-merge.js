@@ -71,6 +71,10 @@ class PreloadScene extends Phaser.Scene {
         FRUITS.forEach(f => {
             this.load.image(f.key, `images/vegetable-merge/${f.key}.webp`);
         });
+
+        // 🔊 Sounds
+        this.load.audio('dropSound', 'music/merge-games/drop-sound.mp3');
+        this.load.audio('mergeSound', 'music/merge-games/merge-sound.mp3');
     }
 
     create() {
@@ -102,6 +106,16 @@ class GameScene extends Phaser.Scene {
         this.input.setPollAlways();
         this.input.mouse.disableContextMenu();
 
+        // 🔊 RESUME AUDIO CONTEXT (Chrome / Mobile FIX)
+        const resumeAudio = () => {
+            if (this.sound.context && this.sound.context.state === 'suspended') {
+                this.sound.context.resume();
+            }
+        };
+
+        this.input.once('pointerdown', resumeAudio);
+        this.input.keyboard.once('keydown', resumeAudio);
+
         this.drawContainerFrame();
         this.createContainerMask();
         this.createParticleTexture();
@@ -110,6 +124,15 @@ class GameScene extends Phaser.Scene {
         for (let i = 0; i < 3; i++) {
             this.queue.push(Phaser.Math.Between(0, this.getSpawnRange()));
         }
+
+        this.sounds = {
+            drop: this.sound.add('dropSound', {
+                volume: 0.5
+            }),
+            merge: this.sound.add('mergeSound', {
+                volume: 0.7
+            })
+        };
 
         this.createUI();
         this.createGuide();
@@ -188,20 +211,20 @@ class GameScene extends Phaser.Scene {
         // ⬇️ Adjustable floor position
         const bottom = GAME.BOX_Y + GAME.BOX_H - GAME.FLOOR_OFFSET;
 
-        this.bounds = { left, right };
+        this.bounds = {left, right};
 
         // Side walls
-        this.matter.add.rectangle(left, GAME.H / 2, GAME.WALL_THICKNESS, GAME.H, { isStatic: true, label: 'wall' });
-        this.matter.add.rectangle(right, GAME.H / 2, GAME.WALL_THICKNESS, GAME.H, { isStatic: true, label: 'wall' });
+        this.matter.add.rectangle(left, GAME.H / 2, GAME.WALL_THICKNESS, GAME.H, {isStatic: true, label: 'wall'});
+        this.matter.add.rectangle(right, GAME.H / 2, GAME.WALL_THICKNESS, GAME.H, {isStatic: true, label: 'wall'});
 
         // 🔵 Bottom floor (adjustable)
-        this.matter.add.rectangle(GAME.W / 2, bottom, GAME.W, GAME.FLOOR_THICKNESS, { isStatic: true, label: 'floor' });
+        this.matter.add.rectangle(GAME.W / 2, bottom, GAME.W, GAME.FLOOR_THICKNESS, {isStatic: true, label: 'floor'});
 
         this.dangerGraphics = this.add.graphics();
         this.dangerGraphics.setMask(this.containerMask); // ✅ CLIP INSIDE BOX
         this.dangerGraphics.lineStyle(GAME.DANGER_LINE_THICK, COLORS.dangerLine);
 
-        const lineLeft  = GAME.BOX_X + GAME.BOX_THICK;
+        const lineLeft = GAME.BOX_X + GAME.BOX_THICK;
         const lineRight = GAME.BOX_X + GAME.BOX_W - GAME.BOX_THICK;
 
         for (let x = lineLeft; x < lineRight; x += 18) {
@@ -217,7 +240,7 @@ class GameScene extends Phaser.Scene {
     }
 
     createContainerMask() {
-        const maskGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        const maskGfx = this.make.graphics({x: 0, y: 0, add: false});
 
         maskGfx.fillStyle(0xffffff);
         maskGfx.fillRect(
@@ -256,7 +279,7 @@ class GameScene extends Phaser.Scene {
             GAME.W / 2,
             GAME.DANGER_Y - 30,
             '',
-            { fontSize: '20px', color: '#ff4444', fontStyle: 'bold' }
+            {fontSize: '20px', color: '#ff4444', fontStyle: 'bold'}
         ).setOrigin(0.5).setDepth(30);
 
     }
@@ -307,6 +330,11 @@ class GameScene extends Phaser.Scene {
 
         this.current.setIgnoreGravity(false);
         this.current.setDepth(5);
+
+        // 🔊 DROP SOUND
+        if (this.sounds?.drop && this.sound.context.state === 'running') {
+            this.sounds.drop.play();
+        }
 
         this.canDrop = false;
         this.guide.clear();
@@ -407,6 +435,14 @@ class GameScene extends Phaser.Scene {
             a._merged = true;
             b._merged = true;
 
+            // 🔊 MERGE SOUND (safe)
+            if (this.sounds?.merge && !this.sounds.merge.isPlaying) {
+                this.sounds.merge.setVolume(
+                    nextType >= EFFECTS.BIG_MERGE_FROM ? 0.9 : 0.5
+                );
+                this.sounds.merge.play();
+            }
+
             this.merging.add(a);
             this.merging.add(b);
 
@@ -470,10 +506,10 @@ class GameScene extends Phaser.Scene {
 
     getSpawnRange() {
         // Increase spawn range gradually
-        if (this.maxUnlockedFruit >= 10) return 6;
-        if (this.maxUnlockedFruit >= 8)  return 5;
-        if (this.maxUnlockedFruit >= 6)  return 4;
-        if (this.maxUnlockedFruit >= 3)  return 3;
+        // if (this.maxUnlockedFruit >= 10) return 6;
+        if (this.maxUnlockedFruit >= 8) return 5;
+        if (this.maxUnlockedFruit >= 6) return 4;
+        if (this.maxUnlockedFruit >= 3) return 3;
         return 2; // default (first 3 fruits)
     }
 
@@ -493,9 +529,9 @@ class GameScene extends Phaser.Scene {
                 min: EFFECTS.PARTICLE_SPEED_MIN + power * 40,
                 max: EFFECTS.PARTICLE_SPEED_MAX + power * 80
             },
-            angle: { min: 0, max: 360 },
-            scale: { start: 0.8 + power * 0.15, end: 0 },
-            alpha: { start: 1, end: 0 },
+            angle: {min: 0, max: 360},
+            scale: {start: 0.8 + power * 0.15, end: 0},
+            alpha: {start: 1, end: 0},
             lifespan: EFFECTS.PARTICLE_LIFESPAN + power * 80,
             quantity: EFFECTS.PARTICLE_QUANTITY + power * 4,
             gravityY: 200 + power * 80,

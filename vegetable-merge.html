@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vegetable Merge</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
     <style>
@@ -25,6 +26,25 @@
             box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
             border-radius: 20px;
             overflow: hidden;
+        }
+
+
+        @media (max-width: 768px) {
+            canvas {
+                height: 800px;
+            }
+        }
+
+        @media (max-width: 450px) {
+            canvas {
+                height: 700px;
+            }
+        }
+
+        @media (max-width: 350px) {
+            canvas {
+                height: 500px;
+            }
         }
     </style>
 </head>
