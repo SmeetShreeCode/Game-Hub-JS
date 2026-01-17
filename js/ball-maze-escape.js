@@ -2,12 +2,12 @@
    GAME CONSTANTS
 ================================ */
 const GAME = {
-    WIDTH: 540,
-    HEIGHT: 840,
+    WIDTH: 420,
+    HEIGHT: 720,
 
     BALL: {
         RADIUS: 8,
-        BOUNCE: 0.7,
+        BOUNCE: 0.6,
         FRICTION: 0.01,
         DENSITY: 0.002
     },
@@ -26,11 +26,11 @@ const GAME = {
         OFFSET_Y: 8,
     },
     RING: {
-        RADIUS: 200,
+        RADIUS: 140,
         THICKNESS: 18,
         GAP_ANGLE: 60,      // opening size in degrees
         GAP_OFFSET: 260,        // 270°=top, 0° =right, 90°=bottom, 180°= left, 260°=top-left, 300°=top-right
-        SEGMENTS: 100        // more = smoother physics
+        SEGMENTS: 90        // more = smoother physics
     },
     GRAVITY: 1.2,
     CONTROL: {
@@ -76,20 +76,19 @@ class GameScene extends Phaser.Scene {
             {
                 ...GAME.RING,
                 GAP_OFFSET: 270,
-                SEGMENTS: 100,
                 lines: [
                     {
                         // angle: Phaser.Math.DegToRad(270),
                         // from: 100 + 14 / 2,
                         // to: 140 - 18 / 2,
-                        angle: Phaser.Math.DegToRad(20), from: 165, to: 200,
+                        angle: Phaser.Math.DegToRad(20), from: 130, to: 115,
                         thickness: 8
                     },
                     {
                         // angle: Phaser.Math.DegToRad(270),
                         // from: 100 + 14 / 2,
                         // to: 140 - 18 / 2,
-                        angle: Phaser.Math.DegToRad(800), from: 160, to: 200,
+                        angle: Phaser.Math.DegToRad(800), from: 130, to: 100,
                         thickness: 8
                     }
                 ]
@@ -99,25 +98,22 @@ class GameScene extends Phaser.Scene {
         this.createRing(
             GAME.WIDTH / 2,
             GAME.HEIGHT / 2 - 80,
-            {...GAME.RING, RADIUS: 125, THICKNESS: 14, GAP_OFFSET: 90}
+            {...GAME.RING, RADIUS: 80, THICKNESS: 14, GAP_OFFSET: 90}
         );
 
         this.createRing(
             GAME.WIDTH / 2,
             GAME.HEIGHT / 2 - 80,
-            {...GAME.RING, RADIUS: 75, THICKNESS: 10, GAP_OFFSET: 270}
+            {...GAME.RING, RADIUS: 40, THICKNESS: 10, GAP_OFFSET: 270}
         );
-
-        // Spawn 10 balls at center of rings
-        this.spawnBalls(
-            GAME.WIDTH / 2,
-            GAME.HEIGHT / 2 -60,
-            8
-        );
-
 
         /* 🔥 THIS WAS MISSING */
         this.setupRingRotation();
+
+        /* Drop ball */
+        this.input.on('pointerdown', (pointer) => {
+            this.dropBall(pointer.x);
+        });
     }
 
     /* ===============================
@@ -318,39 +314,6 @@ class GameScene extends Phaser.Scene {
             this.rotateRing(speed);
         }
     }
-
-    /* ===============================
-       DROP BALL
-    ================================ */
-    spawnBalls(cx, cy, count = 5) {
-
-        const spacing = GAME.BALL.RADIUS * 2.2;
-
-        for (let i = 0; i < count; i++) {
-
-            const offsetX = (i - (count - 1) / 2) * spacing;
-            const offsetY = Phaser.Math.Between(-5, 5);
-
-            const body = this.matter.add.circle(
-                cx + offsetX,
-                cy + offsetY,
-                GAME.BALL.RADIUS,
-                {
-                    restitution: GAME.BALL.BOUNCE,
-                    friction: GAME.BALL.FRICTION,
-                    density: GAME.BALL.DENSITY
-                }
-            );
-
-            const gfx = this.add.graphics();
-            gfx.fillStyle(0xffffff, 1);
-            gfx.fillCircle(0, 0, GAME.BALL.RADIUS);
-
-            const ball = this.add.container(cx + offsetX, cy + offsetY, [gfx]);
-            this.matter.add.gameObject(ball, body);
-        }
-    }
-
 
     /* ===============================
        DROP BALL
