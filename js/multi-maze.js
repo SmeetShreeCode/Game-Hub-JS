@@ -74,15 +74,41 @@ class GameScene extends Phaser.Scene {
             GAME.WIDTH / 2,
             40,
             '0',
-            {font: '26px Arial', fill: '#ffffff'}
+            { font: '26px Arial', fill: '#ffffff' }
         ).setOrigin(0.5);
 
         /* Glass + Guides */
         this.createGlass();
         this.createGuides();
-        this.createRing(GAME.WIDTH / 2, GAME.HEIGHT / 2 - 80);
 
-        /* Input */
+        this.createRing(
+            GAME.WIDTH / 2,
+            GAME.HEIGHT / 2 - 80,
+            {
+                ...GAME.RING,
+                lines: [
+                    {
+                        // angle: Phaser.Math.DegToRad(270),
+                        // from: 100 + 14 / 2,
+                        // to: 140 - 18 / 2,
+                        angle: Phaser.Math.DegToRad(260), from: 130, to: 100,
+                        thickness: 8
+                    }
+                ]
+            }
+        );
+
+        this.createRing(
+            GAME.WIDTH / 2,
+            GAME.HEIGHT / 2 - 80,
+            { ...GAME.RING, RADIUS: 80, THICKNESS: 14 }
+        );
+
+
+        /* 🔥 THIS WAS MISSING */
+        this.setupRingRotation();
+
+        /* Drop ball */
         this.input.on('pointerdown', (pointer) => {
             this.dropBall(pointer.x);
         });
@@ -92,83 +118,149 @@ class GameScene extends Phaser.Scene {
     ROTATABLE RING (COMPOUND BODY)
     ================================ */
 
-    createRing(cx, cy) {
+    createRing(cx, cy, ringConfig) {
 
-        const {RADIUS, THICKNESS, GAP_ANGLE, SEGMENTS} = GAME.RING;
+        const { RADIUS, THICKNESS, GAP_ANGLE, SEGMENTS } = ringConfig;
 
         /* ---------- VISUAL ---------- */
 
-        this.ringGraphics = this.add.graphics();
-        this.ringGraphics.x = cx;
-        this.ringGraphics.y = cy;
+        const graphics = this.add.graphics();
+        graphics.x = cx;
+        graphics.y = cy;
 
-        this.ringStartAngle =
-            Phaser.Math.DegToRad(90 + GAP_ANGLE / 2);
-        this.ringEndAngle =
-            Phaser.Math.DegToRad(450 - GAP_ANGLE / 2);
-
-        this.drawRing(0);
+        const startAngle = Phaser.Math.DegToRad(90 + GAP_ANGLE / 2);
+        const endAngle   = Phaser.Math.DegToRad(450 - GAP_ANGLE / 2);
 
         /* ---------- PHYSICS ---------- */
 
         const bodies = [];
-        const arcLength = this.ringEndAngle - this.ringStartAngle;
+
+// 🔴 ONE TRUE RADIUS (USED EVERYWHERE)
+        const midRadius = RADIUS - THICKNESS / 2;
+
+        const arcLength = endAngle - startAngle;
         const step = arcLength / SEGMENTS;
 
         for (let i = 0; i < SEGMENTS; i++) {
 
-            const angle = this.ringStartAngle + step * i + step / 2;
+            const angle = startAngle + step * i + step / 2;
 
-            const x = Math.cos(angle) * RADIUS;
-            const y = Math.sin(angle) * RADIUS;
+            const x = Math.cos(angle) * midRadius;
+            const y = Math.sin(angle) * midRadius;
 
             bodies.push(
                 this.matter.bodies.rectangle(
                     x,
                     y,
-                    step * RADIUS,
+                    step * midRadius,
                     THICKNESS,
                     {
-                        angle
+                        angle: angle + Math.PI / 2,
+                        chamfer: 2
                     }
                 )
             );
         }
 
-        this.ringBody = this.matter.body.create({
+        /* ---------- CONNECTOR LINE PHYSICS ---------- */
+
+        if (ringConfig.lines) {
+
+            ringConfig.lines.forEach(line => {
+
+                const length = line.to - line.from;
+                const midLineRadius = (line.from + line.to) / 2 - THICKNESS / 2;
+
+                const x = Math.cos(line.angle) * midLineRadius;
+                const y = Math.sin(line.angle) * midLineRadius;
+
+                bodies.push(
+                    this.matter.bodies.rectangle(
+                        x,
+                        y,
+                        length,
+                        line.thickness,
+                        {
+                            angle: line.angle
+                        }
+                    )
+                );
+            });
+        }
+
+        const body = this.matter.body.create({
             parts: bodies,
             isStatic: true
         });
 
-        this.matter.body.setPosition(this.ringBody, {
-            x: cx,
-            y: cy
-        });
+        this.matter.body.setCentre(body, { x: 0, y: 0 }, false);
+        this.matter.body.setPosition(body, { x: cx, y: cy });
+        this.matter.world.add(body);
 
-        this.matter.world.add(this.ringBody);
+        /* ---------- RING OBJECT ---------- */
 
-        /* ---------- INPUT ---------- */
+        const ring = {
+            body,
+            graphics,
+            startAngle,
+            endAngle,
+            rotation: 0,
+            config: ringConfig,
+            lines: ringConfig.lines || [],
+        };
 
-        this.setupRingRotation();
+
+        this.drawRing(ring);
+        this.rings.push(ring);
     }
 
-    drawRing(rotation) {
 
-        const g = this.ringGraphics;
-        g.clear();
+    drawRing(ring) {
 
-        g.lineStyle(GAME.RING.THICKNESS, 0xff8fb1, 1);
-        g.beginPath();
-        g.arc(
+        const { graphics, startAngle, endAngle, rotation, config, lines } = ring;
+
+        graphics.clear();
+
+        /* 🔴 RING ARC */
+        graphics.lineStyle(config.THICKNESS, 0xff8fb1, 1);
+        graphics.beginPath();
+        const midRadius = config.RADIUS - config.THICKNESS / 2;
+
+        graphics.arc(
             0,
             0,
-            GAME.RING.RADIUS,
-            this.ringStartAngle + rotation,
-            this.ringEndAngle + rotation,
+            midRadius,
+            startAngle + rotation,
+            endAngle + rotation,
             false
         );
-        g.strokePath();
+
+        graphics.strokePath();
+
+        /* 🔵 CONNECTOR LINES */
+        graphics.lineStyle(6, 0xffffff, 1);
+
+        lines.forEach(line => {
+
+            const a = line.angle + rotation;
+
+            const r1 = line.from - config.THICKNESS / 2;
+            const r2 = line.to   - config.THICKNESS / 2;
+
+            const x1 = Math.cos(a) * r1;
+            const y1 = Math.sin(a) * r1;
+
+            const x2 = Math.cos(a) * r2;
+            const y2 = Math.sin(a) * r2;
+
+            graphics.beginPath();
+            graphics.moveTo(x1, y1);
+            graphics.lineTo(x2, y2);
+            graphics.strokePath();
+        });
     }
+
+
 
     setupRingRotation() {
 
@@ -205,11 +297,21 @@ class GameScene extends Phaser.Scene {
 
     rotateRing(amount) {
 
-        this.matter.body.rotate(this.ringBody, amount);
-        this.drawRing(this.ringBody.angle);
+        this.rings.forEach(ring => {
+
+            ring.rotation += amount;
+
+            this.matter.body.setAngle(
+                ring.body,
+                ring.rotation
+            );
+
+            this.drawRing(ring);
+        });
     }
 
     update() {
+        if (!this.keys) return;
 
         const speed = GAME.CONTROL.ROTATE_SPEED;
 
